@@ -25,7 +25,7 @@ apply plugin: 'com.palantir.baseline'
 apply plugin: 'com.palantir.git-version'
 apply plugin: 'com.palantir.consistent-versions'
 
-version '0.2.1-gfff'//System.env.CIRCLE_TAG ?: gitVersion()
+version System.env.CIRCLE_TAG ?: gitVersion()
 
 allprojects {
     version rootProject.version
