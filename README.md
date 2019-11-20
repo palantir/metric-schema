@@ -15,7 +15,7 @@ Usage
 Metric definitions are located in project `src/main/metrics` directories.
 Files are YAML formatted with the `.yml` extension. Each file represents a namespace,
 a logical group of metrics with a shared prefix. The schema is defined using [conjure](https://palantir.github.io/conjure),
-and can be [found here](https://github.com/palantir/metric-schema/blob/develop/metric-schema-api/src/main/conjure/metric-schema-api.yml).
+and can be [found here](metric-schema-api/src/main/conjure/metric-schema-api.yml).
 
 Metric utilities are updated using the `generateMetrics` gradle task.
 
