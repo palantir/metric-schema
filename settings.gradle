@@ -1,0 +1,7 @@
+rootProject.name = 'metric-schema-root'
+
+include 'metric-schema-java'
+include 'metric-schema-markdown'
+include 'metric-schema-api'
+include 'metric-schema-api:metric-schema-api-objects'
+include 'gradle-metric-schema'

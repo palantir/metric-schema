@@ -1,0 +1,33 @@
+apply plugin: 'java-gradle-plugin'
+apply plugin: 'groovy'
+apply from: "$rootDir/gradle/publish-jar.gradle"
+
+dependencies {
+    implementation project(':metric-schema-java')
+    implementation project(':metric-schema-markdown')
+    implementation project(':metric-schema-api:metric-schema-api-objects')
+    implementation 'com.google.guava:guava'
+    implementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+
+    testImplementation gradleTestKit()
+    testCompile 'com.netflix.nebula:nebula-test'
+
+    compileOnly 'org.immutables:value::annotations'
+}
+
+gradlePlugin {
+    automatedPublishing = false
+    plugins {
+        metricSchemaPlugin {
+            id = 'com.palantir.metric-schema'
+            implementationClass='com.palantir.metric.schema.gradle.MetricSchemaPlugin'
+        }
+    }
+}
+
+idea {
+    module {
+        testSourceDirs += file("src/test/groovy")
+    }
+}

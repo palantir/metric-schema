@@ -1,0 +1,23 @@
+org.junit.jupiter:* = 5.5.2
+org.junit.vintage:* = 5.4.2
+com.google.guava:guava = 23.6.1-jre
+junit:junit = 4.12
+org.assertj:assertj-core = 3.14.0
+org.immutables:* = 2.8.2
+org.mockito:mockito-core = 3.1.0
+org.slf4j:* = 1.7.25
+com.palantir.tritium:tritium-registry = 0.15.8
+com.palantir.conjure.java:* = 4.8.1
+com.palantir.conjure.java.runtime:* = 4.43.0
+com.palantir.conjure:conjure = 4.7.0
+com.fasterxml.jackson.*:jackson-* = 2.10.1
+com.squareup:javapoet = 1.11.1
+com.google.googlejavaformat:google-java-format = 1.7
+com.atlassian.commonmark:* = 0.12.1
+org.apache.commons:commons-lang3 = 3.9
+com.netflix.nebula:nebula-test = 7.5.0
+com.palantir.safe-logging:preconditions = 1.11.0
+
+# conflict resolution
+com.google.code.findbugs:jsr305 = 3.0.2
+com.google.errorprone:error_prone_annotations = 2.3.3
