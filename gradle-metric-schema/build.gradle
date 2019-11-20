@@ -1,3 +1,5 @@
+apply plugin: 'com.gradle.plugin-publish'
+// java-gradle-plugin MUST be applied before publish-jar.gradle
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'groovy'
 apply from: "$rootDir/gradle/publish-jar.gradle"
@@ -16,12 +18,17 @@ dependencies {
     compileOnly 'org.immutables:value::annotations'
 }
 
-gradlePlugin {
-    automatedPublishing = false
+
+pluginBundle {
+    website = 'https://github.com/palantir/metric-schema'
+    vcsUrl = 'https://github.com/palantir/metric-schema'
+    description = 'Schema for standard metric definitions with generators for documentation and type-safe instrumentation utilities.'
+    tags = ['instrumentation', 'metrics', 'observability']
+
     plugins {
         metricSchemaPlugin {
             id = 'com.palantir.metric-schema'
-            implementationClass='com.palantir.metric.schema.gradle.MetricSchemaPlugin'
+            displayName = 'Metric Schema Plugin'
         }
     }
 }
@@ -31,3 +38,12 @@ idea {
         testSourceDirs += file("src/test/groovy")
     }
 }
+
+publishPlugins.onlyIf {
+    project.version ==~ /[0-9]+(\.[0-9]+)+(-rc[0-9]+)?(-alpha[0-9]+)?/
+}
+
+// Configure the publishPlugins task
+tasks.publish.dependsOn publishPlugins
+project.ext.'gradle.publish.key' = System.env["GRADLE_KEY"]
+project.ext.'gradle.publish.secret' = System.env["GRADLE_SECRET"]
