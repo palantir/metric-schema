@@ -92,6 +92,16 @@ MyServiceMetrics metrics = MyServiceMetrics.of(server.taggedMetrics());
 Meter creationFailures = metrics.failures("create");
 ```
 
+### Options
+Metric definitions can also include options that do not change the overall declaration, but may affect the way it is 
+handled in a particular context.
+```yml
+options:
+  javaPackage: 'com.palantir.my.package' # Specifies under which package Java classes should be generated
+  javaVisibility: packagePrivate # Specifies visibility of generated Utility class. Defaults to public
+namespaces:
+...
+```
 Installation
 ------------
 
