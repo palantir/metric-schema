@@ -206,8 +206,8 @@ final class UtilityGenerator {
                         .collect(ImmutableList.toImmutableList()))
                 .addSuperinterface(ClassName.bestGuess(buildStage(metricName)))
                 .addFields(tagList.stream()
-                        .map(tag ->
-                                FieldSpec.builder(String.class, Custodian.sanitizeName(tag), Modifier.PRIVATE).build())
+                        .map(tag -> FieldSpec.builder(String.class, Custodian.sanitizeName(tag), Modifier.PRIVATE)
+                                .build())
                         .collect(ImmutableList.toImmutableList()))
                 .addMethod(buildMethodBuilder.build())
                 .addMethods(tagList.stream()

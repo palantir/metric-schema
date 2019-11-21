@@ -92,9 +92,11 @@ class ValidatorTest {
         assertThatThrownBy(() -> Validator.validate(MetricSchema.builder()
                         .namespaces("test", MetricNamespace.builder()
                                 .docs(DOCS)
-                                .metrics(
-                                        "name",
-                                        MetricDefinition.builder().docs(DOCS).type(MetricType.COUNTER).tags("").build())
+                                .metrics("name", MetricDefinition.builder()
+                                        .docs(DOCS)
+                                        .type(MetricType.COUNTER)
+                                        .tags("")
+                                        .build())
                                 .build())
                         .build()))
                 .isInstanceOf(SafeIllegalArgumentException.class)
