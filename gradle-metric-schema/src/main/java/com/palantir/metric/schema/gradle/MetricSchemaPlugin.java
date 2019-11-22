@@ -118,8 +118,9 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                 .named("processResources", processResources -> processResources.dependsOn(compileMetricSchema));
 
         javaPlugin.getSourceSets().getByName("main").resources(resources -> {
-            SourceDirectorySet sourceDir =
-                    project.getObjects().sourceDirectorySet("metricSchema", "metric schema").srcDir(metricSchemaDir);
+            SourceDirectorySet sourceDir = project.getObjects()
+                    .sourceDirectorySet("metricSchema", "metric schema")
+                    .srcDir(metricSchemaDir);
             sourceDir.include("metric-schema/**");
             resources.source(sourceDir);
         });

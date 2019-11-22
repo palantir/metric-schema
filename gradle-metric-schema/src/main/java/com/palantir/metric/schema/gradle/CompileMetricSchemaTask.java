@@ -33,8 +33,8 @@ import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
 
 public class CompileMetricSchemaTask extends SourceTask {
-    private static final ObjectReader reader =
-            ObjectMappers.withDefaultModules(new ObjectMapper(new YAMLFactory())).readerFor(MetricSchema.class);
+    private static final ObjectReader reader = ObjectMappers.withDefaultModules(new ObjectMapper(new YAMLFactory()))
+            .readerFor(MetricSchema.class);
     private static final ObjectWriter writer = ObjectMappers.newServerObjectMapper().writer();
 
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
