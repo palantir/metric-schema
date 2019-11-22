@@ -17,7 +17,9 @@ Files are YAML formatted with the `.yml` extension. Each file represents a names
 a logical group of metrics with a shared prefix. The schema is defined using [conjure](https://palantir.github.io/conjure),
 and can be [found here](metric-schema-api/src/main/conjure/metric-schema-api.yml).
 
-Metric utilities are updated using the `generateMetrics` gradle task.
+Metric utilities are updated using the `generateMetrics` gradle task. If this is the first
+metric definition in the module, it may be necessary to regenerate the IDE configuration
+after metrics are generated, IntelliJ IDEA users can run the `idea` task.
 
 ```bash
 ./gradlew generateMetrics
