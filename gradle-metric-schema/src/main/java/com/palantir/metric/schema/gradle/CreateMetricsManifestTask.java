@@ -139,13 +139,14 @@ public class CreateMetricsManifestTask extends DefaultTask {
                     CompileMetricSchemaTask compileMetricSchemaTask = (CompileMetricSchemaTask)
                             dependencyProject.getTasks().getByName(MetricSchemaPlugin.COMPILE_METRIC_SCHEMA);
 
-                    metricSchemaStream =
-                            Files.asByteSource(compileMetricSchemaTask.getOutputFile().get().getAsFile()).openStream();
+                    metricSchemaStream = Files.asByteSource(compileMetricSchemaTask.getOutputFile().get().getAsFile())
+                            .openStream();
                 } else {
                     if (!artifact.getFile().exists()) {
                         log.debug("Artifact did not exist: {}", artifact.getFile());
                         return Stream.empty();
-                    } else if (!Files.getFileExtension(artifact.getFile().getName()).equals("jar")) {
+                    } else if (!Files.getFileExtension(artifact.getFile().getName())
+                            .equals("jar")) {
                         log.debug("Artifact is not jar: {}", artifact.getFile());
                         return Stream.empty();
                     }
