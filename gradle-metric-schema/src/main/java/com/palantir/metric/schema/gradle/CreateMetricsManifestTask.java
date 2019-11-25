@@ -18,14 +18,17 @@ package com.palantir.metric.schema.gradle;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.metric.schema.MetricSchema;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -109,23 +112,25 @@ public class CreateMetricsManifestTask extends DefaultTask {
         File output = getOutputFile().getAsFile().get();
         getProject().mkdir(output.getParent());
 
-        mapper.writeValue(output, Stream.concat(getLocalMetrics(), discoverMetricSchema())
-                .collect(ImmutableSet.toImmutableSet()));
+        mapper.writeValue(
+                output, ImmutableMap.builder().putAll(getLocalMetrics()).putAll(discoverMetricSchema()).build());
     }
 
-    private Stream<MetricSchema> getLocalMetrics() throws IOException {
+    private Map<String, List<MetricSchema>> getLocalMetrics() throws IOException {
         if (getMetricsFile().getAsFile().isPresent()) {
-            List<MetricSchema> metricSchemaStream =
-                    mapper.readValue(getMetricsFile().getAsFile().get(), new TypeReference<List<MetricSchema>>() {});
-            return metricSchemaStream.stream();
+            return ImmutableMap.of(getProjectCoordinates(getProject()), mapper.readValue(
+                    getMetricsFile().getAsFile().get(), new TypeReference<List<MetricSchema>>() {}));
         }
-        return Stream.empty();
+        return Collections.emptyMap();
     }
 
-    private Stream<MetricSchema> discoverMetricSchema() {
-        return configuration.get().getIncoming().getArtifacts().getArtifacts().stream().flatMap(artifact -> {
+    private Map<String, List<MetricSchema>> discoverMetricSchema() {
+        Map<String, List<MetricSchema>> discoveredMetrics = new HashMap<>();
+
+        configuration.get().getIncoming().getArtifacts().getArtifacts().forEach(artifact -> {
             String artifactName = artifact.getId().getDisplayName();
             ComponentIdentifier id = artifact.getId().getComponentIdentifier();
+            String sourceCoordinates;
             InputStream metricSchemaStream;
 
             // TODO(forozco): consider adding some information about the source of the metrics
@@ -134,29 +139,31 @@ public class CreateMetricsManifestTask extends DefaultTask {
                     Project dependencyProject =
                             getProject().getRootProject().project(((ProjectComponentIdentifier) id).getProjectPath());
                     if (!dependencyProject.getPlugins().hasPlugin(MetricSchemaPlugin.class)) {
-                        return Stream.empty();
+                        return;
                     }
                     CompileMetricSchemaTask compileMetricSchemaTask = (CompileMetricSchemaTask)
                             dependencyProject.getTasks().getByName(MetricSchemaPlugin.COMPILE_METRIC_SCHEMA);
 
+                    sourceCoordinates = getProjectCoordinates(dependencyProject);
                     metricSchemaStream =
                             Files.asByteSource(compileMetricSchemaTask.getOutputFile().get().getAsFile()).openStream();
                 } else {
                     if (!artifact.getFile().exists()) {
                         log.debug("Artifact did not exist: {}", artifact.getFile());
-                        return Stream.empty();
+                        return;
                     } else if (!Files.getFileExtension(artifact.getFile().getName()).equals("jar")) {
                         log.debug("Artifact is not jar: {}", artifact.getFile());
-                        return Stream.empty();
+                        return;
                     }
 
                     ZipFile zipFile = new ZipFile(artifact.getFile());
                     ZipEntry manifestEntry = zipFile.getEntry(MetricSchemaPlugin.METRIC_SCHEMA_RESOURCE);
                     if (manifestEntry == null) {
                         log.debug("Manifest file does not exist in jar for '${coord}'");
-                        return Stream.empty();
+                        return;
                     }
 
+                    sourceCoordinates = id.toString();
                     metricSchemaStream = zipFile.getInputStream(manifestEntry);
                 }
             } catch (IOException e) {
@@ -165,16 +172,23 @@ public class CreateMetricsManifestTask extends DefaultTask {
                         artifactName,
                         artifact.getFile(),
                         e);
-                return Stream.empty();
+                return;
             }
 
             try (InputStream is = metricSchemaStream) {
-                List<MetricSchema> recommendedDeps = mapper.readValue(is, new TypeReference<List<MetricSchema>>() {});
-                return recommendedDeps.stream();
+                discoveredMetrics.put(
+                        sourceCoordinates, mapper.readValue(is, new TypeReference<List<MetricSchema>>() {}));
             } catch (IOException | IllegalArgumentException e) {
                 log.debug("Failed to load metric schema for artifact '{}', file '{}', '{}'", artifactName, artifact, e);
-                return Stream.empty();
             }
         });
+
+        return discoveredMetrics;
+    }
+
+    private static String getProjectCoordinates(Project project) {
+        // We explicitly exclude the version for project dependencies so that the output of the task does not depend on
+        // project version and is more likely to be cached
+        return String.format("%s:%s:$projectVersion", project.getGroup(), project.getName());
     }
 }
