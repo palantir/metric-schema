@@ -16,11 +16,8 @@
 
 package com.palantir.metric.schema.gradle;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.io.File;
-import java.util.List;
-import org.gradle.StartParameter;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -37,8 +34,10 @@ import org.gradle.plugins.ide.idea.model.IdeaModule;
 public final class MetricSchemaPlugin implements Plugin<Project> {
     private static final String TASK_GROUP = "MetricSchema";
     public static final String METRIC_SCHEMA_RESOURCE = "metric-schema/metrics.json";
+
     public static final String COMPILE_METRIC_SCHEMA = "compileMetricSchema";
     public static final String GENERATE_METRICS_MARKDOWN = "generateMetricsMarkdown";
+    public static final String CREATE_METRICS_MANIFEST = "createMetricsManifest";
 
     @Override
     public void apply(Project project) {
@@ -63,18 +62,17 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
 
         TaskProvider<CompileMetricSchemaTask> compileSchemaTask =
                 createCompileSchemaTask(project, metricSchemaDir, sourceSet);
-        TaskProvider<CreateMetricsManifestTask> createMetricsManifest =
-                createManifestTask(project, metricSchemaDir, compileSchemaTask);
+        createManifestTask(project, metricSchemaDir, compileSchemaTask);
         project.getPluginManager().withPlugin("com.palantir.sls-java-service-distribution", plugin ->
-                createMetricsMarkdownTask(project, createMetricsManifest));
+                project.getPluginManager().apply(MetricSchemaMarkdownPlugin.class));
     }
 
-    private static TaskProvider<CreateMetricsManifestTask> createManifestTask(
+    private static void createManifestTask(
             Project project,
             Provider<Directory> metricSchemaDir,
             TaskProvider<CompileMetricSchemaTask> compileSchemaTask) {
         Provider<RegularFile> manifestFile = metricSchemaDir.map(dir -> dir.file("manifest.json"));
-        return project.getTasks().register("createMetricsManifest", CreateMetricsManifestTask.class, task -> {
+        project.getTasks().register(CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class, task -> {
             // Need to set to empty if compileSchemaTask didn't execute
             task.getMetricsFile().set(compileSchemaTask.get().getOutputFile().flatMap(file ->
                     file.getAsFile().exists() ? project.provider(() -> file) : project.getObjects().fileProperty()));
@@ -82,27 +80,6 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
             task.getConfiguration().set(project.getConfigurations().getByName("runtimeClasspath"));
             task.dependsOn(compileSchemaTask);
         });
-    }
-
-    private static void createMetricsMarkdownTask(
-            Project project, TaskProvider<CreateMetricsManifestTask> createMetricsManifest) {
-        TaskProvider<GenerateMetricMarkdownTask> generateMetricsMarkdown = project.getTasks()
-                .register(GENERATE_METRICS_MARKDOWN, GenerateMetricMarkdownTask.class, task -> {
-                    task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
-                    task.outputFile().set(project.file("metrics.md"));
-                    task.dependsOn(createMetricsManifest);
-                });
-        project.getTasks().named("check", check -> check.dependsOn(generateMetricsMarkdown));
-
-        // Wire up dependencies so running `./gradlew --write-locks` will update the markdown
-        StartParameter startParam = project.getGradle().getStartParameter();
-        if (startParam.isWriteDependencyLocks() && !startParam.getTaskNames().contains(GENERATE_METRICS_MARKDOWN)) {
-            List<String> taskNames = ImmutableList.<String>builder()
-                    .addAll(startParam.getTaskNames())
-                    .add(GENERATE_METRICS_MARKDOWN)
-                    .build();
-            startParam.setTaskNames(taskNames);
-        }
     }
 
     private static TaskProvider<CompileMetricSchemaTask> createCompileSchemaTask(

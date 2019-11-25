@@ -30,6 +30,10 @@ pluginBundle {
             id = 'com.palantir.metric-schema'
             displayName = 'Metric Schema Plugin'
         }
+        metricSchemaMarkdownPlugin {
+            id = 'com.palantir.metric-schema-markdown'
+            displayName = "Metric Schema Markdown Plugin"
+        }
     }
 }
 
