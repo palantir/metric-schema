@@ -37,35 +37,21 @@ class GenerateMetricMarkdownIntegrationSpec extends IntegrationSpec {
 
     void setup() {
         buildFile << """
-        buildscript {
-            repositories {
-                jcenter()
-                maven { url 'https://dl.bintray.com/palantir/releases/' }
-            }
-            dependencies {
-                classpath 'com.palantir.sls-packaging:gradle-sls-packaging:${Versions.SLS_PACKAGING}'
+        ${applyPlugin(MetricSchemaMarkdownPlugin.class)}
+
+        repositories {
+            jcenter()
+            maven {
+                url 'https://dl.bintray.com/palantir/releases/'
             }
         }
-        
-        version '1.0.0'
-        group 'com.palantir.test'
-        
-        apply plugin: 'com.palantir.sls-java-service-distribution'
-        ${applyPlugin(MetricSchemaPlugin.class)}
 
-            repositories {
-                jcenter()
-                maven {
-                    url 'https://dl.bintray.com/palantir/releases/'
-                }
+        configurations.all {
+            resolutionStrategy {
+                force 'com.palantir.tritium:tritium-registry:${Versions.TRITIUM}'
+                force 'com.palantir.safe-logging:preconditions:${Versions.SAFE_LOGGING}'
             }
-
-            configurations.all {
-                resolutionStrategy {
-                    force 'com.palantir.tritium:tritium-registry:${Versions.TRITIUM}'
-                    force 'com.palantir.safe-logging:preconditions:${Versions.SAFE_LOGGING}'
-                }
-            }
+        }
         """.stripIndent()
     }
 
