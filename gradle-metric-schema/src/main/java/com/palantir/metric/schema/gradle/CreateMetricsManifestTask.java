@@ -159,7 +159,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
                     ZipFile zipFile = new ZipFile(artifact.getFile());
                     ZipEntry manifestEntry = zipFile.getEntry(MetricSchemaPlugin.METRIC_SCHEMA_RESOURCE);
                     if (manifestEntry == null) {
-                        log.debug("Manifest file does not exist in jar for '${coord}'");
+                        log.debug("Manifest file does not exist in jar: {}", id);
                         return;
                     }
 

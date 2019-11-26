@@ -19,6 +19,7 @@ package com.palantir.metric.schema.markdown;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.palantir.metric.schema.Documentation;
 import com.palantir.metric.schema.MetricDefinition;
 import com.palantir.metric.schema.MetricNamespace;
@@ -30,15 +31,16 @@ class MarkdownRendererTest {
 
     @Test
     void testSimple() {
-        String markdown = MarkdownRenderer.render(ImmutableList.of(MetricSchema.builder()
-                .namespaces("namespace", MetricNamespace.builder()
-                        .docs(Documentation.of("namespace docs"))
-                        .metrics("metric", MetricDefinition.builder()
-                                .type(MetricType.METER)
-                                .docs(Documentation.of("metric docs"))
+        String markdown = MarkdownRenderer.render(
+                ImmutableMap.of("com.palantir:test:1.0.0", ImmutableList.of(MetricSchema.builder()
+                        .namespaces("namespace", MetricNamespace.builder()
+                                .docs(Documentation.of("namespace docs"))
+                                .metrics("metric", MetricDefinition.builder()
+                                        .type(MetricType.METER)
+                                        .docs(Documentation.of("metric docs"))
+                                        .build())
                                 .build())
-                        .build())
-                .build()));
+                        .build())));
         assertThat(markdown).isEqualTo("# Metrics\n\n"
                 + "## namespace\n"
                 + "namespace docs\n"
@@ -47,17 +49,18 @@ class MarkdownRendererTest {
 
     @Test
     void testTagged() {
-        String markdown = MarkdownRenderer.render(ImmutableList.of(MetricSchema.builder()
-                .namespaces("namespace", MetricNamespace.builder()
-                        .docs(Documentation.of("namespace docs"))
-                        .metrics("metric", MetricDefinition.builder()
-                                .type(MetricType.METER)
-                                .tags("service")
-                                .tags("endpoint")
-                                .docs(Documentation.of("metric docs"))
+        String markdown = MarkdownRenderer.render(
+                ImmutableMap.of("com.palantir:test:1.0.0", ImmutableList.of(MetricSchema.builder()
+                        .namespaces("namespace", MetricNamespace.builder()
+                                .docs(Documentation.of("namespace docs"))
+                                .metrics("metric", MetricDefinition.builder()
+                                        .type(MetricType.METER)
+                                        .tags("service")
+                                        .tags("endpoint")
+                                        .docs(Documentation.of("metric docs"))
+                                        .build())
                                 .build())
-                        .build())
-                .build()));
+                        .build())));
         assertThat(markdown).isEqualTo("# Metrics\n\n"
                 + "## namespace\n"
                 + "namespace docs\n"
@@ -66,16 +69,19 @@ class MarkdownRendererTest {
 
     @Test
     void testEmptyNamespacesExcluded() {
-        String markdown = MarkdownRenderer.render(ImmutableList.of(MetricSchema.builder()
-                .namespaces("com.foo.namespace", MetricNamespace.builder()
-                        .docs(Documentation.of("Foo namespace docs"))
-                        .metrics("metric", MetricDefinition.builder()
-                                .type(MetricType.METER)
-                                .docs(Documentation.of("metric docs"))
+        String markdown = MarkdownRenderer.render(
+                ImmutableMap.of("com.palantir.test", ImmutableList.of(MetricSchema.builder()
+                        .namespaces("com.foo.namespace", MetricNamespace.builder()
+                                .docs(Documentation.of("Foo namespace docs"))
+                                .metrics("metric", MetricDefinition.builder()
+                                        .type(MetricType.METER)
+                                        .docs(Documentation.of("metric docs"))
+                                        .build())
                                 .build())
-                        .build())
-                .namespaces("empty", MetricNamespace.builder().docs(Documentation.of("empty namespace docs")).build())
-                .build()));
+                        .namespaces(
+                                "empty",
+                                MetricNamespace.builder().docs(Documentation.of("empty namespace docs")).build())
+                        .build())));
         assertThat(markdown).isEqualTo("# Metrics\n\n"
                 + "## com.foo.namespace\n"
                 + "Foo namespace docs\n"

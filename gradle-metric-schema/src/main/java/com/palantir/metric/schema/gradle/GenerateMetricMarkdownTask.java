@@ -23,6 +23,7 @@ import com.palantir.metric.schema.markdown.MarkdownRenderer;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.RegularFile;
@@ -59,8 +60,8 @@ public class GenerateMetricMarkdownTask extends DefaultTask {
         File markdown = outputFile.get().getAsFile();
         File manifest = getManifestFile().getAsFile().get();
 
-        List<MetricSchema> schemas =
-                CreateMetricsManifestTask.mapper.readValue(manifest, new TypeReference<List<MetricSchema>>() {});
+        Map<String, List<MetricSchema>> schemas = CreateMetricsManifestTask.mapper.readValue(
+                manifest, new TypeReference<Map<String, List<MetricSchema>>>() {});
         if (schemas.isEmpty()) {
             return;
         }
