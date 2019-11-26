@@ -18,7 +18,11 @@ package com.palantir.metric.schema.gradle
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.palantir.metric.schema.MetricSchema
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import nebula.test.IntegrationSpec
+import nebula.test.dependencies.DependencyGraph
+import nebula.test.dependencies.GradleDependencyGenerator
 
 class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
     public static final String METRICS = """
@@ -89,7 +93,41 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
                 new TypeReference<List<MetricSchema>>() {}).isEmpty()
     }
 
-    def "createManifest discovers in repo product dependencies"() {
+    def "createManifest discovers metric schema"() {
+        when:
+        def dependencyGraph = new DependencyGraph('a:a:1.0')
+        GradleDependencyGenerator generator = new GradleDependencyGenerator(
+                dependencyGraph, new File(projectDir, "build/testrepogen").toString())
+        def mavenRepo = generator.generateTestMavenRepo()
+
+        Files.copy(
+                MetricSchemaPluginIntegrationSpec.getResourceAsStream("/a-1.0.jar"),
+                new File(mavenRepo, "a/a/1.0/a-1.0.jar").toPath(),
+                StandardCopyOption.REPLACE_EXISTING)
+
+        buildFile << """
+        group 'com.palantir.test'
+
+        repositories {
+            maven {url "file:///${mavenRepo.getAbsolutePath()}"}
+        }
+        dependencies {
+            compile 'a:a:1.0'
+        }
+        """.stripIndent()
+
+        then:
+        def result = runTasksSuccessfully(':createMetricsManifest')
+
+        then:
+        fileExists('build/metricSchema/manifest.json')
+
+        def manifest = CreateMetricsManifestTask.mapper.readValue(file("build/metricSchema/manifest.json"), Map.class)
+        !manifest.isEmpty()
+        manifest['a:a:1.0'] != null
+    }
+
+    def "createManifest discovers in repo metric schema"() {
         setup:
         addSubproject("foo-lib", "")
         file('foo-lib/src/main/metrics/metric.yml') << METRICS
@@ -109,8 +147,9 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         !result.wasExecuted(':bar-lib:jar')
 
         fileExists('foo-server/build/metricSchema/manifest.json')
-        def manifest = CreateMetricsManifestTask.mapper.readValue(file("foo-server/build/metricSchema/manifest.json"), List.class)
+        def manifest = CreateMetricsManifestTask.mapper.readValue(file("foo-server/build/metricSchema/manifest.json"), Map.class)
         !manifest.isEmpty()
+        manifest['com.palantir.test:foo-lib:$projectVersion'] != null
     }
 
 }
