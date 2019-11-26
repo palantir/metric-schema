@@ -25,15 +25,17 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /** {@link MarkdownRenderer} consumes consolidated metric schemas from a distribution to produce metrics in markdown. */
 public final class MarkdownRenderer {
 
     /** Returns rendered markdown based on the provided schemas. */
-    public static String render(List<MetricSchema> schemas) {
+    public static String render(Map<String, List<MetricSchema>> schemas) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("# Metrics\n");
-        namespaces(schemas).forEach(namespace -> render(namespace, buffer));
+        // TODO(forozco): use metric-schema provenance in markdown generation
+        namespaces(schemas.values().stream().flatMap(List::stream)).forEach(namespace -> render(namespace, buffer));
         return CharMatcher.whitespace().trimFrom(buffer.toString());
     }
 
@@ -64,9 +66,8 @@ public final class MarkdownRenderer {
                 .append('\n');
     }
 
-    private static ImmutableList<Namespace> namespaces(List<MetricSchema> schemas) {
-        return schemas.stream()
-                .flatMap(schema -> schema.getNamespaces().entrySet().stream()
+    private static ImmutableList<Namespace> namespaces(Stream<MetricSchema> schemas) {
+        return schemas.flatMap(schema -> schema.getNamespaces().entrySet().stream()
                         .map(entry -> Namespace.builder().name(entry.getKey()).definition(entry.getValue()).build()))
                 .sorted(Comparator.comparing(Namespace::name))
                 .collect(ImmutableList.toImmutableList());
