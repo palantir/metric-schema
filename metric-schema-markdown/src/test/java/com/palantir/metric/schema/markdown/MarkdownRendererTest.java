@@ -78,9 +78,9 @@ class MarkdownRendererTest {
                                         .docs(Documentation.of("metric docs"))
                                         .build())
                                 .build())
-                        .namespaces(
-                                "empty",
-                                MetricNamespace.builder().docs(Documentation.of("empty namespace docs")).build())
+                        .namespaces("empty", MetricNamespace.builder()
+                                .docs(Documentation.of("empty namespace docs"))
+                                .build())
                         .build())));
         assertThat(markdown).isEqualTo("# Metrics\n\n"
                 + "## com.foo.namespace\n"

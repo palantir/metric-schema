@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -125,7 +124,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
     }
 
     private Map<String, List<MetricSchema>> discoverMetricSchema() {
-        Map<String, List<MetricSchema>> discoveredMetrics = new HashMap<>();
+        ImmutableMap.Builder<String, List<MetricSchema>> discoveredMetrics = ImmutableMap.builder();
 
         configuration.get().getIncoming().getArtifacts().getArtifacts().forEach(artifact -> {
             String artifactName = artifact.getId().getDisplayName();
@@ -133,7 +132,6 @@ public class CreateMetricsManifestTask extends DefaultTask {
             String sourceCoordinates;
             InputStream metricSchemaStream;
 
-            // TODO(forozco): consider adding some information about the source of the metrics
             try {
                 if (id instanceof ProjectComponentIdentifier) {
                     Project dependencyProject =
@@ -155,7 +153,8 @@ public class CreateMetricsManifestTask extends DefaultTask {
                     if (!artifact.getFile().exists()) {
                         log.debug("Artifact did not exist: {}", artifact.getFile());
                         return;
-                    } else if (!Files.getFileExtension(artifact.getFile().getName()).equals("jar")) {
+                    } else if (!Files.getFileExtension(artifact.getFile().getName())
+                            .equals("jar")) {
                         log.debug("Artifact is not jar: {}", artifact.getFile());
                         return;
                     }
@@ -187,7 +186,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
             }
         });
 
-        return discoveredMetrics;
+        return discoveredMetrics.build();
     }
 
     private static String getProjectCoordinates(Project project) {
