@@ -34,8 +34,9 @@ public class GoetheTest {
         assertThatThrownBy(() -> Goethe.format(javaFile))
                 .hasMessageContaining("Failed to format 'com.palantir.foo.Foo'")
                 .hasMessageContaining("';' expected")
-                .hasMessageContaining("" // newline to align the output
-                        + "    type oops name = bar;\n"
-                        + "            ^");
+                .hasMessageContaining(
+                        "" // newline to align the output
+                                + "    type oops name = bar;\n"
+                                + "            ^");
     }
 }
