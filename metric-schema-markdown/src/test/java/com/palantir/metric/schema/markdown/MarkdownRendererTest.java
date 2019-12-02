@@ -40,13 +40,24 @@ class MarkdownRendererTest {
                                         .docs(Documentation.of("metric docs"))
                                         .build())
                                 .build())
+                        .namespaces("anamespace", MetricNamespace.builder()
+                                .docs(Documentation.of("namespace docs"))
+                                .metrics("metric", MetricDefinition.builder()
+                                        .type(MetricType.METER)
+                                        .docs(Documentation.of("metric docs"))
+                                        .build())
+                                .build())
                         .build())));
-        assertThat(markdown).isEqualTo("# Test Metrics\n"
+        assertThat(markdown).isEqualTo("# Metrics\n"
                 + "\n"
                 + "## Test\n"
                 + "\n"
                 + "`com.palantir:test:1.0.0`\n"
                 + "\n"
+                + "### anamespace\n"
+                + "namespace docs\n"
+                + "- `anamespace.metric` (meter): metric docs"
+                + "\n\n"
                 + "### namespace\n"
                 + "namespace docs\n"
                 + "- `namespace.metric` (meter): metric docs");
@@ -66,7 +77,7 @@ class MarkdownRendererTest {
                                         .build())
                                 .build())
                         .build())));
-        assertThat(markdown).isEqualTo("# Test Metrics\n"
+        assertThat(markdown).isEqualTo("# Metrics\n"
                 + "\n"
                 + "## Test\n"
                 + "\n"
@@ -92,7 +103,7 @@ class MarkdownRendererTest {
                                 .docs(Documentation.of("empty namespace docs"))
                                 .build())
                         .build())));
-        assertThat(markdown).isEqualTo("# Test Metrics\n"
+        assertThat(markdown).isEqualTo("# Metrics\n"
                 + "\n"
                 + "## Test\n"
                 + "\n"
