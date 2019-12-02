@@ -10,7 +10,7 @@ com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.10.1 (1 constraints: 7a1c
 com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.1 (1 constraints: 7a1c91a4)
 com.fasterxml.jackson.module:jackson-module-afterburner:2.10.1 (1 constraints: 7a1c91a4)
 com.google.code.findbugs:jsr305:3.0.2 (4 constraints: 422f9bdf)
-com.google.errorprone:error_prone_annotations:2.3.3 (4 constraints: b630048a)
+com.google.errorprone:error_prone_annotations:2.3.4 (4 constraints: b730828a)
 com.google.errorprone:javac-shaded:9+181-r4173-1 (1 constraints: 721510f6)
 com.google.googlejavaformat:google-java-format:1.7 (1 constraints: ac04212c)
 com.google.guava:failureaccess:1.0.1 (1 constraints: 140ae1b4)
