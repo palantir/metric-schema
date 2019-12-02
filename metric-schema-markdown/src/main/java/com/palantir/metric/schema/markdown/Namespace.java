@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 
 @Value.Immutable
 @Value.Style(
-        visibility = Value.Style.ImplementationVisibility.PACKAGE,
         overshadowImplementation = true,
         jdkOnly = true,
         get = {"get*", "is*"})

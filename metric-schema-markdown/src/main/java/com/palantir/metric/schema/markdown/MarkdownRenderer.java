@@ -35,8 +35,7 @@ public final class MarkdownRenderer {
 
     /** Returns rendered markdown based on the provided schemas. */
     public static String render(String localCoordinate, Map<String, List<MetricSchema>> schemas) {
-        StringBuilder buffer = new StringBuilder()
-                .append("# Metrics\n");
+        StringBuilder buffer = new StringBuilder().append("# Metrics\n");
         namespaces(localCoordinate, schemas).forEach(section -> render(section, buffer));
         return CharMatcher.whitespace().trimFrom(buffer.toString());
     }
@@ -89,7 +88,8 @@ public final class MarkdownRenderer {
                 .map(entry -> Section.builder()
                         .sourceCoordinates(entry.getKey())
                         .namespaces(entry.getValue().stream()
-                                .flatMap(schema -> schema.getNamespaces().entrySet().stream().sorted(Map.Entry.comparingByKey()))
+                                .flatMap(schema ->
+                                        schema.getNamespaces().entrySet().stream().sorted(Map.Entry.comparingByKey()))
                                 .map(schemaEntry -> Namespace.builder()
                                         .name(schemaEntry.getKey())
                                         .definition(schemaEntry.getValue())
