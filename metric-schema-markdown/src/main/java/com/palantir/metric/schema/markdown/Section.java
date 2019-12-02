@@ -18,7 +18,7 @@ package com.palantir.metric.schema.markdown;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.palantir.metric.schema.MetricNamespace;
+import java.util.List;
 import org.immutables.value.Value;
 
 @Value.Immutable
@@ -26,15 +26,15 @@ import org.immutables.value.Value;
         overshadowImplementation = true,
         jdkOnly = true,
         get = {"get*", "is*"})
-@JsonDeserialize(as = ImmutableNamespace.class)
-@JsonSerialize(as = ImmutableNamespace.class)
-interface Namespace {
+@JsonDeserialize(as = ImmutableSection.class)
+@JsonSerialize(as = ImmutableSection.class)
+interface Section {
 
-    String name();
+    String sourceCoordinates();
 
-    MetricNamespace definition();
+    List<Namespace> namespaces();
 
-    class Builder extends ImmutableNamespace.Builder {}
+    class Builder extends ImmutableSection.Builder {}
 
     static Builder builder() {
         return new Builder();
