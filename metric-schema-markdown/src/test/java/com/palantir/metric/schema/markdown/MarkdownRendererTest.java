@@ -50,7 +50,9 @@ class MarkdownRendererTest {
                         .build())));
         assertThat(markdown).isEqualTo("# Metrics\n"
                 + "\n"
-                + "## `com.palantir:test:1.0.0`\n"
+                + "## Test\n"
+                + "\n"
+                + "`com.palantir:test:1.0.0`\n"
                 + "\n"
                 + "### anamespace\n"
                 + "namespace docs\n"
@@ -77,7 +79,9 @@ class MarkdownRendererTest {
                         .build())));
         assertThat(markdown).isEqualTo("# Metrics\n"
                 + "\n"
-                + "## `com.palantir:test:1.0.0`\n"
+                + "## Test\n"
+                + "\n"
+                + "`com.palantir:test:1.0.0`\n"
                 + "\n"
                 + "### namespace\n"
                 + "namespace docs\n"
@@ -101,7 +105,9 @@ class MarkdownRendererTest {
                         .build())));
         assertThat(markdown).isEqualTo("# Metrics\n"
                 + "\n"
-                + "## `com.palantir:test`\n"
+                + "## Test\n"
+                + "\n"
+                + "`com.palantir:test`\n"
                 + "\n"
                 + "### com.foo.namespace\n"
                 + "Foo namespace docs\n"
