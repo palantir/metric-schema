@@ -27,16 +27,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 
 /** {@link MarkdownRenderer} consumes consolidated metric schemas from a distribution to produce metrics in markdown. */
 public final class MarkdownRenderer {
 
     /** Returns rendered markdown based on the provided schemas. */
     public static String render(String localCoordinate, Map<String, List<MetricSchema>> schemas) {
-        StringBuilder buffer = new StringBuilder()
-                .append("# Metrics\n");
+        StringBuilder buffer = new StringBuilder().append("# Metrics\n");
         namespaces(localCoordinate, schemas).forEach(section -> render(section, buffer));
         return CharMatcher.whitespace().trimFrom(buffer.toString());
     }
@@ -47,12 +44,7 @@ public final class MarkdownRenderer {
             // Don't render sections without metrics.
             return;
         }
-        output.append("\n## ")
-                .append(displayName(getName(section.sourceCoordinates())))
-                .append("\n\n")
-                .append('`')
-                .append(section.sourceCoordinates())
-                .append("`\n");
+        output.append("\n## `").append(section.sourceCoordinates()).append("`\n");
         section.namespaces().forEach(namespace -> render(namespace, output));
     }
 
@@ -89,7 +81,8 @@ public final class MarkdownRenderer {
                 .map(entry -> Section.builder()
                         .sourceCoordinates(entry.getKey())
                         .namespaces(entry.getValue().stream()
-                                .flatMap(schema -> schema.getNamespaces().entrySet().stream().sorted(Map.Entry.comparingByKey()))
+                                .flatMap(schema ->
+                                        schema.getNamespaces().entrySet().stream().sorted(Map.Entry.comparingByKey()))
                                 .map(schemaEntry -> Namespace.builder()
                                         .name(schemaEntry.getKey())
                                         .definition(schemaEntry.getValue())
@@ -97,21 +90,6 @@ public final class MarkdownRenderer {
                                 .collect(ImmutableList.toImmutableList()))
                         .build())
                 .collect(ImmutableList.toImmutableList());
-    }
-
-    private static String getName(String coordinate) {
-        List<String> results = Splitter.on(':').splitToList(coordinate);
-        return results.size() >= 2 ? results.get(1) : coordinate;
-    }
-
-    private static String displayName(String name) {
-        return Splitter.on(CharMatcher.whitespace().or(CharMatcher.anyOf("-_.")))
-                .omitEmptyStrings()
-                .trimResults()
-                .splitToList(name)
-                .stream()
-                .map(StringUtils::capitalize)
-                .collect(Collectors.joining(" "));
     }
 
     private static String getGroup(String coordinate) {
