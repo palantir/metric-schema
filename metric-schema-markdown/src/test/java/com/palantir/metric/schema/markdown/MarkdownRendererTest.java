@@ -56,32 +56,31 @@ class MarkdownRendererTest {
                                 .build())
                         .build())
                 .build();
-        String firstMarkdown = MarkdownRenderer.render(
-                "com.palantir:test",
-                ImmutableMap.of("com.palantir:test:1.0.0", ImmutableList.of(firstSchema, secondSchema)));
-        String secondMarkdown = MarkdownRenderer.render(
-                "com.palantir:test",
-                ImmutableMap.of("com.palantir:test:1.0.0",
-                        // reverse order should produce the same results
-                        ImmutableList.of(secondSchema, firstSchema)));
-        assertThat(firstMarkdown).isEqualTo("# Metrics\n"
-                + "\n"
-                + "## Test\n"
-                + "\n"
-                + "`com.palantir:test:1.0.0`\n"
-                + "\n"
-                + "### anamespace\n"
-                + "namespace docs\n"
-                + "- `anamespace.metric` (meter): metric docs\n"
-                + "\n"
-                + "### namespace\n"
-                + "namespace docs\n"
-                + "- `namespace.metric` (meter): metric docs\n"
-                + "\n"
-                + "### secondSchema\n"
-                + "namespace docs\n"
-                + "- `secondSchema.metric` (meter): metric docs")
-        .isEqualTo(secondMarkdown);
+        String firstMarkdown = MarkdownRenderer.render("com.palantir:test", ImmutableMap.of(
+                "com.palantir:test:1.0.0", ImmutableList.of(firstSchema, secondSchema)));
+        String secondMarkdown = MarkdownRenderer.render("com.palantir:test", ImmutableMap.of(
+                "com.palantir:test:1.0.0",
+                // reverse order should produce the same results
+                ImmutableList.of(secondSchema, firstSchema)));
+        assertThat(firstMarkdown)
+                .isEqualTo("# Metrics\n"
+                        + "\n"
+                        + "## Test\n"
+                        + "\n"
+                        + "`com.palantir:test:1.0.0`\n"
+                        + "\n"
+                        + "### anamespace\n"
+                        + "namespace docs\n"
+                        + "- `anamespace.metric` (meter): metric docs\n"
+                        + "\n"
+                        + "### namespace\n"
+                        + "namespace docs\n"
+                        + "- `namespace.metric` (meter): metric docs\n"
+                        + "\n"
+                        + "### secondSchema\n"
+                        + "namespace docs\n"
+                        + "- `secondSchema.metric` (meter): metric docs")
+                .isEqualTo(secondMarkdown);
     }
 
     @Test
