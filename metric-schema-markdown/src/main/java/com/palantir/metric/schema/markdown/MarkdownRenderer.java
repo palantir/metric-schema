@@ -88,8 +88,8 @@ public final class MarkdownRenderer {
                 .map(entry -> Section.builder()
                         .sourceCoordinates(entry.getKey())
                         .namespaces(entry.getValue().stream()
-                                .flatMap(schema ->
-                                        schema.getNamespaces().entrySet().stream().sorted(Map.Entry.comparingByKey()))
+                                .flatMap(schema -> schema.getNamespaces().entrySet().stream())
+                                .sorted(Map.Entry.comparingByKey())
                                 .map(schemaEntry -> Namespace.builder()
                                         .name(schemaEntry.getKey())
                                         .definition(schemaEntry.getValue())
