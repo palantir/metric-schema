@@ -84,6 +84,49 @@ class MarkdownRendererTest {
     }
 
     @Test
+    void testMultipleNamespacesWithSameName() {
+        MetricSchema firstSchema = MetricSchema.builder()
+                .namespaces("namespace", MetricNamespace.builder()
+                        .docs(Documentation.of("namespace docs"))
+                        .metrics("metric1", MetricDefinition.builder()
+                                .type(MetricType.METER)
+                                .docs(Documentation.of("metric docs 1"))
+                                .build())
+                        .build())
+                .build();
+        MetricSchema secondSchema = MetricSchema.builder()
+                .namespaces("namespace", MetricNamespace.builder()
+                        .docs(Documentation.of("namespace docs"))
+                        .metrics("metric2", MetricDefinition.builder()
+                                .type(MetricType.METER)
+                                .docs(Documentation.of("metric docs 2"))
+                                .build())
+                        .build())
+                .build();
+        String firstMarkdown = MarkdownRenderer.render("com.palantir:test", ImmutableMap.of(
+                "com.palantir:test:1.0.0", ImmutableList.of(firstSchema, secondSchema)));
+        String secondMarkdown = MarkdownRenderer.render("com.palantir:test", ImmutableMap.of(
+                "com.palantir:test:1.0.0",
+                // reverse order should produce the same results
+                ImmutableList.of(secondSchema, firstSchema)));
+        assertThat(firstMarkdown)
+                .isEqualTo("# Metrics\n"
+                        + "\n"
+                        + "## Test\n"
+                        + "\n"
+                        + "`com.palantir:test:1.0.0`\n"
+                        + "\n"
+                        + "### namespace\n"
+                        + "namespace docs\n"
+                        + "- `namespace.metric1` (meter): metric docs 1\n"
+                        + "\n"
+                        + "### namespace\n"
+                        + "namespace docs\n"
+                        + "- `namespace.metric2` (meter): metric docs 2")
+                .isEqualTo(secondMarkdown);
+    }
+
+    @Test
     void testTagged() {
         String markdown = MarkdownRenderer.render(
                 "com.palantir:test", ImmutableMap.of("com.palantir:test:1.0.0", ImmutableList.of(MetricSchema.builder()
