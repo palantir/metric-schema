@@ -21,6 +21,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.palantir.metric.schema.MetricDefinition;
+import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
 import java.util.Comparator;
 import java.util.List;
@@ -89,7 +90,13 @@ public final class MarkdownRenderer {
                         .sourceCoordinates(entry.getKey())
                         .namespaces(entry.getValue().stream()
                                 .flatMap(schema -> schema.getNamespaces().entrySet().stream())
-                                .sorted(Map.Entry.comparingByKey())
+                                // Break ties on the namespace name using the number of metrics, then MetricNamespace
+                                // hashCode value.
+                                .sorted(Map.Entry.<String, MetricNamespace>comparingByKey()
+                                        .thenComparing(Map.Entry.comparingByValue(
+                                                Comparator.comparing(ns -> ns.getMetrics().size())))
+                                        .thenComparing(Map.Entry.comparingByValue(
+                                                Comparator.comparing(MetricNamespace::hashCode))))
                                 .map(schemaEntry -> Namespace.builder()
                                         .name(schemaEntry.getKey())
                                         .definition(schemaEntry.getValue())
