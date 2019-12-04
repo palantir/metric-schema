@@ -90,11 +90,13 @@ public final class MarkdownRenderer {
                         .sourceCoordinates(entry.getKey())
                         .namespaces(entry.getValue().stream()
                                 .flatMap(schema -> schema.getNamespaces().entrySet().stream())
-                                // Break ties on the namespace name using the number of metrics, then MetricNamespace
-                                // hashCode value.
+                                // Break ties on the namespace name using the documentation, number of metrics, then
+                                // MetricNamespace hashCode.
                                 .sorted(Map.Entry.<String, MetricNamespace>comparingByKey()
                                         .thenComparing(Map.Entry.comparingByValue(
-                                                Comparator.comparing(ns -> ns.getMetrics().size())))
+                                                Comparator.comparing(namespace -> namespace.getDocs().get())))
+                                        .thenComparing(Map.Entry.comparingByValue(
+                                                Comparator.comparing(namespace -> namespace.getMetrics().size())))
                                         .thenComparing(Map.Entry.comparingByValue(
                                                 Comparator.comparing(MetricNamespace::hashCode))))
                                 .map(schemaEntry -> Namespace.builder()
