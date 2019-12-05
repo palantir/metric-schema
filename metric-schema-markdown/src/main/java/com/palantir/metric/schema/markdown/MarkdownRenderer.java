@@ -51,7 +51,7 @@ public final class MarkdownRenderer {
                 .append(displayName(getName(section.sourceCoordinates())))
                 .append("\n\n")
                 .append('`')
-                .append(section.sourceCoordinates())
+                .append(getGroupArtifact(section.sourceCoordinates()))
                 .append("`\n");
         section.namespaces().forEach(namespace -> render(namespace, output));
     }
@@ -111,6 +111,12 @@ public final class MarkdownRenderer {
     private static String getName(String coordinate) {
         List<String> results = Splitter.on(':').splitToList(coordinate);
         return results.size() >= 2 ? results.get(1) : coordinate;
+    }
+
+    private static String getGroupArtifact(String coordinate) {
+        int lastIndex = coordinate.lastIndexOf(':');
+        int firstIndex = coordinate.indexOf(':');
+        return lastIndex != firstIndex ? coordinate.substring(0, lastIndex): coordinate;
     }
 
     private static String displayName(String name) {
