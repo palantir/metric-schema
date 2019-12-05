@@ -116,7 +116,7 @@ public final class MarkdownRenderer {
     private static String getGroupArtifact(String coordinate) {
         int lastIndex = coordinate.lastIndexOf(':');
         int firstIndex = coordinate.indexOf(':');
-        return lastIndex != firstIndex ? coordinate.substring(0, lastIndex): coordinate;
+        return lastIndex != firstIndex ? coordinate.substring(0, lastIndex) : coordinate;
     }
 
     private static String displayName(String name) {
