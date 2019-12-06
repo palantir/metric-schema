@@ -29,12 +29,14 @@ import org.gradle.api.GradleException;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.GFileUtils;
 
+@CacheableTask
 public class GenerateMetricMarkdownTask extends DefaultTask {
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
     private final RegularFileProperty manifestFile = getProject().getObjects().fileProperty();

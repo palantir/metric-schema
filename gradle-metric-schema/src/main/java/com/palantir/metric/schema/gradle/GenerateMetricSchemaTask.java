@@ -21,11 +21,13 @@ import com.palantir.metric.schema.JavaGenerator;
 import com.palantir.metric.schema.JavaGeneratorArgs;
 import java.io.File;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.GFileUtils;
 
+@CacheableTask
 public class GenerateMetricSchemaTask extends SourceTask {
     private final DirectoryProperty outputDirectory = getProject().getObjects().directoryProperty();
 

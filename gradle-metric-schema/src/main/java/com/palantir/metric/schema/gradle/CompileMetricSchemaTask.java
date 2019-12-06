@@ -28,10 +28,12 @@ import com.palantir.metric.schema.MetricSchema;
 import java.io.File;
 import java.io.IOException;
 import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
 
+@CacheableTask
 public class CompileMetricSchemaTask extends SourceTask {
     private static final ObjectReader reader = ObjectMappers.withDefaultModules(new ObjectMapper(new YAMLFactory()))
             .readerFor(MetricSchema.class);
