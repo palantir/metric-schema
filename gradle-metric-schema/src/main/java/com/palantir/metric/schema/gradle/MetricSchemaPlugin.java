@@ -58,6 +58,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
 
         configureJavaSource(project, generatedJavaOutputDir);
         configureIdea(project, generateMetricsTask, generatedJavaOutputDir);
+        configureEclipse(project, generateMetricsTask);
         configureProjectDependencies(project);
 
         TaskProvider<CompileMetricSchemaTask> compileSchemaTask =
@@ -116,6 +117,15 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
     private static void configureJavaSource(Project project, Provider<Directory> outputDir) {
         JavaPluginConvention javaPlugin = project.getConvention().findPlugin(JavaPluginConvention.class);
         javaPlugin.getSourceSets().getByName("main").getJava().srcDir(outputDir);
+    }
+
+    private static void configureEclipse(Project project, TaskProvider<? extends Task> generateMetrics) {
+        project.getPluginManager().withPlugin("eclipse", plugin -> {
+            Task task = project.getTasks().findByName("eclipseClasspath");
+            if (task != null) {
+                task.dependsOn(generateMetrics);
+            }
+        });
     }
 
     private static void configureIdea(
