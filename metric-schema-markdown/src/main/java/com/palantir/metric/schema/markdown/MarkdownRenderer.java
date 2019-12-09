@@ -16,6 +16,7 @@
 
 package com.palantir.metric.schema.markdown;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
@@ -108,18 +109,21 @@ public final class MarkdownRenderer {
                 .collect(ImmutableList.toImmutableList());
     }
 
-    private static String getName(String coordinate) {
+    @VisibleForTesting
+    static String getName(String coordinate) {
         List<String> results = Splitter.on(':').splitToList(coordinate);
         return results.size() >= 2 ? results.get(1) : coordinate;
     }
 
-    private static String getGroupArtifact(String coordinate) {
+    @VisibleForTesting
+    static String getGroupArtifact(String coordinate) {
         int lastIndex = coordinate.lastIndexOf(':');
         int firstIndex = coordinate.indexOf(':');
         return lastIndex != firstIndex ? coordinate.substring(0, lastIndex) : coordinate;
     }
 
-    private static String displayName(String name) {
+    @VisibleForTesting
+    static String displayName(String name) {
         return Splitter.on(CharMatcher.whitespace().or(CharMatcher.anyOf("-_.")))
                 .omitEmptyStrings()
                 .trimResults()
@@ -129,7 +133,8 @@ public final class MarkdownRenderer {
                 .collect(Collectors.joining(" "));
     }
 
-    private static String getGroup(String coordinate) {
+    @VisibleForTesting
+    static String getGroup(String coordinate) {
         return Splitter.on(':').splitToList(coordinate).get(0);
     }
 
