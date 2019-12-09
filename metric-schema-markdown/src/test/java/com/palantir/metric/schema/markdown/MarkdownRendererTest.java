@@ -176,4 +176,37 @@ class MarkdownRendererTest {
                 + "Foo namespace docs\n"
                 + "- `com.foo.namespace.metric` (meter): metric docs");
     }
+
+    @Test
+    void testGetName() {
+        assertThat(MarkdownRenderer.getName("com.palantir.foo:bar-baz:123.4.5")).isEqualTo("bar-baz");
+        assertThat(MarkdownRenderer.getName("com.palantir.foo:bar-baz:$projectVersion"))
+                .isEqualTo("bar-baz");
+        assertThat(MarkdownRenderer.getName("com.palantir.foo:bar-baz")).isEqualTo("bar-baz");
+    }
+
+    @Test
+    void testGetGroupArtifact() {
+        assertThat(MarkdownRenderer.getGroupArtifact("com.palantir.foo:bar-baz:123.4.5"))
+                .isEqualTo("com.palantir.foo:bar-baz");
+        assertThat(MarkdownRenderer.getGroupArtifact("com.palantir.foo:bar-baz:$projectVersion"))
+                .isEqualTo("com.palantir.foo:bar-baz");
+        assertThat(MarkdownRenderer.getGroupArtifact("com.palantir.foo:bar-baz"))
+                .isEqualTo("com.palantir.foo:bar-baz");
+    }
+
+    @Test
+    void testGetGroup() {
+        assertThat(MarkdownRenderer.getGroup("com.palantir.foo:bar-baz:123.4.5"))
+                .isEqualTo("com.palantir.foo");
+        assertThat(MarkdownRenderer.getGroup("com.palantir.foo:bar-baz:$projectVersion"))
+                .isEqualTo("com.palantir.foo");
+        assertThat(MarkdownRenderer.getGroup("com.palantir.foo:bar-baz")).isEqualTo("com.palantir.foo");
+    }
+
+    @Test
+    void testGetDisplayName() {
+        assertThat(MarkdownRenderer.displayName("bar-baz")).isEqualTo("Bar Baz");
+        assertThat(MarkdownRenderer.displayName("bar.baz")).isEqualTo("Bar Baz");
+    }
 }
