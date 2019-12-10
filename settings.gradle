@@ -1,5 +1,6 @@
 rootProject.name = 'metric-schema-root'
 
+include 'metric-schema-datadog'
 include 'metric-schema-java'
 include 'metric-schema-markdown'
 include 'metric-schema-api'
