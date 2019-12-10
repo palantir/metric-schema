@@ -62,10 +62,17 @@ class ValidatorTest {
     @Test
     void testEmptyMetricName() {
         assertThatThrownBy(() -> Validator.validate(MetricSchema.builder()
-                        .namespaces("test", MetricNamespace.builder()
-                                .docs(DOCS)
-                                .metrics("", MetricDefinition.builder().docs(DOCS).type(MetricType.COUNTER).build())
-                                .build())
+                        .namespaces(
+                                "test",
+                                MetricNamespace.builder()
+                                        .docs(DOCS)
+                                        .metrics(
+                                                "",
+                                                MetricDefinition.builder()
+                                                        .docs(DOCS)
+                                                        .type(MetricType.COUNTER)
+                                                        .build())
+                                        .build())
                         .build()))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("MetricDefinition names must not be empty");
@@ -74,14 +81,18 @@ class ValidatorTest {
     @Test
     void testUnknownType() {
         assertThatThrownBy(() -> Validator.validate(MetricSchema.builder()
-                        .namespaces("test", MetricNamespace.builder()
-                                .docs(DOCS)
-                                .metrics("name", MetricDefinition.builder()
+                        .namespaces(
+                                "test",
+                                MetricNamespace.builder()
                                         .docs(DOCS)
-                                        .type(MetricType.valueOf("other"))
-                                        .tags("")
+                                        .metrics(
+                                                "name",
+                                                MetricDefinition.builder()
+                                                        .docs(DOCS)
+                                                        .type(MetricType.valueOf("other"))
+                                                        .tags("")
+                                                        .build())
                                         .build())
-                                .build())
                         .build()))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("Unknown metric type");
@@ -90,14 +101,18 @@ class ValidatorTest {
     @Test
     void testEmptyTag() {
         assertThatThrownBy(() -> Validator.validate(MetricSchema.builder()
-                        .namespaces("test", MetricNamespace.builder()
-                                .docs(DOCS)
-                                .metrics("name", MetricDefinition.builder()
+                        .namespaces(
+                                "test",
+                                MetricNamespace.builder()
                                         .docs(DOCS)
-                                        .type(MetricType.COUNTER)
-                                        .tags("")
+                                        .metrics(
+                                                "name",
+                                                MetricDefinition.builder()
+                                                        .docs(DOCS)
+                                                        .type(MetricType.COUNTER)
+                                                        .tags("")
+                                                        .build())
                                         .build())
-                                .build())
                         .build()))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("MetricDefinition tags must not be empty");
@@ -115,13 +130,17 @@ class ValidatorTest {
     @Test
     void testBlankMetricDocs() {
         assertThatThrownBy(() -> Validator.validate(MetricSchema.builder()
-                        .namespaces("test", MetricNamespace.builder()
-                                .docs(DOCS)
-                                .metrics("test", MetricDefinition.builder()
-                                        .type(MetricType.METER)
-                                        .docs(Documentation.of("\t \n"))
+                        .namespaces(
+                                "test",
+                                MetricNamespace.builder()
+                                        .docs(DOCS)
+                                        .metrics(
+                                                "test",
+                                                MetricDefinition.builder()
+                                                        .type(MetricType.METER)
+                                                        .docs(Documentation.of("\t \n"))
+                                                        .build())
                                         .build())
-                                .build())
                         .build()))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("Documentation must not be blank");

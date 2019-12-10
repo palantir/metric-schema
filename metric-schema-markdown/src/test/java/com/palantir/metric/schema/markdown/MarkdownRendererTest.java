@@ -32,36 +32,51 @@ class MarkdownRendererTest {
     @Test
     void testSimple() {
         MetricSchema firstSchema = MetricSchema.builder()
-                .namespaces("namespace", MetricNamespace.builder()
-                        .docs(Documentation.of("namespace docs"))
-                        .metrics("metric", MetricDefinition.builder()
-                                .type(MetricType.METER)
-                                .docs(Documentation.of("metric docs"))
+                .namespaces(
+                        "namespace",
+                        MetricNamespace.builder()
+                                .docs(Documentation.of("namespace docs"))
+                                .metrics(
+                                        "metric",
+                                        MetricDefinition.builder()
+                                                .type(MetricType.METER)
+                                                .docs(Documentation.of("metric docs"))
+                                                .build())
                                 .build())
-                        .build())
-                .namespaces("anamespace", MetricNamespace.builder()
-                        .docs(Documentation.of("namespace docs"))
-                        .metrics("metric", MetricDefinition.builder()
-                                .type(MetricType.METER)
-                                .docs(Documentation.of("metric docs"))
+                .namespaces(
+                        "anamespace",
+                        MetricNamespace.builder()
+                                .docs(Documentation.of("namespace docs"))
+                                .metrics(
+                                        "metric",
+                                        MetricDefinition.builder()
+                                                .type(MetricType.METER)
+                                                .docs(Documentation.of("metric docs"))
+                                                .build())
                                 .build())
-                        .build())
                 .build();
         MetricSchema secondSchema = MetricSchema.builder()
-                .namespaces("secondSchema", MetricNamespace.builder()
-                        .docs(Documentation.of("namespace docs"))
-                        .metrics("metric", MetricDefinition.builder()
-                                .type(MetricType.METER)
-                                .docs(Documentation.of("metric docs"))
+                .namespaces(
+                        "secondSchema",
+                        MetricNamespace.builder()
+                                .docs(Documentation.of("namespace docs"))
+                                .metrics(
+                                        "metric",
+                                        MetricDefinition.builder()
+                                                .type(MetricType.METER)
+                                                .docs(Documentation.of("metric docs"))
+                                                .build())
                                 .build())
-                        .build())
                 .build();
-        String firstMarkdown = MarkdownRenderer.render("com.palantir:test", ImmutableMap.of(
-                "com.palantir:test:1.0.0", ImmutableList.of(firstSchema, secondSchema)));
-        String secondMarkdown = MarkdownRenderer.render("com.palantir:test", ImmutableMap.of(
-                "com.palantir:test:1.0.0",
-                // reverse order should produce the same results
-                ImmutableList.of(secondSchema, firstSchema)));
+        String firstMarkdown = MarkdownRenderer.render(
+                "com.palantir:test",
+                ImmutableMap.of("com.palantir:test:1.0.0", ImmutableList.of(firstSchema, secondSchema)));
+        String secondMarkdown = MarkdownRenderer.render(
+                "com.palantir:test",
+                ImmutableMap.of(
+                        "com.palantir:test:1.0.0",
+                        // reverse order should produce the same results
+                        ImmutableList.of(secondSchema, firstSchema)));
         assertThat(firstMarkdown)
                 .isEqualTo("# Metrics\n"
                         + "\n"
@@ -86,29 +101,40 @@ class MarkdownRendererTest {
     @Test
     void testMultipleNamespacesWithSameName() {
         MetricSchema firstSchema = MetricSchema.builder()
-                .namespaces("namespace", MetricNamespace.builder()
-                        .docs(Documentation.of("namespace docs"))
-                        .metrics("metric1", MetricDefinition.builder()
-                                .type(MetricType.METER)
-                                .docs(Documentation.of("metric docs 1"))
+                .namespaces(
+                        "namespace",
+                        MetricNamespace.builder()
+                                .docs(Documentation.of("namespace docs"))
+                                .metrics(
+                                        "metric1",
+                                        MetricDefinition.builder()
+                                                .type(MetricType.METER)
+                                                .docs(Documentation.of("metric docs 1"))
+                                                .build())
                                 .build())
-                        .build())
                 .build();
         MetricSchema secondSchema = MetricSchema.builder()
-                .namespaces("namespace", MetricNamespace.builder()
-                        .docs(Documentation.of("namespace docs"))
-                        .metrics("metric2", MetricDefinition.builder()
-                                .type(MetricType.METER)
-                                .docs(Documentation.of("metric docs 2"))
+                .namespaces(
+                        "namespace",
+                        MetricNamespace.builder()
+                                .docs(Documentation.of("namespace docs"))
+                                .metrics(
+                                        "metric2",
+                                        MetricDefinition.builder()
+                                                .type(MetricType.METER)
+                                                .docs(Documentation.of("metric docs 2"))
+                                                .build())
                                 .build())
-                        .build())
                 .build();
-        String firstMarkdown = MarkdownRenderer.render("com.palantir:test", ImmutableMap.of(
-                "com.palantir:test:1.0.0", ImmutableList.of(firstSchema, secondSchema)));
-        String secondMarkdown = MarkdownRenderer.render("com.palantir:test", ImmutableMap.of(
-                "com.palantir:test:1.0.0",
-                // reverse order should produce the same results
-                ImmutableList.of(secondSchema, firstSchema)));
+        String firstMarkdown = MarkdownRenderer.render(
+                "com.palantir:test",
+                ImmutableMap.of("com.palantir:test:1.0.0", ImmutableList.of(firstSchema, secondSchema)));
+        String secondMarkdown = MarkdownRenderer.render(
+                "com.palantir:test",
+                ImmutableMap.of(
+                        "com.palantir:test:1.0.0",
+                        // reverse order should produce the same results
+                        ImmutableList.of(secondSchema, firstSchema)));
         assertThat(firstMarkdown)
                 .isEqualTo("# Metrics\n"
                         + "\n"
@@ -129,17 +155,24 @@ class MarkdownRendererTest {
     @Test
     void testTagged() {
         String markdown = MarkdownRenderer.render(
-                "com.palantir:test", ImmutableMap.of("com.palantir:test:1.0.0", ImmutableList.of(MetricSchema.builder()
-                        .namespaces("namespace", MetricNamespace.builder()
-                                .docs(Documentation.of("namespace docs"))
-                                .metrics("metric", MetricDefinition.builder()
-                                        .type(MetricType.METER)
-                                        .tags("service")
-                                        .tags("endpoint")
-                                        .docs(Documentation.of("metric docs"))
-                                        .build())
-                                .build())
-                        .build())));
+                "com.palantir:test",
+                ImmutableMap.of(
+                        "com.palantir:test:1.0.0",
+                        ImmutableList.of(MetricSchema.builder()
+                                .namespaces(
+                                        "namespace",
+                                        MetricNamespace.builder()
+                                                .docs(Documentation.of("namespace docs"))
+                                                .metrics(
+                                                        "metric",
+                                                        MetricDefinition.builder()
+                                                                .type(MetricType.METER)
+                                                                .tags("service")
+                                                                .tags("endpoint")
+                                                                .docs(Documentation.of("metric docs"))
+                                                                .build())
+                                                .build())
+                                .build())));
         assertThat(markdown).isEqualTo("# Metrics\n"
                 + "\n"
                 + "## Test\n"
@@ -154,18 +187,27 @@ class MarkdownRendererTest {
     @Test
     void testEmptyNamespacesExcluded() {
         String markdown = MarkdownRenderer.render(
-                "com.palantir:test", ImmutableMap.of("com.palantir:test", ImmutableList.of(MetricSchema.builder()
-                        .namespaces("com.foo.namespace", MetricNamespace.builder()
-                                .docs(Documentation.of("Foo namespace docs"))
-                                .metrics("metric", MetricDefinition.builder()
-                                        .type(MetricType.METER)
-                                        .docs(Documentation.of("metric docs"))
-                                        .build())
-                                .build())
-                        .namespaces("empty", MetricNamespace.builder()
-                                .docs(Documentation.of("empty namespace docs"))
-                                .build())
-                        .build())));
+                "com.palantir:test",
+                ImmutableMap.of(
+                        "com.palantir:test",
+                        ImmutableList.of(MetricSchema.builder()
+                                .namespaces(
+                                        "com.foo.namespace",
+                                        MetricNamespace.builder()
+                                                .docs(Documentation.of("Foo namespace docs"))
+                                                .metrics(
+                                                        "metric",
+                                                        MetricDefinition.builder()
+                                                                .type(MetricType.METER)
+                                                                .docs(Documentation.of("metric docs"))
+                                                                .build())
+                                                .build())
+                                .namespaces(
+                                        "empty",
+                                        MetricNamespace.builder()
+                                                .docs(Documentation.of("empty namespace docs"))
+                                                .build())
+                                .build())));
         assertThat(markdown).isEqualTo("# Metrics\n"
                 + "\n"
                 + "## Test\n"
