@@ -1,0 +1,35 @@
+{
+  "title" : "Dashboard Title",
+  "description" : null,
+  "layout_type" : "ordered",
+  "is_read_only" : true,
+  "template_variables" : [ ],
+  "notify_list" : [ ],
+  "widgets" : [ {
+    "id" : -218477016,
+    "definition" : {
+      "type" : "group",
+      "title" : "First Namespace",
+      "layout_type" : "ordered",
+      "widgets" : [ {
+        "id" : 2053410890,
+        "definition" : {
+          "type" : "timeseries",
+          "title" : "my.timer",
+          "requests" : [ {
+            "q" : "my.timer.p95"
+          } ],
+          "show_legend" : null
+        }
+      } ]
+    }
+  }, {
+    "id" : -814035000,
+    "definition" : {
+      "type" : "group",
+      "title" : "Second Namespace",
+      "layout_type" : "ordered",
+      "widgets" : [ ]
+    }
+  } ]
+}

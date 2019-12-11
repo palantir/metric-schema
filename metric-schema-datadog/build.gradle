@@ -5,6 +5,7 @@ dependencies {
     implementation 'com.google.guava:guava'
     implementation 'org.slf4j:slf4j-api'
     implementation 'org.apache.commons:commons-lang3'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
 
     testImplementation 'junit:junit'
     testImplementation 'org.assertj:assertj-core'
