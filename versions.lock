@@ -19,7 +19,7 @@ com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 c
 com.google.j2objc:j2objc-annotations:1.3 (1 constraints: b809eda0)
 com.palantir.conjure.java:conjure-lib:4.8.1 (1 constraints: 0f051836)
 com.palantir.conjure.java.api:errors:2.9.0 (1 constraints: f30f8599)
-com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:4.44.0 (1 constraints: 3e05533b)
+com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:4.45.0 (1 constraints: 3f05563b)
 com.palantir.ri:resource-identifier:1.0.1 (1 constraints: ea0f6699)
 com.palantir.safe-logging:preconditions:1.12.1 (6 constraints: 226005f6)
 com.palantir.safe-logging:safe-logging:1.12.1 (3 constraints: b2316d30)
