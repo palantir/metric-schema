@@ -48,6 +48,8 @@ import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
 
 @CacheableTask
@@ -59,8 +61,9 @@ public class CreateMetricsManifestTask extends DefaultTask {
     private final Property<Configuration> configuration = getProject().getObjects().property(Configuration.class);
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
 
-    @InputFile
     @Optional
+    @InputFile
+    @PathSensitive(PathSensitivity.RELATIVE)
     public final RegularFileProperty getMetricsFile() {
         return metricsFile;
     }

@@ -37,7 +37,7 @@ public final class MetricSchemaMarkdownPlugin implements Plugin<Project> {
         TaskProvider<GenerateMetricMarkdownTask> generateMetricsMarkdown = project.getTasks()
                 .register(MetricSchemaPlugin.GENERATE_METRICS_MARKDOWN, GenerateMetricMarkdownTask.class, task -> {
                     task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
-                    task.outputFile().set(project.file("metrics.md"));
+                    task.getOutputFile().set(project.file("metrics.md"));
                     task.dependsOn(createMetricsManifest);
                 });
         project.getTasks().named("check", check -> check.dependsOn(generateMetricsMarkdown));

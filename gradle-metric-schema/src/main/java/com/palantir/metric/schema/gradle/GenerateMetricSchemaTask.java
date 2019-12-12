@@ -32,13 +32,13 @@ public class GenerateMetricSchemaTask extends SourceTask {
     private final DirectoryProperty outputDirectory = getProject().getObjects().directoryProperty();
 
     @OutputDirectory
-    public final DirectoryProperty outputDir() {
+    public final DirectoryProperty getOutputDir() {
         return outputDirectory;
     }
 
     @TaskAction
     public final void generate() {
-        File output = outputDir().getAsFile().get();
+        File output = getOutputDir().getAsFile().get();
         GFileUtils.deleteDirectory(output);
         getProject().mkdir(output);
 
