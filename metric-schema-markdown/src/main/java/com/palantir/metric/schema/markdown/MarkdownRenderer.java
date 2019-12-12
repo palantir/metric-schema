@@ -142,23 +142,22 @@ public final class MarkdownRenderer {
      * Comparator which prefers sections from the local projects group. Metrics defined in the local project should be
      * rendered first.
      */
-    private static final class CoordinateComparator implements Comparator<String> {
+    @VisibleForTesting
+    static final class CoordinateComparator implements Comparator<String> {
 
-        private final String localCoordinate;
+        private final String localGroup;
 
         CoordinateComparator(String localCoordinate) {
-            this.localCoordinate = localCoordinate;
+            this.localGroup = getGroup(localCoordinate);
         }
 
         @Override
         public int compare(String first, String second) {
             String firstGroup = getGroup(first);
             String secondGroup = getGroup(second);
-            if (Objects.equals(firstGroup, localCoordinate) || Objects.equals(secondGroup, localCoordinate)) {
-                if (Objects.equals(firstGroup, secondGroup)) {
-                    return 0;
-                }
-                return Objects.equals(firstGroup, localCoordinate) ? -1 : 1;
+            if (!Objects.equals(firstGroup, secondGroup)
+                    && (Objects.equals(firstGroup, localGroup) || Objects.equals(secondGroup, localGroup))) {
+                return Objects.equals(firstGroup, localGroup) ? -1 : 1;
             }
             return first.compareTo(second);
         }
