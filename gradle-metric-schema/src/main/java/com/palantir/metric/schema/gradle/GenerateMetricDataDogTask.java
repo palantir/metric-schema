@@ -82,7 +82,10 @@ public class GenerateMetricDataDogTask extends DefaultTask {
         GFileUtils.writeFile(
                 DataDogRenderer.render(
                         dashboardConfig,
-                        schemas.values().stream().flatMap(List::stream).collect(Collectors.toSet())),
+                        schemas.values().stream()
+                                .flatMap(List::stream)
+                                .flatMap(schema -> schema.getGraphs().stream())
+                                .collect(Collectors.toList())),
                 outputFile.get().getAsFile());
     }
 }

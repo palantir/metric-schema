@@ -22,10 +22,8 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.metric.schema.GraphDefinition;
+import com.palantir.metric.schema.GraphGroup;
 import com.palantir.metric.schema.GraphWidget;
-import com.palantir.metric.schema.MetricDefinition;
-import com.palantir.metric.schema.MetricNamespace;
-import com.palantir.metric.schema.MetricSchema;
 import com.palantir.metric.schema.Timeseries;
 import com.palantir.metric.schema.TimeseriesGraph;
 import com.palantir.metric.schema.datadog.api.Dashboard;
@@ -37,7 +35,7 @@ import com.palantir.metric.schema.datadog.api.widgets.BaseWidget;
 import com.palantir.metric.schema.datadog.api.widgets.GroupWidget;
 import com.palantir.metric.schema.datadog.api.widgets.TimeseriesWidget;
 import java.io.IOException;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public final class DataDogRenderer {
@@ -48,51 +46,46 @@ public final class DataDogRenderer {
 
     private DataDogRenderer() {}
 
-    public static String render(DashboardConfig config, Set<MetricSchema> schemas) throws IOException {
-        return JSON.writeValueAsString(renderDashboard(config, schemas));
+    public static String render(DashboardConfig config, List<GraphGroup> graphGroups) throws IOException {
+        return JSON.writeValueAsString(renderDashboard(config, graphGroups));
     }
 
     @VisibleForTesting
-    static Dashboard renderDashboard(DashboardConfig config, Set<MetricSchema> schemas) {
+    static Dashboard renderDashboard(DashboardConfig config, List<GraphGroup> graphGroups) {
         return Dashboard.builder()
                 .title(config.title())
                 .description(config.description())
                 .layoutType(LayoutType.ORDERED)
                 .readOnly(true)
                 .templateVariables(config.templateVariables())
-                .widgets(schemas.stream()
-                        .flatMap(schema -> schema.getNamespaces().entrySet().stream()
-                                .filter(entry -> !entry.getValue().getGraphs().isEmpty())
-                                .map(entry -> renderGroup(config, entry.getKey(), entry.getValue())))
+                .widgets(graphGroups.stream()
+                        .map(group -> renderGroup(config, group))
                         .map(widget -> Widget.builder().definition(widget).build())
                         .collect(Collectors.toList()))
                 .build();
     }
 
     @VisibleForTesting
-    static GroupWidget renderGroup(DashboardConfig config, String name, MetricNamespace namespace) {
+    static GroupWidget renderGroup(DashboardConfig config, GraphGroup graphGroup) {
         return GroupWidget.builder()
-                .title(name)
+                .title(graphGroup.getTitle())
                 .layoutType(LayoutType.ORDERED)
-                .widgets(namespace.getGraphs().stream()
-                        .map(graph -> {
-                            return renderMetric(config, graph, namespace.getMetrics().get(graph.getMetric()));
-                        })
+                .widgets(graphGroup.getDefinitions().stream()
+                        .map(graph -> renderGraph(config, graph))
                         .map(widget -> Widget.builder().definition(widget).build())
                         .collect(Collectors.toList()))
                 .build();
     }
 
     @VisibleForTesting
-    static BaseWidget renderMetric(
-            DashboardConfig config, GraphDefinition graph, MetricDefinition _metric) {
+    static BaseWidget renderGraph(DashboardConfig config, GraphDefinition graph) {
         return graph.getWidget().accept(new GraphWidget.Visitor<BaseWidget>() {
             @Override
             public BaseWidget visitTimeseries(TimeseriesGraph timeseriesGraph) {
                 return TimeseriesWidget.builder()
                         .title(graph.getTitle())
                         .addAllRequests(timeseriesGraph.getSeries().stream()
-                                .map(timeseries -> timeseriesRequest(config, graph.getMetric(), timeseries))
+                                .map(timeseries -> timeseriesRequest(config, timeseries))
                                 .collect(Collectors.toList()))
                         .build();
             }
@@ -104,11 +97,10 @@ public final class DataDogRenderer {
         });
     }
 
-    static Request timeseriesRequest(DashboardConfig config, String metricName, Timeseries timeseries) {
+    static Request timeseriesRequest(DashboardConfig config, Timeseries timeseries) {
         return Request.builder()
-                .query(Query.timer(metricName)
-                        .percentile(timeseries.getPercentile())
-                        .from(ImmutableSet.<Query.Selector>builder()
+                .query(Query.of(timeseries.getMetric())
+                        .selectFrom(ImmutableSet.<Query.Selector>builder()
                                 .addAll(config.selectedTags().entrySet().stream()
                                         .map(tag -> Query.TagSelector.of(tag.getKey(), tag.getValue()))
                                         .collect(Collectors.toSet()))

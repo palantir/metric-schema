@@ -19,7 +19,6 @@ package com.palantir.metric.schema.datadog;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.metric.schema.Aggregation;
-import com.palantir.metric.schema.Percentile;
 import com.palantir.metric.schema.datadog.api.TemplateVariable;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,75 +27,22 @@ public final class Query {
 
     private Query() {}
 
-    public static Timer timer(String name) {
-        return new Timer(name);
+    public static Metric of(String name) {
+        return new Metric(name);
     }
 
-    public static final class Timer {
-        private final String name;
-
-        private Timer(String name) {
-            this.name = name;
-        }
-
-        public MetricName p95() {
-            return percentile(Percentile.P95);
-        }
-
-        public MetricName p99() {
-            return percentile(Percentile.P99);
-        }
-
-        public MetricName p999() {
-            return percentile(Percentile.P999);
-        }
-
-        public MetricName max() {
-            return percentile(Percentile.MAX);
-        }
-
-        public MetricName percentile(Percentile percentile) {
-            return percentile.accept(new Percentile.Visitor<MetricName>() {
-                @Override
-                public MetricName visitP95() {
-                    return new MetricName(name + ".p95");
-                }
-
-                @Override
-                public MetricName visitP99() {
-                    return new MetricName(name + ".p99");
-                }
-
-                @Override
-                public MetricName visitP999() {
-                    return new MetricName(name + ".p999");
-                }
-
-                @Override
-                public MetricName visitMax() {
-                    return new MetricName(name + ".max");
-                }
-
-                @Override
-                public MetricName visitUnknown(String _unknownValue) {
-                    throw new UnsupportedOperationException();
-                }
-            });
-        }
-    }
-
-    public static final class MetricName {
+    public static final class Metric {
         private final String query;
 
-        private MetricName(String query) {
+        private Metric(String query) {
             this.query = query;
         }
 
-        public SelectedMetric fromEverywhere() {
-            return from(ImmutableSet.of());
+        public SelectedMetric selectFromEverywhere() {
+            return selectFrom(ImmutableSet.of());
         }
 
-        public SelectedMetric from(Set<Selector> selectors) {
+        public SelectedMetric selectFrom(Set<Selector> selectors) {
             String fromSelector = selectors.isEmpty()
                     ? "*"
                     : Joiner.on(',').join(selectors.stream().map(Selector::selector).collect(Collectors.toSet()));
@@ -117,9 +63,9 @@ public final class Query {
             sb.append(aggregation.getFunction().toString().toLowerCase());
             sb.append(":");
             sb.append(query);
-            if (!aggregation.getGroupByTags().isEmpty()) {
+            if (!aggregation.getGroupBy().isEmpty()) {
                 sb.append(" by {");
-                sb.append(Joiner.on(',').join(aggregation.getGroupByTags()));
+                sb.append(Joiner.on(',').join(aggregation.getGroupBy()));
                 sb.append("}");
             }
             return new AggregatedMetric(sb.toString());

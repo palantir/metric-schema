@@ -14,13 +14,13 @@
   } ],
   "notify_list" : [ ],
   "widgets" : [ {
-    "id" : -17629852,
+    "id" : 782846257,
     "definition" : {
       "type" : "group",
       "title" : "First Namespace",
       "layout_type" : "ordered",
       "widgets" : [ {
-        "id" : -1534279768,
+        "id" : 1823467183,
         "definition" : {
           "type" : "timeseries",
           "title" : "Server Response P99s",
@@ -31,14 +31,6 @@
           "show_legend" : false
         }
       } ]
-    }
-  }, {
-    "id" : -512115444,
-    "definition" : {
-      "type" : "group",
-      "title" : "Second Namespace",
-      "layout_type" : "ordered",
-      "widgets" : [ ]
     }
   } ]
 }

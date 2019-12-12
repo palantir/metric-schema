@@ -6,6 +6,7 @@ types:
       MetricSchema:
         fields:
           namespaces: map<string, MetricNamespace>
+          graphs: list<GraphGroup>
           options:
             docs: >
               Additional pieces of information that do not change the overall declaration,
@@ -37,10 +38,13 @@ types:
           - TIMER
           - HISTOGRAM
 
+      GraphGroup:
+        fields:
+          title: string
+          definitions: list<GraphDefinition>
       GraphDefinition:
         fields:
           title: string
-          metric: string
           widget: GraphWidget
       GraphWidget:
         union:
@@ -50,7 +54,7 @@ types:
           series: list<Timeseries>
       Timeseries:
         fields:
-          percentile: Percentile
+          metric: string
           aggregation: Aggregation
       Percentile:
         values:
@@ -61,7 +65,7 @@ types:
       Aggregation:
         fields:
           function: AggregationFunction
-          groupByTags: set<string>
+          groupBy: set<string>
       AggregationFunction:
         values:
           - AVG
