@@ -251,4 +251,14 @@ class MarkdownRendererTest {
         assertThat(MarkdownRenderer.displayName("bar-baz")).isEqualTo("Bar Baz");
         assertThat(MarkdownRenderer.displayName("bar.baz")).isEqualTo("Bar Baz");
     }
+
+    @Test
+    void testCoordinateComparator() {
+        assertThat("com.palantir.foo:name")
+                .usingComparator(new MarkdownRenderer.CoordinateComparator("com.unknown:name"))
+                .isGreaterThan("com.palantir.bar:name");
+        assertThat("com.palantir.foo:name")
+                .usingComparator(new MarkdownRenderer.CoordinateComparator("com.palantir.foo:name2"))
+                .isLessThan("com.palantir.bar:name");
+    }
 }
