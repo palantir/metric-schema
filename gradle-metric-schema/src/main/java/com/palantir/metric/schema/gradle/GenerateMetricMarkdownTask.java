@@ -33,6 +33,8 @@ import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.GFileUtils;
 
@@ -42,18 +44,20 @@ public class GenerateMetricMarkdownTask extends DefaultTask {
     private final RegularFileProperty manifestFile = getProject().getObjects().fileProperty();
 
     @InputFile
+    @PathSensitive(PathSensitivity.RELATIVE)
     public final RegularFileProperty getManifestFile() {
         return manifestFile;
     }
 
-    @InputFile
     @Optional
-    public final Provider<RegularFile> markdownFile() {
+    @InputFile
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public final Provider<RegularFile> getMarkdownFile() {
         return ProviderUtils.filterNonExistentFile(getProject(), outputFile);
     }
 
     @OutputFile
-    public final RegularFileProperty outputFile() {
+    public final RegularFileProperty getOutputFile() {
         return outputFile;
     }
 

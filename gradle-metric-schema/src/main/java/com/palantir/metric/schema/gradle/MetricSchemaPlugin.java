@@ -52,7 +52,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                     task.setGroup(TASK_GROUP);
                     task.setDescription("Generates bindings for producing well defined metrics");
                     task.setSource(sourceSet);
-                    task.outputDir().set(generatedJavaOutputDir);
+                    task.getOutputDir().set(generatedJavaOutputDir);
                 });
         project.getTasks().named("compileJava", compileJava -> compileJava.dependsOn(generateMetricsTask));
 
