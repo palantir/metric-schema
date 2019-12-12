@@ -19,6 +19,7 @@ types:
           docs: Documentation
           metrics:
             type: map<string,MetricDefinition>
+          monitors: map<string, MonitorDefinition>
       MetricDefinition:
         fields:
           type: MetricType
@@ -34,3 +35,39 @@ types:
       Documentation:
         docs: Documentation describing an associated component. Markdown syntax may be used.
         alias: string
+      MonitorDefinition:
+        fields:
+          docs: Documentation
+          query: QueryDefinition
+          function: optional<MetricFunction>
+          thresholds: MonitorThreshold
+      QueryDefinition:
+        fields:
+          metric: string
+          aggregators: MetricAggregator
+          tags: list<string>
+      MetricAggregator:
+        values:
+          - AVG
+          - MIN
+          - MAX
+          - SUM
+      MetricFunction:
+        union:
+          rate: RateFunction
+      RateFunction:
+        fields:
+          # time window
+          window: integer
+      MonitorThreshold:
+        # it would be great if these were typed with the metric/function
+        fields:
+          comparator: Comparator
+          critical: optional<string>
+          warning: optional<string>
+      Comparator:
+        values:
+          - GREATER_THAN
+          - GREATER_THAN_OR_EQUAL
+          - LESS_THAN
+          - LESS_THAN_OR_EQUAL

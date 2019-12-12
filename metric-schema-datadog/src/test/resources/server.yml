@@ -1,0 +1,39 @@
+namespace:
+  server:
+    docs: General web server metrics.
+    metrics:
+      response.time:
+        type: timer
+        tags:
+          - service-name
+          - endpoint
+        docs: A histogram of the number of bytes written into the response.
+      response.
+      response.error:
+        type: counter
+        tags: [service-name, endpoint]
+    monitors:
+      "slow response":
+        query:
+          metric: response.time
+          aggregator: max
+          tags: [endpoint]
+        threshold:
+          comparator: greater_than
+          critical: 1000
+      "failed requests":
+        query:
+          metric: response.error
+          aggregator: max
+        threshold:
+          comparator: greater_than
+          critical: 1
+      "rate of failure":
+        query:
+          metric: response.error
+          aggregator: max
+          tags: [endpoint]
+        function:
+          type: rate
+          rate:
+            window: 1

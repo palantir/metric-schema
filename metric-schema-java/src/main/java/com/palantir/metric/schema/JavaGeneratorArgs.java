@@ -29,11 +29,7 @@ import org.immutables.value.Value;
 public abstract class JavaGeneratorArgs {
 
     /**
-     * Input directory for metric schema files with the
-     *
-     * <pre>yml</pre>
-     *
-     * extension.
+     * Input directory for metric schema files with the ".yml" extension.
      */
     abstract Set<Path> inputs();
 

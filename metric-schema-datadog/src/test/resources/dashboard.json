@@ -1,0 +1,29 @@
+{
+  "title" : "server Dashboard",
+  "description" : "some description",
+  "layout_type" : "ordered",
+  "template_variables" : [ {
+    "name" : "productversion",
+    "default" : "*",
+    "prefix" : "productversion"
+  } ],
+  "widgets" : [ {
+    "definition" : {
+      "type" : "timeseries",
+      "title" : "widget name",
+      "requests" : [ {
+        "q" : "max:response.size{$productversion} by {service-name, endpoint}.as_count()",
+        "display_type" : "line"
+      } ]
+    }
+  }, {
+    "definition" : {
+      "type" : "timeseries",
+      "title" : "widget name",
+      "requests" : [ {
+        "q" : "max:worker.utilization{$productversion}.as_count()",
+        "display_type" : "line"
+      } ]
+    }
+  } ]
+}

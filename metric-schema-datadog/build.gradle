@@ -1,0 +1,12 @@
+dependencies {
+    implementation project(':metric-schema-api:metric-schema-api-objects')
+    implementation 'com.google.guava:guava'
+    implementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+
+    testImplementation 'junit:junit'
+    testImplementation 'org.assertj:assertj-core'
+
+    annotationProcessor 'org.immutables:value'
+    compileOnly 'org.immutables:value::annotations'
+}
