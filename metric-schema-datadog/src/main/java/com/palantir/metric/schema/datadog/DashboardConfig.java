@@ -16,6 +16,11 @@
 
 package com.palantir.metric.schema.datadog;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.metric.schema.datadog.api.TemplateVariable;
 import java.util.List;
 import java.util.Map;
@@ -23,14 +28,20 @@ import java.util.Optional;
 import org.immutables.value.Value;
 
 @Value.Immutable
+@JsonInclude(JsonInclude.Include.NON_ABSENT)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonDeserialize(as = ImmutableDashboardConfig.class)
+@JsonSerialize(as = ImmutableDashboardConfig.class)
 public interface DashboardConfig {
 
     String title();
 
     Optional<String> description();
 
+    @JsonProperty("selected-tags")
     Map<String, String> selectedTags();
 
+    @JsonProperty("template-variables")
     List<TemplateVariable> templateVariables();
 
     static Builder builder() {

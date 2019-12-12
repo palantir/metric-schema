@@ -16,17 +16,14 @@
 
 package com.palantir.metric.schema.gradle;
 
-import com.google.common.collect.ImmutableList;
-import java.util.List;
-import org.gradle.StartParameter;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 
-public final class MetricSchemaMarkdownPlugin implements Plugin<Project> {
+public final class MetricSchemaDataDogPlugin implements Plugin<Project> {
 
-    public static final String GENERATE_METRICS_MARKDOWN = "generateMetricsMarkdown";
+    public static final String GENERATE_METRICS_DATADOG = "generateMetricsDataDog";
 
     @Override
     public void apply(Project project) {
@@ -36,23 +33,12 @@ public final class MetricSchemaMarkdownPlugin implements Plugin<Project> {
         TaskProvider<CreateMetricsManifestTask> createMetricsManifest =
                 project.getTasks().named(MetricSchemaPlugin.CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class);
 
-        TaskProvider<GenerateMetricMarkdownTask> generateMetricsMarkdown = project.getTasks()
-                .register(GENERATE_METRICS_MARKDOWN, GenerateMetricMarkdownTask.class, task -> {
+        project.getTasks()
+                .register(GENERATE_METRICS_DATADOG, GenerateMetricDataDogTask.class, task -> {
+                    task.getDashboardConfigFile().set(project.file("src/main/metrics/dashboard.yml"));
                     task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
-                    task.outputFile().set(project.file("metrics.md"));
+                    task.outputFile().set(project.getBuildDir().toPath().resolve("datadog.json").toFile());
                     task.dependsOn(createMetricsManifest);
                 });
-        project.getTasks().named("check", check -> check.dependsOn(generateMetricsMarkdown));
-
-        // Wire up dependencies so running `./gradlew --write-locks` will update the markdown
-        StartParameter startParam = project.getGradle().getStartParameter();
-        if (startParam.isWriteDependencyLocks()
-                && !startParam.getTaskNames().contains(GENERATE_METRICS_MARKDOWN)) {
-            List<String> taskNames = ImmutableList.<String>builder()
-                    .addAll(startParam.getTaskNames())
-                    .add(GENERATE_METRICS_MARKDOWN)
-                    .build();
-            startParam.setTaskNames(taskNames);
-        }
     }
 }

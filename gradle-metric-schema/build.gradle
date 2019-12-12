@@ -6,6 +6,7 @@ apply from: "$rootDir/gradle/publish-jar.gradle"
 
 dependencies {
     implementation project(':metric-schema-java')
+    implementation project(':metric-schema-datadog')
     implementation project(':metric-schema-markdown')
     implementation project(':metric-schema-api:metric-schema-api-objects')
     implementation 'com.google.guava:guava'
@@ -33,6 +34,10 @@ pluginBundle {
         metricSchemaMarkdownPlugin {
             id = 'com.palantir.metric-schema-markdown'
             displayName = "Metric Schema Markdown Plugin"
+        }
+        metricSchemaDataDogPlugin {
+            id = 'com.palantir.metric-schema-datadog'
+            displayName = "Metric Schema DataDog Plugin"
         }
     }
 }

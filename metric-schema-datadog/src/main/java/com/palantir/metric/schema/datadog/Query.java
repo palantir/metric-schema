@@ -28,23 +28,11 @@ public final class Query {
 
     private Query() {}
 
-    public static Meter meter(String name) {
-        return new Meter(name);
-    }
-
     public static Timer timer(String name) {
         return new Timer(name);
     }
 
-    public static class Meter {
-        private final String name;
-
-        private Meter(String name) {
-            this.name = name;
-        }
-    }
-
-    public static class Timer {
+    public static final class Timer {
         private final String name;
 
         private Timer(String name) {
@@ -90,14 +78,14 @@ public final class Query {
                 }
 
                 @Override
-                public MetricName visitUnknown(String unknownValue) {
+                public MetricName visitUnknown(String _unknownValue) {
                     throw new UnsupportedOperationException();
                 }
             });
         }
     }
 
-    public static class MetricName {
+    public static final class MetricName {
         private final String query;
 
         private MetricName(String query) {
@@ -117,7 +105,7 @@ public final class Query {
 
     }
 
-    public static class SelectedMetric {
+    public static final class SelectedMetric {
         private final String query;
 
         private SelectedMetric(String query) {
@@ -139,7 +127,7 @@ public final class Query {
 
     }
 
-    public static class AggregatedMetric {
+    public static final class AggregatedMetric {
         private final String query;
 
         private AggregatedMetric(String query) {

@@ -37,7 +37,7 @@ import com.palantir.metric.schema.datadog.api.widgets.BaseWidget;
 import com.palantir.metric.schema.datadog.api.widgets.GroupWidget;
 import com.palantir.metric.schema.datadog.api.widgets.TimeseriesWidget;
 import java.io.IOException;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class DataDogRenderer {
@@ -48,12 +48,12 @@ public final class DataDogRenderer {
 
     private DataDogRenderer() {}
 
-    public static String render(DashboardConfig config, List<MetricSchema> schemas) throws IOException {
+    public static String render(DashboardConfig config, Set<MetricSchema> schemas) throws IOException {
         return JSON.writeValueAsString(renderDashboard(config, schemas));
     }
 
     @VisibleForTesting
-    static Dashboard renderDashboard(DashboardConfig config, List<MetricSchema> schemas) {
+    static Dashboard renderDashboard(DashboardConfig config, Set<MetricSchema> schemas) {
         return Dashboard.builder()
                 .title(config.title())
                 .description(config.description())
@@ -62,6 +62,7 @@ public final class DataDogRenderer {
                 .templateVariables(config.templateVariables())
                 .widgets(schemas.stream()
                         .flatMap(schema -> schema.getNamespaces().entrySet().stream()
+                                .filter(entry -> !entry.getValue().getGraphs().isEmpty())
                                 .map(entry -> renderGroup(config, entry.getKey(), entry.getValue())))
                         .map(widget -> Widget.builder().definition(widget).build())
                         .collect(Collectors.toList()))
@@ -84,7 +85,7 @@ public final class DataDogRenderer {
 
     @VisibleForTesting
     static BaseWidget renderMetric(
-            DashboardConfig config, GraphDefinition graph, MetricDefinition metric) {
+            DashboardConfig config, GraphDefinition graph, MetricDefinition _metric) {
         return graph.getWidget().accept(new GraphWidget.Visitor<BaseWidget>() {
             @Override
             public BaseWidget visitTimeseries(TimeseriesGraph timeseriesGraph) {
@@ -97,7 +98,7 @@ public final class DataDogRenderer {
             }
 
             @Override
-            public BaseWidget visitUnknown(String unknownType) {
+            public BaseWidget visitUnknown(String _unknownType) {
                 throw new UnsupportedOperationException();
             }
         });
