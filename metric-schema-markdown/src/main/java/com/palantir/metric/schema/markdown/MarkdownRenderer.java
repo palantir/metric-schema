@@ -155,10 +155,8 @@ public final class MarkdownRenderer {
         public int compare(String first, String second) {
             String firstGroup = getGroup(first);
             String secondGroup = getGroup(second);
-            if (Objects.equals(firstGroup, localGroup) || Objects.equals(secondGroup, localGroup)) {
-                if (Objects.equals(firstGroup, secondGroup)) {
-                    return 0;
-                }
+            if (!Objects.equals(firstGroup, secondGroup)
+                    && (Objects.equals(firstGroup, localGroup) || Objects.equals(secondGroup, localGroup))) {
                 return Objects.equals(firstGroup, localGroup) ? -1 : 1;
             }
             return first.compareTo(second);

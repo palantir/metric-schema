@@ -260,5 +260,11 @@ class MarkdownRendererTest {
         assertThat("com.palantir.foo:name")
                 .usingComparator(new MarkdownRenderer.CoordinateComparator("com.palantir.foo:name2"))
                 .isLessThan("com.palantir.bar:name");
+        assertThat("com.palantir.foo:a")
+                .usingComparator(new MarkdownRenderer.CoordinateComparator("com.palantir.foo:any"))
+                .isLessThan("com.palantir.foo:b");
+        assertThat("com.palantir.foo:b")
+                .usingComparator(new MarkdownRenderer.CoordinateComparator("com.palantir.foo:any"))
+                .isGreaterThan("com.palantir.foo:a");
     }
 }
