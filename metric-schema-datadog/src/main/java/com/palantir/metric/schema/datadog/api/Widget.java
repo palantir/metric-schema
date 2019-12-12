@@ -16,6 +16,7 @@
 
 package com.palantir.metric.schema.datadog.api;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.metric.schema.datadog.api.widgets.BaseWidget;
@@ -23,6 +24,7 @@ import java.util.Random;
 import org.immutables.value.Value;
 
 @Value.Immutable
+@JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(as = ImmutableWidget.class)
 @JsonSerialize(as = ImmutableWidget.class)
 public interface Widget {

@@ -20,11 +20,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.contentOf;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.palantir.metric.schema.Aggregation;
+import com.palantir.metric.schema.AggregationFunction;
 import com.palantir.metric.schema.Documentation;
+import com.palantir.metric.schema.GraphDefinition;
+import com.palantir.metric.schema.GraphWidget;
 import com.palantir.metric.schema.MetricDefinition;
 import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
 import com.palantir.metric.schema.MetricType;
+import com.palantir.metric.schema.Percentile;
+import com.palantir.metric.schema.Timeseries;
+import com.palantir.metric.schema.TimeseriesGraph;
+import com.palantir.metric.schema.datadog.api.TemplateVariable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -37,11 +46,21 @@ class DataDogRendererTest {
     private static final MetricSchema schema = MetricSchema.builder()
             .namespaces("First Namespace", MetricNamespace.builder()
                     .docs(Documentation.of("Docs for namespace"))
-                    .metrics("my.timer", MetricDefinition.builder()
+                    .metrics("server.response", MetricDefinition.builder()
                             .type(MetricType.TIMER)
                             .docs(Documentation.of("Docs for timer metric"))
-                            .tags("host")
-                            .tags("os")
+                            .tags("service-name")
+                            .tags("endpoint")
+                            .build())
+                    .graphs(GraphDefinition.builder()
+                            .title("Server Response P99s")
+                            .widget(GraphWidget.timeseries(TimeseriesGraph.builder()
+                                    .series(Timeseries.builder()
+                                            .percentile(Percentile.P95)
+                                            .aggregation(Aggregation.of(AggregationFunction.MAX, ImmutableSet.of()))
+                                            .build())
+                                    .build()))
+                            .metric("server.response")
                             .build())
                     .build())
             .namespaces("Second Namespace", MetricNamespace.builder()
@@ -51,7 +70,14 @@ class DataDogRendererTest {
 
     @Test
     void render() throws IOException {
-        String rendered = DataDogRenderer.render("Dashboard Title", ImmutableList.of(schema));
+        DashboardConfig config = DashboardConfig.builder()
+                .title("Dashboard Title")
+                .description("Dashboard Description")
+                .putSelectedTags("product", "artifacts")
+                .addTemplateVariables(TemplateVariable.of("deployment"), TemplateVariable.of("environment"))
+                .build();
+
+        String rendered = DataDogRenderer.render(config, ImmutableList.of(schema));
 
         // FIXME(gatesn): remove
         Files.write(Paths.get("src/test/resources/render.json"), rendered.getBytes(StandardCharsets.UTF_8));

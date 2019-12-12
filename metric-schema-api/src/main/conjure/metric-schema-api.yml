@@ -2,6 +2,7 @@ types:
   definitions:
     default-package: com.palantir.metric.schema
     objects:
+
       MetricSchema:
         fields:
           namespaces: map<string, MetricNamespace>
@@ -11,6 +12,7 @@ types:
               but may affect the way it is handled in a particular context. For example,
               `javaPackage` will determine the package of the generated classes.
             type: map<string, string>
+
       MetricNamespace:
         fields:
           shortName:
@@ -18,7 +20,10 @@ types:
             type: optional<string>
           docs: Documentation
           metrics:
-            type: map<string,MetricDefinition>
+            type: map<string, MetricDefinition>
+          graphs:
+            type: list<GraphDefinition>
+
       MetricDefinition:
         fields:
           type: MetricType
@@ -31,6 +36,39 @@ types:
           - METER
           - TIMER
           - HISTOGRAM
+
+      GraphDefinition:
+        fields:
+          title: string
+          metric: string
+          widget: GraphWidget
+      GraphWidget:
+        union:
+          timeseries: TimeseriesGraph
+      TimeseriesGraph:
+        fields:
+          series: list<Timeseries>
+      Timeseries:
+        fields:
+          percentile: Percentile
+          aggregation: Aggregation
+      Percentile:
+        values:
+          - P95
+          - P99
+          - P999
+          - MAX
+      Aggregation:
+        fields:
+          function: AggregationFunction
+          groupByTags: set<string>
+      AggregationFunction:
+        values:
+          - AVG
+          - SUM
+          - MIN
+          - MAX
+
       Documentation:
         docs: Documentation describing an associated component. Markdown syntax may be used.
         alias: string

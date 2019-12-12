@@ -47,10 +47,13 @@ final class Validator {
         validateDocumentation(namespaceValue.getDocs());
         namespaceValue.getMetrics().forEach((name, definition) -> {
             Preconditions.checkArgument(
-                    !name.isEmpty(), "MetricDefinition names must not be empty", SafeArg.of("namespace", namespace));
+                    !name.isEmpty(),
+                    "MetricDefinition names must not be empty",
+                    SafeArg.of("namespace", namespace));
             Preconditions.checkArgument(
-                    NAME_PREDICATE.matcher(name).matches(), "MetricDefinition names must match pattern", SafeArg.of(
-                            "pattern", NAME_PATTERN));
+                    NAME_PREDICATE.matcher(name).matches(),
+                    "MetricDefinition names must match pattern",
+                    SafeArg.of("pattern", NAME_PATTERN));
             Preconditions.checkArgument(
                     MetricType.Value.UNKNOWN != definition.getType().get(),
                     "Unknown metric type",

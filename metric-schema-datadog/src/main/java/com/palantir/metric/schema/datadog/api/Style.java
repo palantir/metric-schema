@@ -20,35 +20,29 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.util.Optional;
 import org.immutables.value.Value;
 
 @Value.Immutable
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
-@JsonDeserialize(as = ImmutableTemplateVariable.class)
-@JsonSerialize(as = ImmutableTemplateVariable.class)
-public interface TemplateVariable {
+@JsonDeserialize(as = ImmutableStyle.class)
+@JsonSerialize(as = ImmutableStyle.class)
+public interface Style {
 
-    String name();
+    String DOG_CLASSIC = "dog_classic";
 
-    @JsonProperty("default")
-    @Value.Default
-    default String defaultValue() {
-        return "*";
-    }
+    Optional<String> palette();
 
-    @Value.Default
-    default String prefix() {
-        return name();
-    }
+    @JsonProperty("line_type")
+    Optional<LineType> lineType();
 
-    static TemplateVariable of(String name) {
-        return builder().name(name).build();
-    }
+    @JsonProperty("line_width")
+    Optional<LineWidth> lineWidth();
 
     static Builder builder() {
         return new Builder();
     }
 
-    class Builder extends ImmutableTemplateVariable.Builder {}
+    class Builder extends ImmutableStyle.Builder {}
 
 }

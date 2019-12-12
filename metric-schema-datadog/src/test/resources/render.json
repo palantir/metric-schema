@@ -1,30 +1,39 @@
 {
   "title" : "Dashboard Title",
-  "description" : null,
+  "description" : "Dashboard Description",
   "layout_type" : "ordered",
   "is_read_only" : true,
-  "template_variables" : [ ],
+  "template_variables" : [ {
+    "name" : "deployment",
+    "default" : "*",
+    "prefix" : "deployment"
+  }, {
+    "name" : "environment",
+    "default" : "*",
+    "prefix" : "environment"
+  } ],
   "notify_list" : [ ],
   "widgets" : [ {
-    "id" : -218477016,
+    "id" : -17629852,
     "definition" : {
       "type" : "group",
       "title" : "First Namespace",
       "layout_type" : "ordered",
       "widgets" : [ {
-        "id" : 2053410890,
+        "id" : -1534279768,
         "definition" : {
           "type" : "timeseries",
-          "title" : "my.timer",
+          "title" : "Server Response P99s",
           "requests" : [ {
-            "q" : "my.timer.p95"
+            "q" : "max:server.response.p95{product:artifacts,$environment,$deployment}",
+            "display_type" : "line"
           } ],
-          "show_legend" : null
+          "show_legend" : false
         }
       } ]
     }
   }, {
-    "id" : -814035000,
+    "id" : -512115444,
     "definition" : {
       "type" : "group",
       "title" : "Second Namespace",

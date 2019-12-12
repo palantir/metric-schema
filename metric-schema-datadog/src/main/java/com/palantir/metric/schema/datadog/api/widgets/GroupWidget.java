@@ -16,6 +16,7 @@
 
 package com.palantir.metric.schema.datadog.api.widgets;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -28,6 +29,7 @@ import org.immutables.value.Value;
  * https://docs.datadoghq.com/graphing/widgets/group/.
  */
 @Value.Immutable
+@JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(as = ImmutableGroupWidget.class)
 @JsonSerialize(as = ImmutableGroupWidget.class)
 public interface GroupWidget extends BaseWidget {

@@ -14,33 +14,29 @@
  * limitations under the License.
  */
 
-package com.palantir.metric.schema.datadog.api;
+package com.palantir.metric.schema.datadog;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.palantir.metric.schema.datadog.api.TemplateVariable;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.immutables.value.Value;
 
 @Value.Immutable
-@JsonDeserialize(as = ImmutableRequest.class)
-@JsonSerialize(as = ImmutableRequest.class)
-@JsonInclude(JsonInclude.Include.NON_ABSENT)
-public interface Request {
+public interface DashboardConfig {
 
-    @JsonProperty("q")
-    String query();
+    String title();
 
-    @JsonProperty("display_type")
-    Optional<DisplayType> displayType();
+    Optional<String> description();
 
-    Optional<Style> style();
+    Map<String, String> selectedTags();
+
+    List<TemplateVariable> templateVariables();
 
     static Builder builder() {
         return new Builder();
     }
 
-    class Builder extends ImmutableRequest.Builder {}
+    class Builder extends ImmutableDashboardConfig.Builder {}
 
 }

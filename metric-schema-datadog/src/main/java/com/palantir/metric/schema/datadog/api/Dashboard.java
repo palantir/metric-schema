@@ -17,6 +17,7 @@
 package com.palantir.metric.schema.datadog.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -28,6 +29,7 @@ import org.immutables.value.Value;
  * DataDog dashboard schema as per https://docs.datadoghq.com/graphing/graphing_json/.
  */
 @Value.Immutable
+@JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonDeserialize(as = ImmutableDashboard.class)
 @JsonSerialize(as = ImmutableDashboard.class)

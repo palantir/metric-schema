@@ -20,12 +20,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
+import com.palantir.metric.schema.GraphDefinition;
+import com.palantir.metric.schema.GraphWidget;
 import com.palantir.metric.schema.MetricDefinition;
 import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
-import com.palantir.metric.schema.MetricType;
+import com.palantir.metric.schema.Timeseries;
+import com.palantir.metric.schema.TimeseriesGraph;
 import com.palantir.metric.schema.datadog.api.Dashboard;
+import com.palantir.metric.schema.datadog.api.DisplayType;
 import com.palantir.metric.schema.datadog.api.LayoutType;
+import com.palantir.metric.schema.datadog.api.Request;
 import com.palantir.metric.schema.datadog.api.Widget;
 import com.palantir.metric.schema.datadog.api.widgets.BaseWidget;
 import com.palantir.metric.schema.datadog.api.widgets.GroupWidget;
@@ -42,75 +48,77 @@ public final class DataDogRenderer {
 
     private DataDogRenderer() {}
 
-    public static String render(String title, List<MetricSchema> schemas) throws IOException {
-        return JSON.writeValueAsString(renderDashboard(title, schemas));
+    public static String render(DashboardConfig config, List<MetricSchema> schemas) throws IOException {
+        return JSON.writeValueAsString(renderDashboard(config, schemas));
     }
 
     @VisibleForTesting
-    static Dashboard renderDashboard(String title, List<MetricSchema> schemas) {
+    static Dashboard renderDashboard(DashboardConfig config, List<MetricSchema> schemas) {
         return Dashboard.builder()
-                .title(title)
+                .title(config.title())
+                .description(config.description())
                 .layoutType(LayoutType.ORDERED)
                 .readOnly(true)
+                .templateVariables(config.templateVariables())
                 .widgets(schemas.stream()
                         .flatMap(schema -> schema.getNamespaces().entrySet().stream()
-                                .map(entry -> renderGroup(entry.getKey(), entry.getValue())))
+                                .map(entry -> renderGroup(config, entry.getKey(), entry.getValue())))
                         .map(widget -> Widget.builder().definition(widget).build())
                         .collect(Collectors.toList()))
                 .build();
     }
 
     @VisibleForTesting
-    static GroupWidget renderGroup(String name, MetricNamespace namespace) {
+    static GroupWidget renderGroup(DashboardConfig config, String name, MetricNamespace namespace) {
         return GroupWidget.builder()
                 .title(name)
                 .layoutType(LayoutType.ORDERED)
-                .widgets(namespace.getMetrics().entrySet().stream()
-                        .map(entry -> renderMetric(entry.getKey(), entry.getValue()))
+                .widgets(namespace.getGraphs().stream()
+                        .map(graph -> {
+                            return renderMetric(config, graph, namespace.getMetrics().get(graph.getMetric()));
+                        })
                         .map(widget -> Widget.builder().definition(widget).build())
                         .collect(Collectors.toList()))
                 .build();
     }
 
     @VisibleForTesting
-    static BaseWidget renderMetric(String name, MetricDefinition metric) {
-        return metric.getType().accept(new MetricType.Visitor<BaseWidget>() {
+    static BaseWidget renderMetric(
+            DashboardConfig config, GraphDefinition graph, MetricDefinition metric) {
+        return graph.getWidget().accept(new GraphWidget.Visitor<BaseWidget>() {
             @Override
-            public BaseWidget visitCounter() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public BaseWidget visitGauge() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public BaseWidget visitMeter() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public BaseWidget visitTimer() {
+            public BaseWidget visitTimeseries(TimeseriesGraph timeseriesGraph) {
                 return TimeseriesWidget.builder()
-                        .title(name)
-                        .addRequests(RequestBuilder
-                                .timer(name)
-                                .p95()
-                                .build())
+                        .title(graph.getTitle())
+                        .addAllRequests(timeseriesGraph.getSeries().stream()
+                                .map(timeseries -> timeseriesRequest(config, graph.getMetric(), timeseries))
+                                .collect(Collectors.toList()))
                         .build();
             }
 
             @Override
-            public BaseWidget visitHistogram() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public BaseWidget visitUnknown(String unknownValue) {
+            public BaseWidget visitUnknown(String unknownType) {
                 throw new UnsupportedOperationException();
             }
         });
+    }
+
+    static Request timeseriesRequest(DashboardConfig config, String metricName, Timeseries timeseries) {
+        return Request.builder()
+                .query(Query.timer(metricName)
+                        .percentile(timeseries.getPercentile())
+                        .from(ImmutableSet.<Query.Selector>builder()
+                                .addAll(config.selectedTags().entrySet().stream()
+                                        .map(tag -> Query.TagSelector.of(tag.getKey(), tag.getValue()))
+                                        .collect(Collectors.toSet()))
+                                .addAll(config.templateVariables().stream()
+                                        .map(Query.TemplateSelector::of)
+                                        .collect(Collectors.toSet()))
+                                .build())
+                        .aggregate(timeseries.getAggregation())
+                        .build())
+                .displayType(DisplayType.LINE)
+                .build();
     }
 
 }
