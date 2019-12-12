@@ -34,7 +34,8 @@ import org.junit.jupiter.api.io.TempDir;
 public class JavaGeneratorTest {
     private static final String REFERENCE_FILES_FOLDER = "src/integrationInput/java";
 
-    @TempDir public Path tempDir;
+    @TempDir
+    public Path tempDir;
 
     @Test
     void generates_code() {

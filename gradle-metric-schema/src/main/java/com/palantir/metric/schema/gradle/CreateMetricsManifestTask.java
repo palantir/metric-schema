@@ -119,8 +119,9 @@ public class CreateMetricsManifestTask extends DefaultTask {
 
     private Map<String, List<MetricSchema>> getLocalMetrics() throws IOException {
         if (getMetricsFile().getAsFile().isPresent()) {
-            return ImmutableMap.of(getProjectCoordinates(getProject()), mapper.readValue(
-                    getMetricsFile().getAsFile().get(), new TypeReference<List<MetricSchema>>() {}));
+            return ImmutableMap.of(
+                    getProjectCoordinates(getProject()),
+                    mapper.readValue(getMetricsFile().getAsFile().get(), new TypeReference<List<MetricSchema>>() {}));
         }
         return Collections.emptyMap();
     }

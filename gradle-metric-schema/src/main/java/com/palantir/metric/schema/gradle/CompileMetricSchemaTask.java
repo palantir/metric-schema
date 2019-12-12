@@ -51,9 +51,11 @@ public class CompileMetricSchemaTask extends SourceTask {
         File output = getOutputFile().getAsFile().get();
         getProject().mkdir(output.getParent());
 
-        writer.writeValue(output, getSource().getFiles().stream()
-                .map(CompileMetricSchemaTask::readFile)
-                .collect(ImmutableSet.toImmutableSet()));
+        writer.writeValue(
+                output,
+                getSource().getFiles().stream()
+                        .map(CompileMetricSchemaTask::readFile)
+                        .collect(ImmutableSet.toImmutableSet()));
     }
 
     private static MetricSchema readFile(File file) {

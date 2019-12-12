@@ -41,16 +41,18 @@ final class Validator {
                 // Provide enough data to figure out which schema is missing a namespace
                 SafeArg.of("namespaceValue", namespaceValue));
         Preconditions.checkArgument(
-                NAME_PREDICATE.matcher(namespace).matches(), "Namespace must match pattern", SafeArg.of(
-                        "pattern", NAME_PATTERN));
+                NAME_PREDICATE.matcher(namespace).matches(),
+                "Namespace must match pattern",
+                SafeArg.of("pattern", NAME_PATTERN));
         validateShortName(namespaceValue);
         validateDocumentation(namespaceValue.getDocs());
         namespaceValue.getMetrics().forEach((name, definition) -> {
             Preconditions.checkArgument(
                     !name.isEmpty(), "MetricDefinition names must not be empty", SafeArg.of("namespace", namespace));
             Preconditions.checkArgument(
-                    NAME_PREDICATE.matcher(name).matches(), "MetricDefinition names must match pattern", SafeArg.of(
-                            "pattern", NAME_PATTERN));
+                    NAME_PREDICATE.matcher(name).matches(),
+                    "MetricDefinition names must match pattern",
+                    SafeArg.of("pattern", NAME_PATTERN));
             Preconditions.checkArgument(
                     MetricType.Value.UNKNOWN != definition.getType().get(),
                     "Unknown metric type",
@@ -64,16 +66,18 @@ final class Validator {
                         SafeArg.of("namespace", namespace),
                         SafeArg.of("definition", definition));
                 Preconditions.checkArgument(
-                        NAME_PREDICATE.matcher(tag).matches(), "MetricDefinition tags must match pattern", SafeArg.of(
-                                "pattern", NAME_PATTERN));
+                        NAME_PREDICATE.matcher(tag).matches(),
+                        "MetricDefinition tags must match pattern",
+                        SafeArg.of("pattern", NAME_PATTERN));
             });
         });
     }
 
     private static void validateShortName(MetricNamespace namespace) {
         namespace.getShortName().ifPresent(shortName -> Preconditions.checkArgument(
-                SHORT_NAME_PREDICATE.matcher(shortName).matches(), "ShortName must match pattern", SafeArg.of(
-                        "pattern", SHORT_NAME_PATTERN)));
+                SHORT_NAME_PREDICATE.matcher(shortName).matches(),
+                "ShortName must match pattern",
+                SafeArg.of("pattern", SHORT_NAME_PATTERN)));
     }
 
     private static void validateDocumentation(Documentation documentation) {
