@@ -26,6 +26,8 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
 
 public final class MetricSchemaMarkdownPlugin implements Plugin<Project> {
 
+    public static final String GENERATE_METRICS_MARKDOWN = "generateMetricsMarkdown";
+
     @Override
     public void apply(Project project) {
         project.getPluginManager().apply(LifecycleBasePlugin.class);
@@ -35,7 +37,7 @@ public final class MetricSchemaMarkdownPlugin implements Plugin<Project> {
                 project.getTasks().named(MetricSchemaPlugin.CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class);
 
         TaskProvider<GenerateMetricMarkdownTask> generateMetricsMarkdown = project.getTasks()
-                .register(MetricSchemaPlugin.GENERATE_METRICS_MARKDOWN, GenerateMetricMarkdownTask.class, task -> {
+                .register(GENERATE_METRICS_MARKDOWN, GenerateMetricMarkdownTask.class, task -> {
                     task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
                     task.outputFile().set(project.file("metrics.md"));
                     task.dependsOn(createMetricsManifest);
@@ -45,10 +47,10 @@ public final class MetricSchemaMarkdownPlugin implements Plugin<Project> {
         // Wire up dependencies so running `./gradlew --write-locks` will update the markdown
         StartParameter startParam = project.getGradle().getStartParameter();
         if (startParam.isWriteDependencyLocks()
-                && !startParam.getTaskNames().contains(MetricSchemaPlugin.GENERATE_METRICS_MARKDOWN)) {
+                && !startParam.getTaskNames().contains(GENERATE_METRICS_MARKDOWN)) {
             List<String> taskNames = ImmutableList.<String>builder()
                     .addAll(startParam.getTaskNames())
-                    .add(MetricSchemaPlugin.GENERATE_METRICS_MARKDOWN)
+                    .add(GENERATE_METRICS_MARKDOWN)
                     .build();
             startParam.setTaskNames(taskNames);
         }
