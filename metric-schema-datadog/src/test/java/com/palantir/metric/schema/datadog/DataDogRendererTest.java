@@ -58,7 +58,6 @@ class DataDogRendererTest {
         DashboardConfig config = DashboardConfig.builder()
                 .title("Dashboard Title")
                 .description("Dashboard Description")
-                .putSelectedTags("product", "artifacts")
                 .addTemplateVariables(TemplateVariable.of("deployment"), TemplateVariable.of("environment"))
                 .build();
 

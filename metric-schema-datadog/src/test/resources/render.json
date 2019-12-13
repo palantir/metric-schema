@@ -14,18 +14,18 @@
   } ],
   "notify_list" : [ ],
   "widgets" : [ {
-    "id" : 782846257,
+    "id" : -976031572,
     "definition" : {
       "type" : "group",
-      "title" : "First Namespace",
+      "title" : "First Group",
       "layout_type" : "ordered",
       "widgets" : [ {
-        "id" : 1823467183,
+        "id" : 1693557976,
         "definition" : {
           "type" : "timeseries",
           "title" : "Server Response P99s",
           "requests" : [ {
-            "q" : "max:server.response.p95{product:artifacts,$environment,$deployment}",
+            "q" : "max:server.response.p99{$environment,$deployment}",
             "display_type" : "line"
           } ],
           "show_legend" : false
