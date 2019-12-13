@@ -31,18 +31,13 @@ public final class MetricSchemaDataDogPlugin implements Plugin<Project> {
         project.getPluginManager().apply(LifecycleBasePlugin.class);
         project.getPluginManager().apply(MetricSchemaPlugin.class);
 
-        MetricSchemaDataDogExtension dataDogExtension = project.getExtensions()
-                .create(EXT_DATADOG, MetricSchemaDataDogExtension.class, project);
+        project.getExtensions().create(EXT_DATADOG, MetricSchemaDataDogExtension.class, project);
 
         TaskProvider<CreateMetricsManifestTask> createMetricsManifest =
                 project.getTasks().named(MetricSchemaPlugin.CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class);
 
         project.getTasks()
                 .register(TASK_GENERATE_METRICS_DATADOG, GenerateMetricDataDogTask.class, task -> {
-                    task.getDashboardTitle().set(dataDogExtension.getTitle());
-                    task.getDashboardDescription().set(dataDogExtension.getDescription());
-                    task.getSelectedTags().set(dataDogExtension.getSelectedTags());
-
                     task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
                     task.outputFile().set(project.getBuildDir().toPath().resolve("datadog.json").toFile());
                     task.dependsOn(createMetricsManifest);

@@ -28,9 +28,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.provider.ListProperty;
-import org.gradle.api.provider.MapProperty;
-import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
@@ -45,22 +43,22 @@ public class GenerateMetricDataDogTask extends DefaultTask {
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
 
     @Input
-    public final Property<String> getDashboardTitle() {
+    public final Provider<String> getDashboardTitle() {
         return getProject().getExtensions().getByType(MetricSchemaDataDogExtension.class).getTitle();
     }
 
     @Input
-    public final Property<String> getDashboardDescription() {
+    public final Provider<String> getDashboardDescription() {
         return getProject().getExtensions().getByType(MetricSchemaDataDogExtension.class).getDescription();
     }
 
     @Input
-    public final MapProperty<String, String> getSelectedTags() {
+    public final Provider<Map<String, String>> getSelectedTags() {
         return getProject().getExtensions().getByType(MetricSchemaDataDogExtension.class).getSelectedTags();
     }
 
     @Input
-    public final ListProperty<String> getTemplateVariables() {
+    public final Provider<List<String>> getTemplateVariables() {
         return getProject().getExtensions().getByType(MetricSchemaDataDogExtension.class).getTemplateVariables();
     }
 
