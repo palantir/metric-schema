@@ -32,7 +32,7 @@ javax.ws.rs:javax.ws.rs-api:2.1 (1 constraints: 8d0fc779)
 org.apache.commons:commons-lang3:3.9 (1 constraints: b004292c)
 org.checkerframework:checker-qual:2.8.1 (1 constraints: 1d0afeb4)
 org.codehaus.mojo:animal-sniffer-annotations:1.17 (1 constraints: ed09d8aa)
-org.immutables:value:2.8.2 (1 constraints: 0e050f36)
+org.immutables:value:2.8.3 (1 constraints: 0f051036)
 org.slf4j:slf4j-api:1.7.25 (3 constraints: 99226026)
 org.yaml:snakeyaml:1.24 (1 constraints: 6f17f727)
 
