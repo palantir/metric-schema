@@ -173,15 +173,16 @@ class MarkdownRendererTest {
                                                                 .build())
                                                 .build())
                                 .build())));
-        assertThat(markdown).isEqualTo("# Metrics\n"
-                + "\n"
-                + "## Test\n"
-                + "\n"
-                + "`com.palantir:test`\n"
-                + "\n"
-                + "### namespace\n"
-                + "namespace docs\n"
-                + "- `namespace.metric` tagged `service`, `endpoint` (meter): metric docs");
+        assertThat(markdown)
+                .isEqualTo("# Metrics\n"
+                        + "\n"
+                        + "## Test\n"
+                        + "\n"
+                        + "`com.palantir:test`\n"
+                        + "\n"
+                        + "### namespace\n"
+                        + "namespace docs\n"
+                        + "- `namespace.metric` tagged `service`, `endpoint` (meter): metric docs");
     }
 
     @Test
@@ -208,15 +209,16 @@ class MarkdownRendererTest {
                                                 .docs(Documentation.of("empty namespace docs"))
                                                 .build())
                                 .build())));
-        assertThat(markdown).isEqualTo("# Metrics\n"
-                + "\n"
-                + "## Test\n"
-                + "\n"
-                + "`com.palantir:test`\n"
-                + "\n"
-                + "### com.foo.namespace\n"
-                + "Foo namespace docs\n"
-                + "- `com.foo.namespace.metric` (meter): metric docs");
+        assertThat(markdown)
+                .isEqualTo("# Metrics\n"
+                        + "\n"
+                        + "## Test\n"
+                        + "\n"
+                        + "`com.palantir:test`\n"
+                        + "\n"
+                        + "### com.foo.namespace\n"
+                        + "Foo namespace docs\n"
+                        + "- `com.foo.namespace.metric` (meter): metric docs");
     }
 
     @Test
