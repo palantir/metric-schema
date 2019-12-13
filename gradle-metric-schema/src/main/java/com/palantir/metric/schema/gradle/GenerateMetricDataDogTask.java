@@ -17,24 +17,23 @@
 package com.palantir.metric.schema.gradle;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.metric.schema.MetricSchema;
 import com.palantir.metric.schema.datadog.DashboardConfig;
 import com.palantir.metric.schema.datadog.DataDogRenderer;
+import com.palantir.metric.schema.datadog.api.TemplateVariable;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.provider.Provider;
+import org.gradle.api.provider.ListProperty;
+import org.gradle.api.provider.MapProperty;
+import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.CacheableTask;
+import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
-import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.GFileUtils;
@@ -42,24 +41,32 @@ import org.gradle.util.GFileUtils;
 @CacheableTask
 public class GenerateMetricDataDogTask extends DefaultTask {
 
-    private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
-    private final RegularFileProperty dashboardConfigFile = getProject().getObjects().fileProperty();
     private final RegularFileProperty manifestFile = getProject().getObjects().fileProperty();
+    private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
 
-    @InputFile
-    public final RegularFileProperty getDashboardConfigFile() {
-        return dashboardConfigFile;
+    @Input
+    public final Property<String> getDashboardTitle() {
+        return getProject().getExtensions().getByType(MetricSchemaDataDogExtension.class).getTitle();
+    }
+
+    @Input
+    public final Property<String> getDashboardDescription() {
+        return getProject().getExtensions().getByType(MetricSchemaDataDogExtension.class).getDescription();
+    }
+
+    @Input
+    public final MapProperty<String, String> getSelectedTags() {
+        return getProject().getExtensions().getByType(MetricSchemaDataDogExtension.class).getSelectedTags();
+    }
+
+    @Input
+    public final ListProperty<String> getTemplateVariables() {
+        return getProject().getExtensions().getByType(MetricSchemaDataDogExtension.class).getTemplateVariables();
     }
 
     @InputFile
     public final RegularFileProperty getManifestFile() {
         return manifestFile;
-    }
-
-    @InputFile
-    @Optional
-    public final Provider<RegularFile> dataDogFile() {
-        return ProviderUtils.filterNonExistentFile(getProject(), outputFile);
     }
 
     @OutputFile
@@ -76,8 +83,14 @@ public class GenerateMetricDataDogTask extends DefaultTask {
             return;
         }
 
-        DashboardConfig dashboardConfig = ObjectMappers.withDefaultModules(new ObjectMapper(new YAMLFactory()))
-                .readValue(getDashboardConfigFile().get().getAsFile(), DashboardConfig.class);
+        DashboardConfig dashboardConfig = DashboardConfig.builder()
+                .title(getDashboardTitle().get())
+                .description(getDashboardDescription().get())
+                .putAllSelectedTags(getSelectedTags().get())
+                .addAllTemplateVariables(getTemplateVariables().get().stream()
+                        .map(TemplateVariable::of)
+                        .collect(Collectors.toList()))
+                .build();
 
         GFileUtils.writeFile(
                 DataDogRenderer.render(
@@ -88,4 +101,5 @@ public class GenerateMetricDataDogTask extends DefaultTask {
                                 .collect(Collectors.toList())),
                 outputFile.get().getAsFile());
     }
+
 }

@@ -23,19 +23,26 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
 
 public final class MetricSchemaDataDogPlugin implements Plugin<Project> {
 
-    public static final String GENERATE_METRICS_DATADOG = "generateMetricsDataDog";
+    public static final String EXT_DATADOG = "datadog";
+    public static final String TASK_GENERATE_METRICS_DATADOG = "generateMetricsDataDog";
 
     @Override
     public void apply(Project project) {
         project.getPluginManager().apply(LifecycleBasePlugin.class);
         project.getPluginManager().apply(MetricSchemaPlugin.class);
 
+        MetricSchemaDataDogExtension dataDogExtension = project.getExtensions()
+                .create(EXT_DATADOG, MetricSchemaDataDogExtension.class, project);
+
         TaskProvider<CreateMetricsManifestTask> createMetricsManifest =
                 project.getTasks().named(MetricSchemaPlugin.CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class);
 
         project.getTasks()
-                .register(GENERATE_METRICS_DATADOG, GenerateMetricDataDogTask.class, task -> {
-                    task.getDashboardConfigFile().set(project.file("src/main/metrics/dashboard.yml"));
+                .register(TASK_GENERATE_METRICS_DATADOG, GenerateMetricDataDogTask.class, task -> {
+                    task.getDashboardTitle().set(dataDogExtension.getTitle());
+                    task.getDashboardDescription().set(dataDogExtension.getDescription());
+                    task.getSelectedTags().set(dataDogExtension.getSelectedTags());
+
                     task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
                     task.outputFile().set(project.getBuildDir().toPath().resolve("datadog.json").toFile());
                     task.dependsOn(createMetricsManifest);

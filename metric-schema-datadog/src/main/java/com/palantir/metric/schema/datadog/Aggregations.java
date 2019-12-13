@@ -16,16 +16,27 @@
 
 package com.palantir.metric.schema.datadog;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.palantir.metric.schema.Aggregation;
+import com.palantir.metric.schema.AggregationFunction;
 
-import org.junit.jupiter.api.Test;
+public final class Aggregations {
 
-class QueryTest {
+    private Aggregations() {}
 
-    @Test
-    public void query_everywhere_aggMax() {
-        assertThat(Query.of("metric").selectFromEverywhere().aggregate(Aggregations.max()).build())
-                .isEqualTo("max:metric{*}");
+    public static Aggregation avg() {
+        return Aggregation.builder().function(AggregationFunction.AVG).build();
+    }
+
+    public static Aggregation sum() {
+        return Aggregation.builder().function(AggregationFunction.SUM).build();
+    }
+
+    public static Aggregation min() {
+        return Aggregation.builder().function(AggregationFunction.MIN).build();
+    }
+
+    public static Aggregation max() {
+        return Aggregation.builder().function(AggregationFunction.MAX).build();
     }
 
 }

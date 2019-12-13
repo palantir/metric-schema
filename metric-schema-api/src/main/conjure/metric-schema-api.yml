@@ -56,16 +56,12 @@ types:
         fields:
           metric: string
           aggregation: Aggregation
-      Percentile:
-        values:
-          - P95
-          - P99
-          - P999
-          - MAX
       Aggregation:
         fields:
           function: AggregationFunction
-          groupBy: set<string>
+          groupBy:
+            docs: The set of tags to group by.
+            type: set<string>
       AggregationFunction:
         values:
           - AVG
