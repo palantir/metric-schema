@@ -114,13 +114,13 @@ final class UtilityGenerator {
             String namespace, String metricName, MetricDefinition definition, ImplementationVisibility visibility) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(Custodian.sanitizeName(metricName))
                 .addModifiers(visibility.apply())
-                .returns(MetricTypes.get(definition.getType()))
+                .returns(MetricTypes.type(definition.getType()))
                 .addParameters(definition.getTags().stream()
                         .map(tag -> ParameterSpec.builder(String.class, Custodian.sanitizeName(tag)).build())
                         .collect(ImmutableList.toImmutableList()))
                 .addJavadoc(Javadoc.render(definition.getDocs()));
         CodeBlock metricNameBlock = metricName(namespace, metricName, definition.getTags());
-        String metricRegistryMethod = definition.getType().toString().toLowerCase(Locale.ENGLISH);
+        String metricRegistryMethod = MetricTypes.registryAccessor(definition.getType());
         if (MetricType.GAUGE.equals(definition.getType())) {
             methodBuilder.addParameter(
                     ParameterizedTypeName.get(ClassName.get(Gauge.class), WildcardTypeName.subtypeOf(Object.class)),
@@ -149,7 +149,7 @@ final class UtilityGenerator {
         boolean isGauge = MetricType.GAUGE.equals(definition.getType());
         MethodSpec.Builder abstractBuildMethodBuilder = MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .returns(MetricTypes.get(definition.getType()));
+                .returns(MetricTypes.type(definition.getType()));
         if (isGauge) {
             abstractBuildMethodBuilder.addParameter(
                     ParameterizedTypeName.get(ClassName.get(Gauge.class), WildcardTypeName.subtypeOf(Object.class)),
@@ -179,7 +179,7 @@ final class UtilityGenerator {
         MethodSpec.Builder buildMethodBuilder = MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
-                .returns(MetricTypes.get(definition.getType()));
+                .returns(MetricTypes.type(definition.getType()));
         if (isGauge) {
             buildMethodBuilder
                     .addParameter(

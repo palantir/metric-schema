@@ -25,7 +25,7 @@ public final class MyNamespaceMetrics {
 
     /** A gauge of the ratio of active workers to the number of workers. */
     public void workerUtilization(Gauge<?> gauge) {
-        registry.gauge(
+        registry.registerWithReplacement(
                 MetricName.builder()
                         .safeName("com.palantir.very.long.namespace.worker.utilization")
                         .build(),
