@@ -46,8 +46,7 @@ public final class MetricSchemaMarkdownPlugin implements Plugin<Project> {
 
         // Wire up dependencies so running `./gradlew --write-locks` will update the markdown
         StartParameter startParam = project.getGradle().getStartParameter();
-        if (startParam.isWriteDependencyLocks()
-                && !startParam.getTaskNames().contains(GENERATE_METRICS_MARKDOWN)) {
+        if (startParam.isWriteDependencyLocks() && !startParam.getTaskNames().contains(GENERATE_METRICS_MARKDOWN)) {
             List<String> taskNames = ImmutableList.<String>builder()
                     .addAll(startParam.getTaskNames())
                     .add(GENERATE_METRICS_MARKDOWN)

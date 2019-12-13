@@ -48,7 +48,6 @@ public final class Query {
                     : Joiner.on(',').join(selectors.stream().map(Selector::selector).collect(Collectors.toSet()));
             return new SelectedMetric(query + "{" + fromSelector + "}");
         }
-
     }
 
     public static final class SelectedMetric {
@@ -70,7 +69,6 @@ public final class Query {
             }
             return new AggregatedMetric(sb.toString());
         }
-
     }
 
     public static final class AggregatedMetric {
@@ -88,7 +86,6 @@ public final class Query {
     public interface Selector {
 
         String selector();
-
     }
 
     public static final class TemplateSelector implements Selector {
@@ -107,7 +104,6 @@ public final class Query {
         public static TemplateSelector of(TemplateVariable templateVariable) {
             return new TemplateSelector(templateVariable);
         }
-
     }
 
     public static final class TagSelector implements Selector {
@@ -128,7 +124,5 @@ public final class Query {
         public static TagSelector of(String tagName, String tagValue) {
             return new TagSelector(tagName, tagValue);
         }
-
     }
-
 }

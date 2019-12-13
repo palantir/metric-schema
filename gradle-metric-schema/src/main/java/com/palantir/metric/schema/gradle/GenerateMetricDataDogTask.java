@@ -44,22 +44,34 @@ public class GenerateMetricDataDogTask extends DefaultTask {
 
     @Input
     public final Provider<String> getDashboardTitle() {
-        return getProject().getExtensions().getByType(MetricSchemaDataDogExtension.class).getTitle();
+        return getProject()
+                .getExtensions()
+                .getByType(MetricSchemaDataDogExtension.class)
+                .getTitle();
     }
 
     @Input
     public final Provider<String> getDashboardDescription() {
-        return getProject().getExtensions().getByType(MetricSchemaDataDogExtension.class).getDescription();
+        return getProject()
+                .getExtensions()
+                .getByType(MetricSchemaDataDogExtension.class)
+                .getDescription();
     }
 
     @Input
     public final Provider<Map<String, String>> getSelectedTags() {
-        return getProject().getExtensions().getByType(MetricSchemaDataDogExtension.class).getSelectedTags();
+        return getProject()
+                .getExtensions()
+                .getByType(MetricSchemaDataDogExtension.class)
+                .getSelectedTags();
     }
 
     @Input
     public final Provider<List<String>> getTemplateVariables() {
-        return getProject().getExtensions().getByType(MetricSchemaDataDogExtension.class).getTemplateVariables();
+        return getProject()
+                .getExtensions()
+                .getByType(MetricSchemaDataDogExtension.class)
+                .getTemplateVariables();
     }
 
     @InputFile
@@ -85,19 +97,15 @@ public class GenerateMetricDataDogTask extends DefaultTask {
                 .title(getDashboardTitle().get())
                 .description(getDashboardDescription().get())
                 .putAllSelectedTags(getSelectedTags().get())
-                .addAllTemplateVariables(getTemplateVariables().get().stream()
-                        .map(TemplateVariable::of)
-                        .collect(Collectors.toList()))
+                .addAllTemplateVariables(
+                        getTemplateVariables().get().stream().map(TemplateVariable::of).collect(Collectors.toList()))
                 .build();
 
         GFileUtils.writeFile(
-                DataDogRenderer.render(
-                        dashboardConfig,
-                        schemas.values().stream()
-                                .flatMap(List::stream)
-                                .flatMap(schema -> schema.getGraphs().stream())
-                                .collect(Collectors.toList())),
+                DataDogRenderer.render(dashboardConfig, schemas.values().stream()
+                        .flatMap(List::stream)
+                        .flatMap(schema -> schema.getGraphs().stream())
+                        .collect(Collectors.toList())),
                 outputFile.get().getAsFile());
     }
-
 }

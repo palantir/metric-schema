@@ -44,5 +44,4 @@ public interface Style {
     }
 
     class Builder extends ImmutableStyle.Builder {}
-
 }

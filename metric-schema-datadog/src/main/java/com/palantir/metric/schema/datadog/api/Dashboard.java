@@ -25,9 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import org.immutables.value.Value;
 
-/**
- * DataDog dashboard schema as per https://docs.datadoghq.com/graphing/graphing_json/.
- */
+/** DataDog dashboard schema as per https://docs.datadoghq.com/graphing/graphing_json/. */
 @Value.Immutable
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -58,5 +56,4 @@ public interface Dashboard {
     }
 
     class Builder extends ImmutableDashboard.Builder {}
-
 }

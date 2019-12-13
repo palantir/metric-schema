@@ -27,5 +27,4 @@ class QueryTest {
         assertThat(Query.of("metric").selectFromEverywhere().aggregate(Aggregations.max()).build())
                 .isEqualTo("max:metric{*}");
     }
-
 }

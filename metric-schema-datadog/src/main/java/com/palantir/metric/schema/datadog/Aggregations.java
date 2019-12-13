@@ -38,5 +38,4 @@ public final class Aggregations {
     public static Aggregation max() {
         return Aggregation.builder().function(AggregationFunction.MAX).build();
     }
-
 }

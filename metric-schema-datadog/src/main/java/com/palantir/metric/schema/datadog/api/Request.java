@@ -42,5 +42,4 @@ public interface Request {
     }
 
     class Builder extends ImmutableRequest.Builder {}
-
 }

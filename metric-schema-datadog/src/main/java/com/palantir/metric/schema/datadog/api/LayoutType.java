@@ -58,10 +58,7 @@ public enum LayoutType {
 
     @JsonCreator
     public static LayoutType fromString(String name) {
-        return Optional.ofNullable(ENUM_MAP.get(name))
-                .orElseThrow(() -> new SafeIllegalArgumentException("Unknown enum value",
-                        UnsafeArg.of("found", name),
-                        SafeArg.of("expected", ENUM_MAP.keySet())));
+        return Optional.ofNullable(ENUM_MAP.get(name)).orElseThrow(() -> new SafeIllegalArgumentException(
+                "Unknown enum value", UnsafeArg.of("found", name), SafeArg.of("expected", ENUM_MAP.keySet())));
     }
-
 }

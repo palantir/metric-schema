@@ -41,5 +41,4 @@ public interface Widget {
     }
 
     class Builder extends ImmutableWidget.Builder {}
-
 }

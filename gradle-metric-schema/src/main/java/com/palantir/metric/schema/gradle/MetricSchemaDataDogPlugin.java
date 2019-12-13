@@ -36,11 +36,10 @@ public final class MetricSchemaDataDogPlugin implements Plugin<Project> {
         TaskProvider<CreateMetricsManifestTask> createMetricsManifest =
                 project.getTasks().named(MetricSchemaPlugin.CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class);
 
-        project.getTasks()
-                .register(TASK_GENERATE_METRICS_DATADOG, GenerateMetricDataDogTask.class, task -> {
-                    task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
-                    task.outputFile().set(project.getBuildDir().toPath().resolve("datadog.json").toFile());
-                    task.dependsOn(createMetricsManifest);
-                });
+        project.getTasks().register(TASK_GENERATE_METRICS_DATADOG, GenerateMetricDataDogTask.class, task -> {
+            task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
+            task.outputFile().set(project.getBuildDir().toPath().resolve("datadog.json").toFile());
+            task.dependsOn(createMetricsManifest);
+        });
     }
 }

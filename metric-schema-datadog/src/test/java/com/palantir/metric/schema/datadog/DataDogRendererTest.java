@@ -68,5 +68,4 @@ class DataDogRendererTest {
 
         assertThat(rendered).isEqualTo(contentOf(new File("src/test/resources/render.json")));
     }
-
 }

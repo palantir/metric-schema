@@ -38,5 +38,4 @@ public interface DashboardConfig {
     }
 
     class Builder extends ImmutableDashboardConfig.Builder {}
-
 }

@@ -28,7 +28,7 @@ import org.immutables.value.Value;
 /**
  * https://docs.datadoghq.com/graphing/widgets/timeseries/.
  *
- * Not yet supported: yaxis, events, markers
+ * <p>Not yet supported: yaxis, events, markers
  */
 @Value.Immutable
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -58,5 +58,4 @@ public interface TimeseriesWidget extends BaseWidget {
     }
 
     class Builder extends ImmutableTimeseriesWidget.Builder {}
-
 }

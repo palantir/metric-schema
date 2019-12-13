@@ -25,9 +25,7 @@ import com.palantir.metric.schema.datadog.api.Widget;
 import java.util.List;
 import org.immutables.value.Value;
 
-/**
- * https://docs.datadoghq.com/graphing/widgets/group/.
- */
+/** https://docs.datadoghq.com/graphing/widgets/group/. */
 @Value.Immutable
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(as = ImmutableGroupWidget.class)
@@ -57,5 +55,4 @@ public interface GroupWidget extends BaseWidget {
     }
 
     class Builder extends ImmutableGroupWidget.Builder {}
-
 }

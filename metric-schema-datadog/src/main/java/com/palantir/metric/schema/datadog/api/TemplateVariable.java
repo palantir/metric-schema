@@ -50,5 +50,4 @@ public interface TemplateVariable {
     }
 
     class Builder extends ImmutableTemplateVariable.Builder {}
-
 }

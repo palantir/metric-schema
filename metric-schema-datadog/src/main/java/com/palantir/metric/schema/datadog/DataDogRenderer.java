@@ -40,9 +40,8 @@ import java.util.stream.Collectors;
 
 public final class DataDogRenderer {
 
-    private static final ObjectMapper JSON = new ObjectMapper()
-            .registerModule(new Jdk8Module())
-            .enable(SerializationFeature.INDENT_OUTPUT);
+    private static final ObjectMapper JSON =
+            new ObjectMapper().registerModule(new Jdk8Module()).enable(SerializationFeature.INDENT_OUTPUT);
 
     private DataDogRenderer() {}
 
@@ -113,5 +112,4 @@ public final class DataDogRenderer {
                 .displayType(DisplayType.LINE)
                 .build();
     }
-
 }
