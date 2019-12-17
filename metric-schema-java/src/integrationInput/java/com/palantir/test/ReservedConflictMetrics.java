@@ -120,7 +120,7 @@ public final class ReservedConflictMetrics {
 
         @Override
         public void build(Gauge<?> gauge) {
-            registry.gauge(
+            registry.registerWithReplacement(
                     MetricName.builder()
                             .safeName("reserved.conflict.double")
                             .putSafeTags("int", int_)
