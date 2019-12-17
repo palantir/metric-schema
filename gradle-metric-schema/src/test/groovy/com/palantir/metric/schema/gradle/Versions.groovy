@@ -17,7 +17,7 @@
 package com.palantir.metric.schema.gradle
 
 class Versions {
-    public static final String TRITIUM = "0.15.8"
+    public static final String TRITIUM = "0.16.2"
     public static final String SAFE_LOGGING = "1.11.0"
     public static final String SLS_PACKAGING = "4.3.3"
 

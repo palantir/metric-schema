@@ -59,8 +59,44 @@ final class MetricTypes {
         }
     };
 
-    static TypeName get(MetricType type) {
+    private static final MetricType.Visitor<String> REGISTRY_ACCESSOR = new MetricType.Visitor<String>() {
+        @Override
+        public String visitCounter() {
+            return "counter";
+        }
+
+        @Override
+        public String visitGauge() {
+            return "registerWithReplacement";
+        }
+
+        @Override
+        public String visitMeter() {
+            return "meter";
+        }
+
+        @Override
+        public String visitTimer() {
+            return "timer";
+        }
+
+        @Override
+        public String visitHistogram() {
+            return "histogram";
+        }
+
+        @Override
+        public String visitUnknown(String unknownValue) {
+            throw new SafeRuntimeException("Unknown type", SafeArg.of("type", unknownValue));
+        }
+    };
+
+    static TypeName type(MetricType type) {
         return type.accept(METRIC_TYPE);
+    }
+
+    static String registryAccessor(MetricType type) {
+        return type.accept(REGISTRY_ACCESSOR);
     }
 
     private MetricTypes() {}

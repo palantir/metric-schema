@@ -36,7 +36,8 @@ public final class ReservedConflictMetrics {
 
     /** Gauge metric with a single no tags. */
     public void float_(Gauge<?> gauge) {
-        registry.gauge(MetricName.builder().safeName("reserved.conflict.float").build(), gauge);
+        registry.registerWithReplacement(
+                MetricName.builder().safeName("reserved.conflict.float").build(), gauge);
     }
 
     /** Gauge metric with a single tag. */
