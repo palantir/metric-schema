@@ -30,7 +30,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.lang.model.element.Modifier;
@@ -174,7 +173,7 @@ final class UtilityGenerator {
                     .build());
         }
         CodeBlock metricNameBlock = metricName(namespaceName, metricName, definition.getTags());
-        String metricRegistryMethod = definition.getType().toString().toLowerCase(Locale.ENGLISH);
+        String metricRegistryMethod = MetricTypes.registryAccessor(definition.getType());
 
         MethodSpec.Builder buildMethodBuilder = MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC)
