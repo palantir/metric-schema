@@ -6,7 +6,7 @@ org.assertj:assertj-core = 3.14.0
 org.immutables:* = 2.8.3
 org.mockito:mockito-core = 3.2.4
 org.slf4j:* = 1.7.25
-com.palantir.tritium:tritium-registry = 0.16.2
+com.palantir.tritium:tritium-registry = 0.16.3
 com.palantir.conjure.java:* = 4.8.1
 com.palantir.conjure.java.runtime:* = 4.46.0
 com.palantir.conjure:conjure = 4.7.0
@@ -20,4 +20,4 @@ com.palantir.safe-logging:preconditions = 1.11.0
 
 # conflict resolution
 com.google.code.findbugs:jsr305 = 3.0.2
-com.google.errorprone:error_prone_annotations = 2.3.4
+com.google.errorprone:error_prone_annotations = 2.3.3
