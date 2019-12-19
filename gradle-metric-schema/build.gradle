@@ -36,9 +36,9 @@ pluginBundle {
             id = 'com.palantir.metric-schema-markdown'
             displayName = "Metric Schema Markdown Plugin"
         }
-        metricSchemaDataDogPlugin {
-            id = 'com.palantir.metric-schema-datadog'
-            displayName = "Metric Schema DataDog Plugin"
+        metricSchemaDashboardPlugin {
+            id = 'com.palantir.metric-schema-dashboard'
+            displayName = "Metric Schema Dashboard Plugin"
         }
     }
 }
