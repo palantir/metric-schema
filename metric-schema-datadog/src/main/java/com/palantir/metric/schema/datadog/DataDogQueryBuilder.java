@@ -27,6 +27,7 @@ public final class DataDogQueryBuilder implements QueryBuilder {
 
     public DataDogQueryBuilder() {}
 
+    @Override
     public Metric of(String name) {
         return new DataDogMetric(name);
     }
@@ -49,10 +50,12 @@ public final class DataDogQueryBuilder implements QueryBuilder {
             this.query = query;
         }
 
+        @Override
         public SelectedMetric selectFromEverywhere() {
             return selectFrom(ImmutableSet.of());
         }
 
+        @Override
         public SelectedMetric selectFrom(Set<Selector> selectors) {
             String fromSelector = selectors.isEmpty()
                     ? "*"
@@ -68,7 +71,8 @@ public final class DataDogQueryBuilder implements QueryBuilder {
             this.query = query;
         }
 
-        public AggregatedMetric aggregate(Aggregation aggregation) {
+        @Override
+        public QueryBuilder.AggregatedMetric aggregate(Aggregation aggregation) {
             StringBuilder sb = new StringBuilder();
             sb.append(aggregation.getFunction().toString().toLowerCase());
             sb.append(":");
@@ -78,20 +82,7 @@ public final class DataDogQueryBuilder implements QueryBuilder {
                 sb.append(Joiner.on(',').join(aggregation.getGroupBy()));
                 sb.append("}");
             }
-            return new AggregatedMetric(sb.toString());
+            return sb::toString;
         }
     }
-
-    public static final class AggregatedMetric implements QueryBuilder.AggregatedMetric {
-        private final String query;
-
-        private AggregatedMetric(String query) {
-            this.query = query;
-        }
-
-        public String build() {
-            return query;
-        }
-    }
-
 }

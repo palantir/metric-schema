@@ -29,4 +29,5 @@ configure(subprojects) {
 
 dependencies {
     api project('metric-schema-api-objects')
+    implementation 'com.google.guava:guava'
 }

@@ -27,6 +27,7 @@ public final class PrometheusQueryBuilder implements QueryBuilder {
 
     public PrometheusQueryBuilder() {}
 
+    @Override
     public Metric of(String name) {
         return new Metric(name.replace(".", "_"));
     }
@@ -49,10 +50,12 @@ public final class PrometheusQueryBuilder implements QueryBuilder {
             this.query = query;
         }
 
+        @Override
         public SelectedMetric selectFromEverywhere() {
             return selectFrom(ImmutableSet.of());
         }
 
+        @Override
         public SelectedMetric selectFrom(Set<Selector> selectors) {
             String fromSelector = Joiner.on(',')
                     .join(selectors.stream().map(Selector::selector).collect(Collectors.toSet()));
@@ -67,26 +70,14 @@ public final class PrometheusQueryBuilder implements QueryBuilder {
             this.query = query;
         }
 
+        @Override
         public AggregatedMetric aggregate(Aggregation aggregation) {
-            String sb = aggregation.getFunction().toString().toLowerCase()
+            return () -> aggregation.getFunction().toString().toLowerCase()
                     + " by "
                     + "(" + Joiner.on(',').join(aggregation.getGroupBy()) + ")"
                     + " ("
                     + query
                     + ")";
-            return new AggregatedMetric(sb);
-        }
-    }
-
-    public static final class AggregatedMetric implements QueryBuilder.AggregatedMetric {
-        private final String query;
-
-        private AggregatedMetric(String query) {
-            this.query = query;
-        }
-
-        public String build() {
-            return query;
         }
     }
 
