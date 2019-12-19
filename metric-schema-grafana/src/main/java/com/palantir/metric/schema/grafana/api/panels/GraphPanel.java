@@ -40,11 +40,6 @@ public interface GraphPanel extends Panel {
 
     List<Target> targets();
 
-    @Value.Default
-    default boolean lines() {
-        return true;
-    }
-
     @Value.Immutable
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonDeserialize(as = ImmutableTarget.class)

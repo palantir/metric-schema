@@ -19,7 +19,6 @@ package com.palantir.metric.schema.grafana.api.panels;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import java.util.List;
 import org.immutables.value.Value;
 
 @Value.Immutable
@@ -37,8 +36,6 @@ public interface RowPanel extends Panel {
     }
 
     String title();
-
-    List<Panel> panels();
 
     @Value.Default
     default boolean collapsed() {

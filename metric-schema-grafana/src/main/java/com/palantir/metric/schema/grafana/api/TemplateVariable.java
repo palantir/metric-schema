@@ -37,18 +37,27 @@ public interface TemplateVariable {
         return true;
     }
 
-    @Value.Default
-    default String allFormat() {
-        return "wildcard";
-    }
-
     String name();
 
-    String query();
+    @Value.Default
+    default String definition() {
+        return "label_values(" + name() + ")";
+    }
+
+    @Value.Default
+    default String query() {
+        return definition();
+    }
 
     @Value.Default
     default String type() {
         return "query";
+    }
+
+    @Value.Default
+    default int refresh() {
+        // We know that 1 means on dashboard load
+        return 1;
     }
 
     static Builder builder() {

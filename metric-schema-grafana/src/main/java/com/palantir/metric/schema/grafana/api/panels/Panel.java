@@ -18,6 +18,7 @@ package com.palantir.metric.schema.grafana.api.panels;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import java.util.Random;
 import org.immutables.value.Value;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY)
@@ -28,6 +29,11 @@ import org.immutables.value.Value;
 public interface Panel {
 
     String type();
+
+    @Value.Default
+    default int id() {
+        return new Random().nextInt();
+    }
 
     @Value.Default
     default GridPosition gridPos() {

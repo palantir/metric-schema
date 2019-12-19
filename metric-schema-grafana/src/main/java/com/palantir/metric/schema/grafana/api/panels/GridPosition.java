@@ -41,14 +41,14 @@ public interface GridPosition {
     @Value.Default
     @JsonProperty("w")
     default int width() {
-        return MAX_WIDTH / 3;
+        return MAX_WIDTH / 2;
     }
 
     /** Each unit represents 30 pixels. **/
     @Value.Default
     @JsonProperty("h")
     default int height() {
-        return 10;
+        return 8;
     }
 
     static Builder builder() {

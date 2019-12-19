@@ -27,15 +27,16 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.tasks.InputFile;
-import org.gradle.api.tasks.OutputFile;
-import org.gradle.api.tasks.SourceTask;
+import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.util.GFileUtils;
 
-public abstract class AbstractDashboardTask extends SourceTask {
+public abstract class AbstractDashboardTask extends DefaultTask {
 
     private static final ObjectMapper json = new ObjectMapper()
             .registerModule(new Jdk8Module())
@@ -49,7 +50,7 @@ public abstract class AbstractDashboardTask extends SourceTask {
         return manifestFile;
     }
 
-    @OutputFile
+    @OutputDirectory
     public final DirectoryProperty getOutputDirectory() {
         return outputDirectory;
     }
@@ -68,6 +69,7 @@ public abstract class AbstractDashboardTask extends SourceTask {
                 .flatMap(metricSchema -> metricSchema.getDashboards().entrySet().stream())
                 .forEach(entry -> {
                     try {
+                        GFileUtils.mkdirs(getOutputDirectory().getAsFile().get());
                         json.writeValue(
                                 getOutputDirectory().file(entry.getKey() + "." + dashboardExtension())
                                         .get()

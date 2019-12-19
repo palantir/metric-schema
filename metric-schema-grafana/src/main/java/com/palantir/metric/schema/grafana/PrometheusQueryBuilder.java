@@ -34,7 +34,7 @@ public final class PrometheusQueryBuilder implements QueryBuilder {
 
     @Override
     public QueryBuilder.TemplateSelector templateSelector(String templateName) {
-        return () -> "$" + templateName;
+        return () -> templateName + "=\"$" + templateName + "\"";
     }
 
     @Override

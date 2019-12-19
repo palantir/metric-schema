@@ -25,9 +25,14 @@ import com.palantir.metric.schema.Timeseries;
 import com.palantir.metric.schema.TimeseriesCell;
 import com.palantir.metric.schema.api.QueryBuilder;
 import com.palantir.metric.schema.grafana.api.GrafanaDashboard;
+import com.palantir.metric.schema.grafana.api.TemplateVariable;
+import com.palantir.metric.schema.grafana.api.Templating;
 import com.palantir.metric.schema.grafana.api.panels.GraphPanel;
+import com.palantir.metric.schema.grafana.api.panels.GridPosition;
 import com.palantir.metric.schema.grafana.api.panels.Panel;
 import com.palantir.metric.schema.grafana.api.panels.RowPanel;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("StrictUnusedVariable")
@@ -40,29 +45,49 @@ public final class GrafanaRenderer {
     public static GrafanaDashboard render(Dashboard dashboard) {
         return GrafanaDashboard.builder()
                 .title(dashboard.getTitle())
+                .templating(Templating.builder()
+                        .list(dashboard.getTemplatedTags().stream()
+                                .map(tag -> TemplateVariable.builder().name(tag).build())
+                                .collect(Collectors.toList()))
+                        .build())
                 .panels(dashboard.getRows().stream()
-                        .map(row -> renderRow(dashboard, row))
+                        .flatMap(row -> renderRow(dashboard, row).stream())
                         .collect(Collectors.toList()))
                 .build();
     }
 
     @VisibleForTesting
-    static Panel renderRow(Dashboard dashboard, Row row) {
-        return RowPanel.builder()
+    static List<Panel> renderRow(Dashboard dashboard, Row row) {
+        List<Panel> panels = new ArrayList<>();
+        panels.add(RowPanel.builder()
                 .title(row.getTitle())
-                .panels(row.getCells().stream()
-                        .map(cell -> renderCell(dashboard, cell))
-                        .collect(Collectors.toList()))
-                .build();
+                .build());
+
+        int xPosition = 0;
+        for (Cell cell : row.getCells()) {
+            Panel panel = renderCell(dashboard, cell, xPosition);
+            panels.add(panel);
+
+            // Grafana will push panels onto a new row if they exceed max width, but will push them as far right as
+            // they can go if their xPos is high. So need to reset to zero if we exceed max width
+            xPosition += panel.gridPos().width();
+            if (xPosition >= GridPosition.MAX_WIDTH) {
+                xPosition = 0;
+            }
+        }
+
+        return panels;
     }
 
     @VisibleForTesting
-    static Panel renderCell(Dashboard dashboard, Cell cell) {
+    static Panel renderCell(Dashboard dashboard, Cell cell, int xPosition) {
+        GridPosition gridPosition = GridPosition.builder().xPos(xPosition).build();
         return cell.getContent().accept(new CellContent.Visitor<Panel>() {
             @Override
             public Panel visitTimeseries(TimeseriesCell timeseriesCell) {
                 return GraphPanel.builder()
                         .title(cell.getTitle())
+                        .gridPos(gridPosition)
                         .addAllTargets(timeseriesCell.getSeries().stream()
                                 .map(timeseries -> timeseriesRequest(dashboard, timeseries))
                                 .collect(Collectors.toList()))
