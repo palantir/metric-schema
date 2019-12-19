@@ -21,18 +21,18 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.palantir.metric.schema.GraphDefinition;
-import com.palantir.metric.schema.GraphGroup;
-import com.palantir.metric.schema.GraphWidget;
+import com.palantir.metric.schema.Cell;
+import com.palantir.metric.schema.CellContent;
+import com.palantir.metric.schema.Dashboard;
+import com.palantir.metric.schema.Row;
 import com.palantir.metric.schema.Timeseries;
-import com.palantir.metric.schema.TimeseriesGraph;
+import com.palantir.metric.schema.TimeseriesCell;
 import com.palantir.metric.schema.api.QueryBuilder;
-import com.palantir.metric.schema.grafana.api.Dashboard;
+import com.palantir.metric.schema.grafana.api.GrafanaDashboard;
 import com.palantir.metric.schema.grafana.api.panels.GraphPanel;
 import com.palantir.metric.schema.grafana.api.panels.Panel;
 import com.palantir.metric.schema.grafana.api.panels.RowPanel;
 import java.io.IOException;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("StrictUnusedVariable")
@@ -44,40 +44,38 @@ public final class GrafanaRenderer {
 
     private GrafanaRenderer() {}
 
-    public static String render(DashboardConfig config, List<GraphGroup> graphGroups) throws IOException {
-        return JSON.writeValueAsString(renderDashboard(config, graphGroups));
+    public static String render(DashboardConfig config, Dashboard dashboard) throws IOException {
+        return JSON.writeValueAsString(renderDashboard(config, dashboard));
     }
 
     @VisibleForTesting
-    static Dashboard renderDashboard(DashboardConfig config, List<GraphGroup> graphGroups) {
-        return Dashboard.builder()
-                .title(config.title())
-                .panels(graphGroups.stream()
-                        .flatMap(group -> renderGroup(config, group).stream())
+    static GrafanaDashboard renderDashboard(DashboardConfig config, Dashboard dashboard) {
+        return GrafanaDashboard.builder()
+                .title(dashboard.getTitle())
+                .panels(dashboard.getRows().stream()
+                        .map(row -> renderRow(config, row))
                         .collect(Collectors.toList()))
                 .build();
     }
 
     @VisibleForTesting
-    static List<Panel> renderGroup(DashboardConfig config, GraphGroup graphGroup) {
-        return ImmutableList.<Panel>builder()
-                .add(RowPanel.builder()
-                        .title(graphGroup.getTitle())
-                        .build())
-                .addAll(graphGroup.getDefinitions().stream()
-                        .map(graph -> renderGraph(config, graph))
+    static Panel renderRow(DashboardConfig config, Row row) {
+        return RowPanel.builder()
+                .title(row.getTitle())
+                .panels(row.getCells().stream()
+                        .map(cell -> renderCell(config, cell))
                         .collect(Collectors.toList()))
                 .build();
     }
 
     @VisibleForTesting
-    static Panel renderGraph(DashboardConfig config, GraphDefinition graph) {
-        return graph.getWidget().accept(new GraphWidget.Visitor<Panel>() {
+    static Panel renderCell(DashboardConfig config, Cell cell) {
+        return cell.getContent().accept(new CellContent.Visitor<Panel>() {
             @Override
-            public Panel visitTimeseries(TimeseriesGraph value) {
+            public Panel visitTimeseries(TimeseriesCell timeseriesCell) {
                 return GraphPanel.builder()
-                        .title(graph.getTitle())
-                        .addAllTargets(value.getSeries().stream()
+                        .title(cell.getTitle())
+                        .addAllTargets(timeseriesCell.getSeries().stream()
                                 .map(timeseries -> timeseriesRequest(config, timeseries))
                                 .collect(Collectors.toList()))
                         .build();

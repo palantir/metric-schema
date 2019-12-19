@@ -20,13 +20,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.annotations.VisibleForTesting;
-import com.palantir.metric.schema.GraphDefinition;
-import com.palantir.metric.schema.GraphGroup;
-import com.palantir.metric.schema.GraphWidget;
+import com.palantir.metric.schema.Cell;
+import com.palantir.metric.schema.CellContent;
+import com.palantir.metric.schema.Dashboard;
+import com.palantir.metric.schema.Row;
 import com.palantir.metric.schema.Timeseries;
-import com.palantir.metric.schema.TimeseriesGraph;
+import com.palantir.metric.schema.TimeseriesCell;
 import com.palantir.metric.schema.api.QueryBuilder;
-import com.palantir.metric.schema.datadog.api.Dashboard;
+import com.palantir.metric.schema.datadog.api.DataDogDashboard;
 import com.palantir.metric.schema.datadog.api.DisplayType;
 import com.palantir.metric.schema.datadog.api.LayoutType;
 import com.palantir.metric.schema.datadog.api.Request;
@@ -36,7 +37,6 @@ import com.palantir.metric.schema.datadog.api.widgets.BaseWidget;
 import com.palantir.metric.schema.datadog.api.widgets.GroupWidget;
 import com.palantir.metric.schema.datadog.api.widgets.TimeseriesWidget;
 import java.io.IOException;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public final class DataDogRenderer {
@@ -47,45 +47,44 @@ public final class DataDogRenderer {
 
     private DataDogRenderer() {}
 
-    public static String render(DashboardConfig config, List<GraphGroup> graphGroups) throws IOException {
-        return JSON.writeValueAsString(renderDashboard(config, graphGroups));
+    public static String render(DashboardConfig config, Dashboard dashboard) throws IOException {
+        return JSON.writeValueAsString(renderDashboard(config, dashboard));
     }
 
     @VisibleForTesting
-    static Dashboard renderDashboard(DashboardConfig config, List<GraphGroup> graphGroups) {
-        return Dashboard.builder()
-                .title(config.title())
-                .description(config.description())
+    static DataDogDashboard renderDashboard(DashboardConfig config, Dashboard dashboard) {
+        return DataDogDashboard.builder()
+                .title(dashboard.getTitle())
                 .layoutType(LayoutType.ORDERED)
                 .readOnly(true)
                 .templateVariables(config.templateVariables())
-                .widgets(graphGroups.stream()
-                        .map(group -> renderGroup(config, group))
+                .widgets(dashboard.getRows().stream()
+                        .map(row -> renderRow(config, row))
                         .map(widget -> Widget.builder().definition(widget).build())
                         .collect(Collectors.toList()))
                 .build();
     }
 
     @VisibleForTesting
-    static GroupWidget renderGroup(DashboardConfig config, GraphGroup graphGroup) {
+    static GroupWidget renderRow(DashboardConfig config, Row row) {
         return GroupWidget.builder()
-                .title(graphGroup.getTitle())
+                .title(row.getTitle())
                 .layoutType(LayoutType.ORDERED)
-                .widgets(graphGroup.getDefinitions().stream()
-                        .map(graph -> renderGraph(config, graph))
+                .widgets(row.getCells().stream()
+                        .map(cell -> renderCell(config, cell))
                         .map(widget -> Widget.builder().definition(widget).build())
                         .collect(Collectors.toList()))
                 .build();
     }
 
     @VisibleForTesting
-    static BaseWidget renderGraph(DashboardConfig config, GraphDefinition graph) {
-        return graph.getWidget().accept(new GraphWidget.Visitor<BaseWidget>() {
+    static BaseWidget renderCell(DashboardConfig config, Cell cell) {
+        return cell.getContent().accept(new CellContent.Visitor<BaseWidget>() {
             @Override
-            public BaseWidget visitTimeseries(TimeseriesGraph timeseriesGraph) {
+            public BaseWidget visitTimeseries(TimeseriesCell timeseriesCell) {
                 return TimeseriesWidget.builder()
-                        .title(graph.getTitle())
-                        .addAllRequests(timeseriesGraph.getSeries().stream()
+                        .title(cell.getTitle())
+                        .addAllRequests(timeseriesCell.getSeries().stream()
                                 .map(timeseries -> timeseriesRequest(config, timeseries))
                                 .collect(Collectors.toList()))
                         .build();

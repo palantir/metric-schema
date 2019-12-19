@@ -6,7 +6,8 @@ types:
       MetricSchema:
         fields:
           namespaces: map<string, MetricNamespace>
-          graphs: list<GraphGroup>
+          dashboards:
+            type: list<Dashboard>
           options:
             docs: >
               Additional pieces of information that do not change the overall declaration,
@@ -22,8 +23,6 @@ types:
           docs: Documentation
           metrics:
             type: map<string, MetricDefinition>
-          graphs:
-            type: list<GraphDefinition>
 
       MetricDefinition:
         fields:
@@ -38,20 +37,26 @@ types:
           - TIMER
           - HISTOGRAM
 
-      GraphGroup:
+      Dashboard:
         fields:
           title: string
-          definitions: list<GraphDefinition>
-      GraphDefinition:
+          rows: list<Row>
+      Row:
         fields:
           title: string
-          widget: GraphWidget
-      GraphWidget:
+          cells: list<Cell>
+      Cell:
+        fields:
+          title: string
+          content: CellContent
+      CellContent:
         union:
-          timeseries: TimeseriesGraph
-      TimeseriesGraph:
+          timeseries: TimeseriesCell
+
+      TimeseriesCell:
         fields:
           series: list<Timeseries>
+
       Timeseries:
         fields:
           metric: string
