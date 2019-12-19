@@ -22,53 +22,42 @@ import static org.assertj.core.api.Assertions.contentOf;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.metric.schema.Aggregation;
 import com.palantir.metric.schema.AggregationFunction;
-import com.palantir.metric.schema.GraphDefinition;
-import com.palantir.metric.schema.GraphGroup;
-import com.palantir.metric.schema.GraphWidget;
-import com.palantir.metric.schema.MetricSchema;
+import com.palantir.metric.schema.Cell;
+import com.palantir.metric.schema.CellContent;
+import com.palantir.metric.schema.Dashboard;
+import com.palantir.metric.schema.Row;
 import com.palantir.metric.schema.Timeseries;
-import com.palantir.metric.schema.TimeseriesGraph;
+import com.palantir.metric.schema.TimeseriesCell;
+import com.palantir.metric.schema.grafana.api.GrafanaDashboard;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 
 class GrafanaRendererTest {
 
-    private static final MetricSchema schema = MetricSchema.builder()
-            .graphs(GraphGroup.builder()
-                    .title("First Group")
-                    .definitions(GraphDefinition.builder()
+    private static final Dashboard dashboard = Dashboard.builder()
+            .title("First Group")
+            .selectedTags("mytag", "myvalue")
+            .templatedTags("templateTag")
+            .rows(Row.builder()
+                    .title("My Row")
+                    .cells(Cell.builder()
                             .title("Client Response P95s")
-                            .widget(GraphWidget.timeseries(TimeseriesGraph.builder()
+                            .content(CellContent.timeseries(TimeseriesCell.builder()
                                     .series(Timeseries.builder()
                                             .metric("client.response.p95")
                                             .aggregation(Aggregation.of(
                                                     AggregationFunction.MAX,
                                                     ImmutableSet.of("host")))
-                                            .build())
+                                           .build())
                                     .build()))
                             .build())
-                    .build())
-            .graphs(GraphGroup.builder()
-                    .title("Second Group")
                     .build())
             .build();
 
     @Test
     void render() throws IOException {
-        DashboardConfig config = DashboardConfig.builder()
-                .title("Dashboard Title")
-                .putSelectedTags("product", "artifacts")
-                .build();
-
-        String rendered = GrafanaRenderer.render(config, schema.getGraphs());
-
-        // FIXME(gatesn): remove
-        Files.write(Paths.get("src/test/resources/render.json"), rendered.getBytes(StandardCharsets.UTF_8));
-
+        GrafanaDashboard rendered = GrafanaRenderer.render(dashboard);
         assertThat(rendered).isEqualTo(contentOf(new File("src/test/resources/render.json")));
     }
 

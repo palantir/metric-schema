@@ -18,6 +18,8 @@ package com.palantir.metric.schema.gradle;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.file.Directory;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 
@@ -35,17 +37,18 @@ public final class MetricSchemaDashboardPlugin implements Plugin<Project> {
         TaskProvider<CreateMetricsManifestTask> createMetricsManifest =
                 project.getTasks().named(MetricSchemaPlugin.CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class);
 
-        TaskProvider<GenerateMetricDataDogTask> datadog = project.getTasks()
-                .register(TASK_GENERATE_DASHBOARD_DATADOG, GenerateMetricDataDogTask.class, task -> {
+        Provider<Directory> dashboardDir = project.getLayout().getBuildDirectory().dir("dashboards");
+        TaskProvider<DataDogDashboardTask> datadog = project.getTasks()
+                .register(TASK_GENERATE_DASHBOARD_DATADOG, DataDogDashboardTask.class, task -> {
                     task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
-                    task.outputFile().set(project.getBuildDir().toPath().resolve("datadog.json").toFile());
+                    task.getOutputDirectory().set(dashboardDir);
                     task.dependsOn(createMetricsManifest);
                 });
 
-        TaskProvider<GenerateMetricGrafanaTask> grafana = project.getTasks()
-                .register(TASK_GENERATE_DASHBOARD_GRAFANA, GenerateMetricGrafanaTask.class, task -> {
+        TaskProvider<GrafanaDashboardTask> grafana = project.getTasks()
+                .register(TASK_GENERATE_DASHBOARD_GRAFANA, GrafanaDashboardTask.class, task -> {
                     task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
-                    task.outputFile().set(project.getBuildDir().toPath().resolve("grafana.json").toFile());
+                    task.getOutputDirectory().set(dashboardDir);
                     task.dependsOn(createMetricsManifest);
                 });
 

@@ -16,11 +16,7 @@
 
 package com.palantir.metric.schema.grafana;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.palantir.metric.schema.Cell;
 import com.palantir.metric.schema.CellContent;
 import com.palantir.metric.schema.Dashboard;
@@ -32,51 +28,43 @@ import com.palantir.metric.schema.grafana.api.GrafanaDashboard;
 import com.palantir.metric.schema.grafana.api.panels.GraphPanel;
 import com.palantir.metric.schema.grafana.api.panels.Panel;
 import com.palantir.metric.schema.grafana.api.panels.RowPanel;
-import java.io.IOException;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("StrictUnusedVariable")
 public final class GrafanaRenderer {
 
     private static final QueryBuilder queryBuilder = new PrometheusQueryBuilder();
-    private static final ObjectMapper JSON =
-            new ObjectMapper().registerModule(new Jdk8Module()).enable(SerializationFeature.INDENT_OUTPUT);
 
     private GrafanaRenderer() {}
 
-    public static String render(DashboardConfig config, Dashboard dashboard) throws IOException {
-        return JSON.writeValueAsString(renderDashboard(config, dashboard));
-    }
-
-    @VisibleForTesting
-    static GrafanaDashboard renderDashboard(DashboardConfig config, Dashboard dashboard) {
+    public static GrafanaDashboard render(Dashboard dashboard) {
         return GrafanaDashboard.builder()
                 .title(dashboard.getTitle())
                 .panels(dashboard.getRows().stream()
-                        .map(row -> renderRow(config, row))
+                        .map(row -> renderRow(dashboard, row))
                         .collect(Collectors.toList()))
                 .build();
     }
 
     @VisibleForTesting
-    static Panel renderRow(DashboardConfig config, Row row) {
+    static Panel renderRow(Dashboard dashboard, Row row) {
         return RowPanel.builder()
                 .title(row.getTitle())
                 .panels(row.getCells().stream()
-                        .map(cell -> renderCell(config, cell))
+                        .map(cell -> renderCell(dashboard, cell))
                         .collect(Collectors.toList()))
                 .build();
     }
 
     @VisibleForTesting
-    static Panel renderCell(DashboardConfig config, Cell cell) {
+    static Panel renderCell(Dashboard dashboard, Cell cell) {
         return cell.getContent().accept(new CellContent.Visitor<Panel>() {
             @Override
             public Panel visitTimeseries(TimeseriesCell timeseriesCell) {
                 return GraphPanel.builder()
                         .title(cell.getTitle())
                         .addAllTargets(timeseriesCell.getSeries().stream()
-                                .map(timeseries -> timeseriesRequest(config, timeseries))
+                                .map(timeseries -> timeseriesRequest(dashboard, timeseries))
                                 .collect(Collectors.toList()))
                         .build();
             }
@@ -88,11 +76,11 @@ public final class GrafanaRenderer {
         });
     }
 
-    static GraphPanel.Target timeseriesRequest(DashboardConfig config, Timeseries timeseries) {
+    static GraphPanel.Target timeseriesRequest(Dashboard dashboard, Timeseries timeseries) {
         return GraphPanel.Target.of(QueryBuilder.create(
                 queryBuilder,
                 timeseries,
-                config.selectedTags(),
-                ImmutableList.of()));
+                dashboard.getSelectedTags(),
+                dashboard.getTemplatedTags()));
     }
 }

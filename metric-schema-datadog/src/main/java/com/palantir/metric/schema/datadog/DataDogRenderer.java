@@ -16,9 +16,6 @@
 
 package com.palantir.metric.schema.datadog;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.annotations.VisibleForTesting;
 import com.palantir.metric.schema.Cell;
 import com.palantir.metric.schema.CellContent;
@@ -36,56 +33,50 @@ import com.palantir.metric.schema.datadog.api.Widget;
 import com.palantir.metric.schema.datadog.api.widgets.BaseWidget;
 import com.palantir.metric.schema.datadog.api.widgets.GroupWidget;
 import com.palantir.metric.schema.datadog.api.widgets.TimeseriesWidget;
-import java.io.IOException;
 import java.util.stream.Collectors;
 
 public final class DataDogRenderer {
 
     private static final QueryBuilder queryBuilder = new DataDogQueryBuilder();
-    private static final ObjectMapper JSON =
-            new ObjectMapper().registerModule(new Jdk8Module()).enable(SerializationFeature.INDENT_OUTPUT);
 
     private DataDogRenderer() {}
 
-    public static String render(DashboardConfig config, Dashboard dashboard) throws IOException {
-        return JSON.writeValueAsString(renderDashboard(config, dashboard));
-    }
-
-    @VisibleForTesting
-    static DataDogDashboard renderDashboard(DashboardConfig config, Dashboard dashboard) {
+    public static DataDogDashboard render(Dashboard dashboard) {
         return DataDogDashboard.builder()
                 .title(dashboard.getTitle())
                 .layoutType(LayoutType.ORDERED)
                 .readOnly(true)
-                .templateVariables(config.templateVariables())
+                .templateVariables(dashboard.getTemplatedTags().stream()
+                        .map(TemplateVariable::of)
+                        .collect(Collectors.toList()))
                 .widgets(dashboard.getRows().stream()
-                        .map(row -> renderRow(config, row))
+                        .map(row -> renderRow(dashboard, row))
                         .map(widget -> Widget.builder().definition(widget).build())
                         .collect(Collectors.toList()))
                 .build();
     }
 
     @VisibleForTesting
-    static GroupWidget renderRow(DashboardConfig config, Row row) {
+    static GroupWidget renderRow(Dashboard dashboard, Row row) {
         return GroupWidget.builder()
                 .title(row.getTitle())
                 .layoutType(LayoutType.ORDERED)
                 .widgets(row.getCells().stream()
-                        .map(cell -> renderCell(config, cell))
+                        .map(cell -> renderCell(dashboard, cell))
                         .map(widget -> Widget.builder().definition(widget).build())
                         .collect(Collectors.toList()))
                 .build();
     }
 
     @VisibleForTesting
-    static BaseWidget renderCell(DashboardConfig config, Cell cell) {
+    static BaseWidget renderCell(Dashboard dashboard, Cell cell) {
         return cell.getContent().accept(new CellContent.Visitor<BaseWidget>() {
             @Override
             public BaseWidget visitTimeseries(TimeseriesCell timeseriesCell) {
                 return TimeseriesWidget.builder()
                         .title(cell.getTitle())
                         .addAllRequests(timeseriesCell.getSeries().stream()
-                                .map(timeseries -> timeseriesRequest(config, timeseries))
+                                .map(timeseries -> timeseriesRequest(dashboard, timeseries))
                                 .collect(Collectors.toList()))
                         .build();
             }
@@ -97,13 +88,13 @@ public final class DataDogRenderer {
         });
     }
 
-    static Request timeseriesRequest(DashboardConfig config, Timeseries timeseries) {
+    static Request timeseriesRequest(Dashboard dashboard, Timeseries timeseries) {
         return Request.builder()
                 .query(QueryBuilder.create(
                         queryBuilder,
                         timeseries,
-                        config.selectedTags(),
-                        config.templateVariables().stream().map(TemplateVariable::name).collect(Collectors.toList())))
+                        dashboard.getSelectedTags(),
+                        dashboard.getTemplatedTags()))
                 .displayType(DisplayType.LINE)
                 .build();
     }

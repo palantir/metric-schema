@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package com.palantir.metric.schema.datadog;
+package com.palantir.metric.schema.gradle;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.palantir.metric.schema.Dashboard;
+import com.palantir.metric.schema.grafana.GrafanaRenderer;
+import org.gradle.api.tasks.CacheableTask;
 
-import org.junit.jupiter.api.Test;
+@CacheableTask
+public class GrafanaDashboardTask extends AbstractDashboardTask {
 
-class QueryTest {
+    @Override
+    protected final String dashboardExtension() {
+        return "grafana.json";
+    }
 
-    @Test
-    public void query_everywhere_aggMax() {
-        assertThat(DataDogQueryBuilder.of("metric").selectFromEverywhere().aggregate(Aggregations.max()).build())
-                .isEqualTo("max:metric{*}");
+    @Override
+    protected final Object renderDashboard(Dashboard dashboard) {
+        return GrafanaRenderer.render(dashboard);
     }
 }

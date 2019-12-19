@@ -14,28 +14,22 @@
  * limitations under the License.
  */
 
-package com.palantir.metric.schema.datadog;
+package com.palantir.metric.schema.gradle;
 
-import com.palantir.metric.schema.datadog.api.TemplateVariable;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import org.immutables.value.Value;
+import com.palantir.metric.schema.Dashboard;
+import com.palantir.metric.schema.datadog.DataDogRenderer;
+import org.gradle.api.tasks.CacheableTask;
 
-@Value.Immutable
-public interface DashboardConfig {
+@CacheableTask
+public class DataDogDashboardTask extends AbstractDashboardTask {
 
-    String title();
-
-    Optional<String> description();
-
-    Map<String, String> selectedTags();
-
-    List<TemplateVariable> templateVariables();
-
-    static Builder builder() {
-        return new Builder();
+    @Override
+    protected final String dashboardExtension() {
+        return "datadog.json";
     }
 
-    class Builder extends ImmutableDashboardConfig.Builder {}
+    @Override
+    protected final Object renderDashboard(Dashboard dashboard) {
+        return DataDogRenderer.render(dashboard);
+    }
 }

@@ -7,7 +7,11 @@ types:
         fields:
           namespaces: map<string, MetricNamespace>
           dashboards:
-            type: list<Dashboard>
+            docs: Set of dashboards to be produced from this project.
+            type: map<string, Dashboard>
+          providedDashboardRows:
+            docs: Set of dashboard rows to be inherited by consumers of this project.
+            type: list<Row>
           options:
             docs: >
               Additional pieces of information that do not change the overall declaration,
@@ -40,6 +44,8 @@ types:
       Dashboard:
         fields:
           title: string
+          selectedTags: map<string, string>
+          templatedTags: list<string>
           rows: list<Row>
       Row:
         fields:
