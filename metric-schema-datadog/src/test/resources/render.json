@@ -1,0 +1,36 @@
+{
+  "title" : "Dashboard Title",
+  "description" : "Dashboard Description",
+  "layout_type" : "ordered",
+  "is_read_only" : true,
+  "template_variables" : [ {
+    "name" : "deployment",
+    "default" : "*",
+    "prefix" : "deployment"
+  }, {
+    "name" : "environment",
+    "default" : "*",
+    "prefix" : "environment"
+  } ],
+  "notify_list" : [ ],
+  "widgets" : [ {
+    "id" : -976031572,
+    "definition" : {
+      "type" : "group",
+      "title" : "First Group",
+      "layout_type" : "ordered",
+      "widgets" : [ {
+        "id" : 1693557976,
+        "definition" : {
+          "type" : "timeseries",
+          "title" : "Server Response P99s",
+          "requests" : [ {
+            "q" : "max:server.response.p99{$environment,$deployment}",
+            "display_type" : "line"
+          } ],
+          "show_legend" : false
+        }
+      } ]
+    }
+  } ]
+}

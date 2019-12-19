@@ -2,15 +2,23 @@ types:
   definitions:
     default-package: com.palantir.metric.schema
     objects:
+
       MetricSchema:
         fields:
           namespaces: map<string, MetricNamespace>
+          dashboards:
+            docs: Set of dashboards to be produced from this project.
+            type: map<string, Dashboard>
+          providedDashboardRows:
+            docs: Set of dashboard rows to be inherited by consumers of this project.
+            type: list<Row>
           options:
             docs: >
               Additional pieces of information that do not change the overall declaration,
               but may affect the way it is handled in a particular context. For example,
               `javaPackage` will determine the package of the generated classes.
             type: map<string, string>
+
       MetricNamespace:
         fields:
           shortName:
@@ -18,7 +26,8 @@ types:
             type: optional<string>
           docs: Documentation
           metrics:
-            type: map<string,MetricDefinition>
+            type: map<string, MetricDefinition>
+
       MetricDefinition:
         fields:
           type: MetricType
@@ -31,6 +40,46 @@ types:
           - METER
           - TIMER
           - HISTOGRAM
+
+      Dashboard:
+        fields:
+          title: string
+          selectedTags: map<string, string>
+          templatedTags: list<string>
+          rows: list<Row>
+      Row:
+        fields:
+          title: string
+          cells: list<Cell>
+      Cell:
+        fields:
+          title: string
+          content: CellContent
+      CellContent:
+        union:
+          timeseries: TimeseriesCell
+
+      TimeseriesCell:
+        fields:
+          series: list<Timeseries>
+
+      Timeseries:
+        fields:
+          metric: string
+          aggregation: Aggregation
+      Aggregation:
+        fields:
+          function: AggregationFunction
+          groupBy:
+            docs: The set of tags to group by.
+            type: set<string>
+      AggregationFunction:
+        values:
+          - AVG
+          - SUM
+          - MIN
+          - MAX
+
       Documentation:
         docs: Documentation describing an associated component. Markdown syntax may be used.
         alias: string

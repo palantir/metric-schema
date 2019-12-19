@@ -1,0 +1,36 @@
+{
+  "schemaVersion" : 0,
+  "title" : "Dashboard Title",
+  "tags" : [ ],
+  "panels" : [ {
+    "type" : "row",
+    "title" : "First Group",
+    "panels" : [ ],
+    "collapsed" : false,
+    "gridPos" : {
+      "w" : 24,
+      "h" : 1
+    }
+  }, {
+    "gridPos" : {
+      "w" : 8,
+      "h" : 10
+    },
+    "type" : "graph",
+    "title" : "Client Response P95s",
+    "targets" : [ {
+      "expr" : "max by (host) (client_response_p95{product=\"artifacts\"})",
+      "refId" : "A"
+    } ],
+    "lines" : true
+  }, {
+    "type" : "row",
+    "title" : "Second Group",
+    "panels" : [ ],
+    "collapsed" : false,
+    "gridPos" : {
+      "w" : 24,
+      "h" : 1
+    }
+  } ]
+}

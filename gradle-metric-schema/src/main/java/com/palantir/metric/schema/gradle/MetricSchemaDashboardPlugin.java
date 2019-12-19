@@ -16,17 +16,18 @@
 
 package com.palantir.metric.schema.gradle;
 
-import com.google.common.collect.ImmutableList;
-import java.util.List;
-import org.gradle.StartParameter;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.file.Directory;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 
-public final class MetricSchemaMarkdownPlugin implements Plugin<Project> {
+public final class MetricSchemaDashboardPlugin implements Plugin<Project> {
 
-    public static final String GENERATE_METRICS_MARKDOWN = "generateMetricsMarkdown";
+    public static final String TASK_GENERATE_DASHBOARDS = "generateDashboards";
+    public static final String TASK_GENERATE_DASHBOARD_DATADOG = "generateDashboardDataDog";
+    public static final String TASK_GENERATE_DASHBOARD_GRAFANA = "generateDashboardGrafana";
 
     @Override
     public void apply(Project project) {
@@ -36,22 +37,24 @@ public final class MetricSchemaMarkdownPlugin implements Plugin<Project> {
         TaskProvider<CreateMetricsManifestTask> createMetricsManifest =
                 project.getTasks().named(MetricSchemaPlugin.CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class);
 
-        TaskProvider<GenerateMetricMarkdownTask> generateMetricsMarkdown = project.getTasks()
-                .register(GENERATE_METRICS_MARKDOWN, GenerateMetricMarkdownTask.class, task -> {
+        Provider<Directory> dashboardDir = project.getLayout().getBuildDirectory().dir("dashboards");
+        TaskProvider<DataDogDashboardTask> datadog = project.getTasks()
+                .register(TASK_GENERATE_DASHBOARD_DATADOG, DataDogDashboardTask.class, task -> {
                     task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
-                    task.getOutputFile().set(project.file("metrics.md"));
+                    task.getOutputDirectory().set(dashboardDir);
                     task.dependsOn(createMetricsManifest);
                 });
-        project.getTasks().named("check", check -> check.dependsOn(generateMetricsMarkdown));
 
-        // Wire up dependencies so running `./gradlew --write-locks` will update the markdown
-        StartParameter startParam = project.getGradle().getStartParameter();
-        if (startParam.isWriteDependencyLocks() && !startParam.getTaskNames().contains(GENERATE_METRICS_MARKDOWN)) {
-            List<String> taskNames = ImmutableList.<String>builder()
-                    .addAll(startParam.getTaskNames())
-                    .add(GENERATE_METRICS_MARKDOWN)
-                    .build();
-            startParam.setTaskNames(taskNames);
-        }
+        TaskProvider<GrafanaDashboardTask> grafana = project.getTasks()
+                .register(TASK_GENERATE_DASHBOARD_GRAFANA, GrafanaDashboardTask.class, task -> {
+                    task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
+                    task.getOutputDirectory().set(dashboardDir);
+                    task.dependsOn(createMetricsManifest);
+                });
+
+        project.getTasks().register(TASK_GENERATE_DASHBOARDS, task -> {
+            task.dependsOn(datadog);
+            task.dependsOn(grafana);
+        });
     }
 }

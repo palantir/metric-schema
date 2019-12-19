@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-apply plugin: 'com.palantir.conjure'
-apply plugin: 'com.palantir.conjure-publish'
-apply from: "$rootDir/gradle/publish-jar.gradle"
+package com.palantir.metric.schema.datadog.api.widgets;
 
-conjure {
-    java {
-        strictObjects = true
-    }
-}
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-configure(subprojects) {
-    apply from: "$rootDir/gradle/publish-jar.gradle"
-}
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = GroupWidget.class, name = GroupWidget.TYPE),
+    @JsonSubTypes.Type(value = TimeseriesWidget.class, name = TimeseriesWidget.TYPE)
+})
+public interface BaseWidget {
 
-dependencies {
-    api project('metric-schema-api-objects')
-    implementation 'com.google.guava:guava'
+    String type();
 }
