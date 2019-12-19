@@ -25,6 +25,7 @@ public final class MetricSchemaDataDogPlugin implements Plugin<Project> {
 
     public static final String EXT_DATADOG = "datadog";
     public static final String TASK_GENERATE_METRICS_DATADOG = "generateMetricsDataDog";
+    public static final String TASK_GENERATE_METRICS_GRAFANA = "generateMetricsGrafana";
 
     @Override
     public void apply(Project project) {
@@ -39,6 +40,12 @@ public final class MetricSchemaDataDogPlugin implements Plugin<Project> {
         project.getTasks().register(TASK_GENERATE_METRICS_DATADOG, GenerateMetricDataDogTask.class, task -> {
             task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
             task.outputFile().set(project.getBuildDir().toPath().resolve("datadog.json").toFile());
+            task.dependsOn(createMetricsManifest);
+        });
+
+        project.getTasks().register(TASK_GENERATE_METRICS_GRAFANA, GenerateMetricGrafanaTask.class, task -> {
+            task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
+            task.outputFile().set(project.getBuildDir().toPath().resolve("grafana.json").toFile());
             task.dependsOn(createMetricsManifest);
         });
     }

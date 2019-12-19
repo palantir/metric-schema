@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-package com.palantir.metric.schema.datadog;
+package com.palantir.metric.schema.grafana.api.panels;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.immutables.value.Value;
 
-import org.junit.jupiter.api.Test;
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = TextPanel.class, name = TextPanel.TYPE),
+    @JsonSubTypes.Type(value = GraphPanel.class, name = GraphPanel.TYPE)
+})
+public interface Panel {
 
-class QueryTest {
+    String type();
 
-    @Test
-    public void query_everywhere_aggMax() {
-        assertThat(DataDogQueryBuilder.of("metric").selectFromEverywhere().aggregate(Aggregations.max()).build())
-                .isEqualTo("max:metric{*}");
+    @Value.Default
+    default GridPosition gridPos() {
+        return GridPosition.builder().build();
     }
+
 }

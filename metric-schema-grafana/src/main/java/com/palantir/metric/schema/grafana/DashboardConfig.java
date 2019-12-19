@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-apply plugin: 'com.palantir.conjure'
-apply plugin: 'com.palantir.conjure-publish'
+package com.palantir.metric.schema.grafana;
 
-conjure {
-    java {
-        strictObjects = true
+import java.util.Map;
+import org.immutables.value.Value;
+
+@Value.Immutable
+public interface DashboardConfig {
+
+    String title();
+
+    Map<String, String> selectedTags();
+
+    static Builder builder() {
+        return new Builder();
     }
-}
 
-configure(subprojects) {
-    apply from: "$rootDir/gradle/publish-jar.gradle"
-}
-
-dependencies {
-    api project('metric-schema-api-objects')
+    class Builder extends ImmutableDashboardConfig.Builder {}
 }

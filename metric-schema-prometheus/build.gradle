@@ -1,7 +1,6 @@
 apply from: "$rootDir/gradle/publish-jar.gradle"
 
 dependencies {
-    api project(':metric-schema-api')
     api project(':metric-schema-api:metric-schema-api-objects')
     implementation 'com.google.guava:guava'
     implementation 'org.slf4j:slf4j-api'

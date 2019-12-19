@@ -19,22 +19,33 @@ package com.palantir.metric.schema.datadog;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.metric.schema.Aggregation;
-import com.palantir.metric.schema.datadog.api.TemplateVariable;
+import com.palantir.metric.schema.api.QueryBuilder;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public final class Query {
+public final class DataDogQueryBuilder implements QueryBuilder {
 
-    private Query() {}
+    public DataDogQueryBuilder() {}
 
-    public static Metric of(String name) {
-        return new Metric(name);
+    public Metric of(String name) {
+        return new DataDogMetric(name);
     }
 
-    public static final class Metric {
+    @Override
+    public QueryBuilder.TemplateSelector templateSelector(String templateName) {
+        return () -> "$" + templateName;
+    }
+
+    @Override
+    public QueryBuilder.TagSelector tagSelector(String tagName, String tagValue) {
+        return () -> tagName + ":" + tagValue;
+    }
+
+    public static final class DataDogMetric implements QueryBuilder.Metric {
+
         private final String query;
 
-        private Metric(String query) {
+        private DataDogMetric(String query) {
             this.query = query;
         }
 
@@ -50,7 +61,7 @@ public final class Query {
         }
     }
 
-    public static final class SelectedMetric {
+    public static final class SelectedMetric implements QueryBuilder.SelectedMetric {
         private final String query;
 
         private SelectedMetric(String query) {
@@ -71,58 +82,16 @@ public final class Query {
         }
     }
 
-    public static final class AggregatedMetric {
+    public static final class AggregatedMetric implements QueryBuilder.AggregatedMetric {
         private final String query;
 
         private AggregatedMetric(String query) {
             this.query = query;
         }
 
-        String build() {
+        public String build() {
             return query;
         }
     }
 
-    public interface Selector {
-
-        String selector();
-    }
-
-    public static final class TemplateSelector implements Selector {
-
-        private final TemplateVariable templateVariable;
-
-        private TemplateSelector(TemplateVariable templateVariable) {
-            this.templateVariable = templateVariable;
-        }
-
-        @Override
-        public String selector() {
-            return "$" + templateVariable.name();
-        }
-
-        public static TemplateSelector of(TemplateVariable templateVariable) {
-            return new TemplateSelector(templateVariable);
-        }
-    }
-
-    public static final class TagSelector implements Selector {
-
-        private final String tagName;
-        private final String tagValue;
-
-        private TagSelector(String tagName, String tagValue) {
-            this.tagName = tagName;
-            this.tagValue = tagValue;
-        }
-
-        @Override
-        public String selector() {
-            return tagName + ":" + tagValue;
-        }
-
-        public static TagSelector of(String tagName, String tagValue) {
-            return new TagSelector(tagName, tagValue);
-        }
-    }
 }

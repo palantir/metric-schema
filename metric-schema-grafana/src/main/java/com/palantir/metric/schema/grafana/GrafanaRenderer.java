@@ -14,38 +14,35 @@
  * limitations under the License.
  */
 
-package com.palantir.metric.schema.datadog;
+package com.palantir.metric.schema.grafana;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.palantir.metric.schema.GraphDefinition;
 import com.palantir.metric.schema.GraphGroup;
 import com.palantir.metric.schema.GraphWidget;
 import com.palantir.metric.schema.Timeseries;
 import com.palantir.metric.schema.TimeseriesGraph;
 import com.palantir.metric.schema.api.QueryBuilder;
-import com.palantir.metric.schema.datadog.api.Dashboard;
-import com.palantir.metric.schema.datadog.api.DisplayType;
-import com.palantir.metric.schema.datadog.api.LayoutType;
-import com.palantir.metric.schema.datadog.api.Request;
-import com.palantir.metric.schema.datadog.api.TemplateVariable;
-import com.palantir.metric.schema.datadog.api.Widget;
-import com.palantir.metric.schema.datadog.api.widgets.BaseWidget;
-import com.palantir.metric.schema.datadog.api.widgets.GroupWidget;
-import com.palantir.metric.schema.datadog.api.widgets.TimeseriesWidget;
+import com.palantir.metric.schema.grafana.api.Dashboard;
+import com.palantir.metric.schema.grafana.api.panels.GraphPanel;
+import com.palantir.metric.schema.grafana.api.panels.Panel;
+import com.palantir.metric.schema.grafana.api.panels.RowPanel;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class DataDogRenderer {
+@SuppressWarnings("StrictUnusedVariable")
+public final class GrafanaRenderer {
 
-    private static final QueryBuilder queryBuilder = new DataDogQueryBuilder();
+    private static final QueryBuilder queryBuilder = new PrometheusQueryBuilder();
     private static final ObjectMapper JSON =
             new ObjectMapper().registerModule(new Jdk8Module()).enable(SerializationFeature.INDENT_OUTPUT);
 
-    private DataDogRenderer() {}
+    private GrafanaRenderer() {}
 
     public static String render(DashboardConfig config, List<GraphGroup> graphGroups) throws IOException {
         return JSON.writeValueAsString(renderDashboard(config, graphGroups));
@@ -55,57 +52,49 @@ public final class DataDogRenderer {
     static Dashboard renderDashboard(DashboardConfig config, List<GraphGroup> graphGroups) {
         return Dashboard.builder()
                 .title(config.title())
-                .description(config.description())
-                .layoutType(LayoutType.ORDERED)
-                .readOnly(true)
-                .templateVariables(config.templateVariables())
-                .widgets(graphGroups.stream()
-                        .map(group -> renderGroup(config, group))
-                        .map(widget -> Widget.builder().definition(widget).build())
+                .panels(graphGroups.stream()
+                        .flatMap(group -> renderGroup(config, group).stream())
                         .collect(Collectors.toList()))
                 .build();
     }
 
     @VisibleForTesting
-    static GroupWidget renderGroup(DashboardConfig config, GraphGroup graphGroup) {
-        return GroupWidget.builder()
-                .title(graphGroup.getTitle())
-                .layoutType(LayoutType.ORDERED)
-                .widgets(graphGroup.getDefinitions().stream()
+    static List<Panel> renderGroup(DashboardConfig config, GraphGroup graphGroup) {
+        return ImmutableList.<Panel>builder()
+                .add(RowPanel.builder()
+                        .title(graphGroup.getTitle())
+                        .build())
+                .addAll(graphGroup.getDefinitions().stream()
                         .map(graph -> renderGraph(config, graph))
-                        .map(widget -> Widget.builder().definition(widget).build())
                         .collect(Collectors.toList()))
                 .build();
     }
 
     @VisibleForTesting
-    static BaseWidget renderGraph(DashboardConfig config, GraphDefinition graph) {
-        return graph.getWidget().accept(new GraphWidget.Visitor<BaseWidget>() {
+    static Panel renderGraph(DashboardConfig config, GraphDefinition graph) {
+        return graph.getWidget().accept(new GraphWidget.Visitor<Panel>() {
             @Override
-            public BaseWidget visitTimeseries(TimeseriesGraph timeseriesGraph) {
-                return TimeseriesWidget.builder()
+            public Panel visitTimeseries(TimeseriesGraph value) {
+                return GraphPanel.builder()
                         .title(graph.getTitle())
-                        .addAllRequests(timeseriesGraph.getSeries().stream()
+                        .addAllTargets(value.getSeries().stream()
                                 .map(timeseries -> timeseriesRequest(config, timeseries))
                                 .collect(Collectors.toList()))
                         .build();
             }
 
             @Override
-            public BaseWidget visitUnknown(String _unknownType) {
+            public Panel visitUnknown(String _unknownType) {
                 throw new UnsupportedOperationException();
             }
         });
     }
 
-    static Request timeseriesRequest(DashboardConfig config, Timeseries timeseries) {
-        return Request.builder()
-                .query(QueryBuilder.create(
-                        queryBuilder,
-                        timeseries,
-                        config.selectedTags(),
-                        config.templateVariables().stream().map(TemplateVariable::name).collect(Collectors.toList())))
-                .displayType(DisplayType.LINE)
-                .build();
+    static GraphPanel.Target timeseriesRequest(DashboardConfig config, Timeseries timeseries) {
+        return GraphPanel.Target.of(QueryBuilder.create(
+                queryBuilder,
+                timeseries,
+                config.selectedTags(),
+                ImmutableList.of()));
     }
 }
