@@ -13,8 +13,8 @@ Usage
 -----
 
 Metric definitions are located in project `src/main/metrics` directories.
-Files are YAML formatted with the `.yml` extension. Each file represents a namespace,
-a logical group of metrics with a shared prefix. The schema is defined using [conjure](https://palantir.github.io/conjure),
+Files are YAML formatted with the `.yml` extension and represent a collection of namespaces, a logical group of metrics 
+with a shared prefix. The schema is defined using [conjure](https://palantir.github.io/conjure),
 and can be [found here](metric-schema-api/src/main/conjure/metric-schema-api.yml).
 
 Metric utilities are updated using the `generateMetrics` gradle task. If this is the first
@@ -24,6 +24,9 @@ after metrics are generated, IntelliJ IDEA users can run the `idea` task.
 ```bash
 ./gradlew generateMetrics
 ```
+
+Metric documentation is updated using the `generateMetricsMarkdown` gradle task or by running 
+`./gradlew --write-locks`. The gradle plugin will ensure that the metrics markdown is always up to date.
 
 All metric definitions will be embedded within the output JAR as a resource located `metric-schema/metrics.json`.
 
