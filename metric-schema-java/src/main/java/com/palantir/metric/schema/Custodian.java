@@ -24,7 +24,8 @@ import org.apache.commons.lang3.StringUtils;
 /** Utility functionality to escape metric values for generated java code. */
 final class Custodian {
 
-    private static final Splitter splitter = Splitter.onPattern("[^a-zA-Z0-9]").trimResults().omitEmptyStrings();
+    private static final Splitter splitter =
+            Splitter.onPattern("[^a-zA-Z0-9]").trimResults().omitEmptyStrings();
 
     /** Sanitizes a tag value into a valid java parameter or method name. */
     static String sanitizeName(String input) {

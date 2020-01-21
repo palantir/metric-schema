@@ -43,7 +43,8 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
     public void apply(Project project) {
         project.getPluginManager().apply(JavaLibraryPlugin.class);
         SourceDirectorySet sourceSet = createSourceSet(project);
-        Provider<Directory> metricSchemaDir = project.getLayout().getBuildDirectory().dir("metricSchema");
+        Provider<Directory> metricSchemaDir =
+                project.getLayout().getBuildDirectory().dir("metricSchema");
 
         Provider<Directory> generatedJavaOutputDir = metricSchemaDir.map(file -> file.dir("generated_src"));
 
@@ -76,7 +77,9 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         project.getTasks().register(CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class, task -> {
             // Need to set to empty if compileSchemaTask didn't execute
             task.getMetricsFile().set(compileSchemaTask.get().getOutputFile().flatMap(file ->
-                    file.getAsFile().exists() ? project.provider(() -> file) : project.getObjects().fileProperty()));
+                    file.getAsFile().exists()
+                            ? project.provider(() -> file)
+                            : project.getObjects().fileProperty()));
             task.getOutputFile().set(manifestFile);
             task.getConfiguration().set(project.getConfigurations().getByName("runtimeClasspath"));
             task.dependsOn(compileSchemaTask);

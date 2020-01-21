@@ -30,7 +30,9 @@ public class GoetheTest {
         JavaFile javaFile = JavaFile.builder(
                         "com.palantir.foo",
                         TypeSpec.classBuilder("Foo")
-                                .addStaticBlock(CodeBlock.builder().addStatement("type oops name = bar").build())
+                                .addStaticBlock(CodeBlock.builder()
+                                        .addStatement("type oops name = bar")
+                                        .build())
                                 .build())
                 .build();
         assertThatThrownBy(() -> Goethe.format(javaFile))

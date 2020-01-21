@@ -58,7 +58,8 @@ public class CreateMetricsManifestTask extends DefaultTask {
     static final ObjectMapper mapper = ObjectMappers.newClientObjectMapper();
 
     private final RegularFileProperty metricsFile = getProject().getObjects().fileProperty();
-    private final Property<Configuration> configuration = getProject().getObjects().property(Configuration.class);
+    private final Property<Configuration> configuration =
+            getProject().getObjects().property(Configuration.class);
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
 
     @Optional
@@ -117,7 +118,11 @@ public class CreateMetricsManifestTask extends DefaultTask {
         getProject().mkdir(output.getParent());
 
         mapper.writeValue(
-                output, ImmutableMap.builder().putAll(getLocalMetrics()).putAll(discoverMetricSchema()).build());
+                output,
+                ImmutableMap.builder()
+                        .putAll(getLocalMetrics())
+                        .putAll(discoverMetricSchema())
+                        .build());
     }
 
     private Map<String, List<MetricSchema>> getLocalMetrics() throws IOException {

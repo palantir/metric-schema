@@ -44,7 +44,8 @@ public final class MarkdownRenderer {
 
     private static void render(Section section, StringBuilder output) {
         if (section.namespaces().isEmpty()
-                || section.namespaces().stream().allMatch(namespace -> namespace.definition().getMetrics().isEmpty())) {
+                || section.namespaces().stream().allMatch(namespace ->
+                        namespace.definition().getMetrics().isEmpty())) {
             // Don't render sections without metrics.
             return;
         }
@@ -94,10 +95,10 @@ public final class MarkdownRenderer {
                                 // Break ties on the namespace name using the documentation, number of metrics, then
                                 // MetricNamespace hashCode.
                                 .sorted(Map.Entry.<String, MetricNamespace>comparingByKey()
-                                        .thenComparing(Map.Entry.comparingByValue(
-                                                Comparator.comparing(namespace -> namespace.getDocs().get())))
-                                        .thenComparing(Map.Entry.comparingByValue(
-                                                Comparator.comparing(namespace -> namespace.getMetrics().size())))
+                                        .thenComparing(Map.Entry.comparingByValue(Comparator.comparing(
+                                                namespace -> namespace.getDocs().get())))
+                                        .thenComparing(Map.Entry.comparingByValue(Comparator.comparing(namespace ->
+                                                namespace.getMetrics().size())))
                                         .thenComparing(Map.Entry.comparingByValue(
                                                 Comparator.comparing(MetricNamespace::hashCode))))
                                 .map(schemaEntry -> Namespace.builder()
