@@ -23,8 +23,10 @@ import org.gradle.api.provider.Provider;
 public final class ProviderUtils {
 
     public static Provider<RegularFile> filterNonExistentFile(Project project, Provider<RegularFile> provider) {
-        return provider.flatMap(
-                file -> file.getAsFile().exists() ? project.provider(() -> file) : project.getObjects().fileProperty());
+        return provider.flatMap(file ->
+                file.getAsFile().exists()
+                        ? project.provider(() -> file)
+                        : project.getObjects().fileProperty());
     }
 
     private ProviderUtils() {}

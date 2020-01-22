@@ -27,8 +27,9 @@ class ValidatorTest {
 
     @Test
     void testValidateNamespace_empty() {
-        assertThatThrownBy(() -> Validator.validate(
-                        MetricSchema.builder().namespaces("", MetricNamespace.builder().docs(DOCS).build()).build()))
+        assertThatThrownBy(() -> Validator.validate(MetricSchema.builder()
+                        .namespaces("", MetricNamespace.builder().docs(DOCS).build())
+                        .build()))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("Namespace must not be empty");
     }
@@ -44,8 +45,9 @@ class ValidatorTest {
 
     @Test
     void testValidateNamespace_whitespace() {
-        assertThatThrownBy(() -> Validator.validate(
-                        MetricSchema.builder().namespaces("a b", MetricNamespace.builder().docs(DOCS).build()).build()))
+        assertThatThrownBy(() -> Validator.validate(MetricSchema.builder()
+                        .namespaces("a b", MetricNamespace.builder().docs(DOCS).build())
+                        .build()))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("Namespace must match pattern");
     }
@@ -121,7 +123,11 @@ class ValidatorTest {
     @Test
     void testBlankTopLevelDocs() {
         assertThatThrownBy(() -> Validator.validate(MetricSchema.builder()
-                        .namespaces("test", MetricNamespace.builder().docs(Documentation.of("\t \n")).build())
+                        .namespaces(
+                                "test",
+                                MetricNamespace.builder()
+                                        .docs(Documentation.of("\t \n"))
+                                        .build())
                         .build()))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("Documentation must not be blank");
@@ -148,20 +154,27 @@ class ValidatorTest {
 
     @Test
     void testValidNamespace_singleGroup() {
-        Validator.validate(
-                MetricSchema.builder().namespaces("test", MetricNamespace.builder().docs(DOCS).build()).build());
+        Validator.validate(MetricSchema.builder()
+                .namespaces("test", MetricNamespace.builder().docs(DOCS).build())
+                .build());
     }
 
     @Test
     void testValidNamespace_multipleGroups() {
-        Validator.validate(
-                MetricSchema.builder().namespaces("test0.test1", MetricNamespace.builder().docs(DOCS).build()).build());
+        Validator.validate(MetricSchema.builder()
+                .namespaces("test0.test1", MetricNamespace.builder().docs(DOCS).build())
+                .build());
     }
 
     @Test
     void testLowerCamelShortName() {
         assertThatThrownBy(() -> Validator.validate(MetricSchema.builder()
-                        .namespaces("test0.test1", MetricNamespace.builder().docs(DOCS).shortName("abcdEfg").build())
+                        .namespaces(
+                                "test0.test1",
+                                MetricNamespace.builder()
+                                        .docs(DOCS)
+                                        .shortName("abcdEfg")
+                                        .build())
                         .build()))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("ShortName must match pattern");

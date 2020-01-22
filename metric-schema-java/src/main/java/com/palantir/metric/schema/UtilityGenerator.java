@@ -38,7 +38,8 @@ final class UtilityGenerator {
 
     static JavaFile generateUtilityClass(
             String namespace, MetricNamespace metrics, String packageName, ImplementationVisibility visibility) {
-        ClassName className = ClassName.get(packageName, className(metrics.getShortName().orElse(namespace)));
+        ClassName className =
+                ClassName.get(packageName, className(metrics.getShortName().orElse(namespace)));
         TypeSpec.Builder builder = TypeSpec.classBuilder(className.simpleName())
                 .addModifiers(visibility.apply(Modifier.FINAL))
                 .addJavadoc(Javadoc.render(metrics.getDocs()))
@@ -115,7 +116,8 @@ final class UtilityGenerator {
                 .addModifiers(visibility.apply())
                 .returns(MetricTypes.type(definition.getType()))
                 .addParameters(definition.getTags().stream()
-                        .map(tag -> ParameterSpec.builder(String.class, Custodian.sanitizeName(tag)).build())
+                        .map(tag -> ParameterSpec.builder(String.class, Custodian.sanitizeName(tag))
+                                .build())
                         .collect(ImmutableList.toImmutableList()))
                 .addJavadoc(Javadoc.render(definition.getDocs()));
         CodeBlock metricNameBlock = metricName(namespace, metricName, definition.getTags());

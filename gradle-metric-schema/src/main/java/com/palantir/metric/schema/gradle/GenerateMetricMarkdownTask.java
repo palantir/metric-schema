@@ -72,7 +72,8 @@ public class GenerateMetricMarkdownTask extends DefaultTask {
             return;
         }
 
-        String localCoordinate = "" + getProject().getGroup() + ':' + getProject().getName();
+        String localCoordinate =
+                "" + getProject().getGroup() + ':' + getProject().getName();
         String upToDateContents = MarkdownRenderer.render(localCoordinate, schemas);
 
         if (getProject().getGradle().getStartParameter().isWriteDependencyLocks()) {
