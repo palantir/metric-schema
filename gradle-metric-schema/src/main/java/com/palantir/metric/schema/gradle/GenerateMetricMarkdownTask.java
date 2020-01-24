@@ -28,8 +28,10 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.CacheableTask;
+import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
@@ -42,6 +44,11 @@ import org.gradle.util.GFileUtils;
 public class GenerateMetricMarkdownTask extends DefaultTask {
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
     private final RegularFileProperty manifestFile = getProject().getObjects().fileProperty();
+    private final Property<String> localCoordinates = getProject()
+            .getObjects()
+            .property(String.class)
+            .value(getProject().provider(() ->
+                    "" + getProject().getGroup() + ':' + getProject().getName()));
 
     @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
@@ -54,6 +61,11 @@ public class GenerateMetricMarkdownTask extends DefaultTask {
     @PathSensitive(PathSensitivity.RELATIVE)
     public final Provider<RegularFile> getMarkdownFile() {
         return ProviderUtils.filterNonExistentFile(getProject(), outputFile);
+    }
+
+    @Input
+    public final Property<String> getLocalCoordinates() {
+        return localCoordinates;
     }
 
     @OutputFile
@@ -72,9 +84,7 @@ public class GenerateMetricMarkdownTask extends DefaultTask {
             return;
         }
 
-        String localCoordinate =
-                "" + getProject().getGroup() + ':' + getProject().getName();
-        String upToDateContents = MarkdownRenderer.render(localCoordinate, schemas);
+        String upToDateContents = MarkdownRenderer.render(localCoordinates.get(), schemas);
 
         if (getProject().getGradle().getStartParameter().isWriteDependencyLocks()) {
             GFileUtils.writeFile(upToDateContents, markdown);
