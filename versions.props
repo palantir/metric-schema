@@ -15,7 +15,7 @@ com.squareup:javapoet = 1.12.1
 com.google.googlejavaformat:google-java-format = 1.7
 com.atlassian.commonmark:* = 0.12.1
 org.apache.commons:commons-lang3 = 3.9
-com.netflix.nebula:nebula-test = 7.7.0
+com.netflix.nebula:nebula-test = 7.8.1
 com.palantir.safe-logging:preconditions = 1.11.0
 
 # conflict resolution
