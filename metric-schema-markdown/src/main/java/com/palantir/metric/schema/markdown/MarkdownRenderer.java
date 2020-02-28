@@ -44,8 +44,9 @@ public final class MarkdownRenderer {
 
     private static void render(Section section, StringBuilder output) {
         if (section.namespaces().isEmpty()
-                || section.namespaces().stream().allMatch(namespace ->
-                        namespace.definition().getMetrics().isEmpty())) {
+                || section.namespaces().stream()
+                        .allMatch(
+                                namespace -> namespace.definition().getMetrics().isEmpty())) {
             // Don't render sections without metrics.
             return;
         }
