@@ -74,10 +74,12 @@ final class Validator {
     }
 
     private static void validateShortName(MetricNamespace namespace) {
-        namespace.getShortName().ifPresent(shortName -> Preconditions.checkArgument(
-                SHORT_NAME_PREDICATE.matcher(shortName).matches(),
-                "ShortName must match pattern",
-                SafeArg.of("pattern", SHORT_NAME_PATTERN)));
+        namespace
+                .getShortName()
+                .ifPresent(shortName -> Preconditions.checkArgument(
+                        SHORT_NAME_PREDICATE.matcher(shortName).matches(),
+                        "ShortName must match pattern",
+                        SafeArg.of("pattern", SHORT_NAME_PATTERN)));
     }
 
     private static void validateDocumentation(Documentation documentation) {
