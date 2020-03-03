@@ -47,8 +47,9 @@ public class GenerateMetricMarkdownTask extends DefaultTask {
     private final Property<String> localCoordinates = getProject()
             .getObjects()
             .property(String.class)
-            .value(getProject().provider(() ->
-                    "" + getProject().getGroup() + ':' + getProject().getName()));
+            .value(getProject()
+                    .provider(() ->
+                            "" + getProject().getGroup() + ':' + getProject().getName()));
 
     @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)

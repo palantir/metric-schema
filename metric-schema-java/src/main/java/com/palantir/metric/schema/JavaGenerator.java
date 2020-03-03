@@ -34,8 +34,8 @@ public final class JavaGenerator {
     public static List<Path> generate(JavaGeneratorArgs args) {
         return args.inputs().stream()
                 .map(SchemaParser.get()::parseFile)
-                .flatMap(schema ->
-                        schema.getNamespaces().entrySet().stream().map(entry -> UtilityGenerator.generateUtilityClass(
+                .flatMap(schema -> schema.getNamespaces().entrySet().stream()
+                        .map(entry -> UtilityGenerator.generateUtilityClass(
                                 entry.getKey(), entry.getValue(), getPackage(args, schema), getVisibility(schema))))
                 .map(javaFile -> Goethe.formatAndEmit(javaFile, args.output()))
                 .collect(ImmutableList.toImmutableList());
