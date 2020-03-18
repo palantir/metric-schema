@@ -65,8 +65,9 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         TaskProvider<CompileMetricSchemaTask> compileSchemaTask =
                 createCompileSchemaTask(project, metricSchemaDir, sourceSet);
         createManifestTask(project, metricSchemaDir, compileSchemaTask);
-        project.getPluginManager().withPlugin("com.palantir.sls-java-service-distribution", plugin ->
-                project.getPluginManager().apply(MetricSchemaMarkdownPlugin.class));
+        project.getPluginManager()
+                .withPlugin("com.palantir.sls-java-service-distribution", plugin -> project.getPluginManager()
+                        .apply(MetricSchemaMarkdownPlugin.class));
     }
 
     private static void createManifestTask(
@@ -76,10 +77,13 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         Provider<RegularFile> manifestFile = metricSchemaDir.map(dir -> dir.file("manifest.json"));
         project.getTasks().register(CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class, task -> {
             // Need to set to empty if compileSchemaTask didn't execute
-            task.getMetricsFile().set(compileSchemaTask.get().getOutputFile().flatMap(file ->
-                    file.getAsFile().exists()
-                            ? project.provider(() -> file)
-                            : project.getObjects().fileProperty()));
+            task.getMetricsFile()
+                    .set(compileSchemaTask
+                            .get()
+                            .getOutputFile()
+                            .flatMap(file -> file.getAsFile().exists()
+                                    ? project.provider(() -> file)
+                                    : project.getObjects().fileProperty()));
             task.getOutputFile().set(manifestFile);
             task.getConfiguration().set(project.getConfigurations().getByName("runtimeClasspath"));
             task.dependsOn(compileSchemaTask);
