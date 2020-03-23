@@ -1,4 +1,4 @@
-org.junit.jupiter:* = 5.6.0
+org.junit.jupiter:* = 5.6.1
 org.junit.vintage:* = 5.4.2
 com.google.guava:guava = 23.6.1-jre
 junit:junit = 4.13
