@@ -20,10 +20,13 @@ import com.google.common.annotations.VisibleForTesting;
 import com.palantir.metric.schema.Cell;
 import com.palantir.metric.schema.CellContent;
 import com.palantir.metric.schema.Dashboard;
+import com.palantir.metric.schema.GroupedTimeseries;
 import com.palantir.metric.schema.Row;
 import com.palantir.metric.schema.Timeseries;
 import com.palantir.metric.schema.TimeseriesCell;
+import com.palantir.metric.schema.ValueCell;
 import com.palantir.metric.schema.api.QueryBuilder;
+import com.palantir.metric.schema.datadog.api.Aggregator;
 import com.palantir.metric.schema.datadog.api.DataDogDashboard;
 import com.palantir.metric.schema.datadog.api.DisplayType;
 import com.palantir.metric.schema.datadog.api.LayoutType;
@@ -32,6 +35,7 @@ import com.palantir.metric.schema.datadog.api.TemplateVariable;
 import com.palantir.metric.schema.datadog.api.Widget;
 import com.palantir.metric.schema.datadog.api.widgets.BaseWidget;
 import com.palantir.metric.schema.datadog.api.widgets.GroupWidget;
+import com.palantir.metric.schema.datadog.api.widgets.QueryValueWidget;
 import com.palantir.metric.schema.datadog.api.widgets.TimeseriesWidget;
 import java.util.stream.Collectors;
 
@@ -76,8 +80,19 @@ public final class DataDogRenderer {
                 return TimeseriesWidget.builder()
                         .title(cell.getTitle())
                         .addAllRequests(timeseriesCell.getSeries().stream()
-                                .map(timeseries -> timeseriesRequest(dashboard, timeseries))
+                                .map(timeseries -> groupedTimeseriesRequest(dashboard, timeseries))
                                 .collect(Collectors.toList()))
+                        .build();
+            }
+
+            @Override
+            public BaseWidget visitValue(ValueCell value) {
+                return QueryValueWidget.builder()
+                        .title(cell.getTitle())
+                        .addRequests(Request.builder()
+                                .from(timeseriesRequest(dashboard, value.getSeries()))
+                                .aggregator(Aggregator.fromString(value.getSelection().toString().toLowerCase()))
+                                .build())
                         .build();
             }
 
@@ -88,14 +103,21 @@ public final class DataDogRenderer {
         });
     }
 
-    static Request timeseriesRequest(Dashboard dashboard, Timeseries timeseries) {
+    static Request groupedTimeseriesRequest(Dashboard dashboard, GroupedTimeseries groupedTimeseries) {
         return Request.builder()
                 .query(QueryBuilder.create(
                         queryBuilder,
-                        timeseries,
+                        groupedTimeseries,
                         dashboard.getSelectedTags(),
                         dashboard.getTemplatedTags()))
                 .displayType(DisplayType.LINE)
                 .build();
+    }
+
+    static Request timeseriesRequest(Dashboard dashboard, Timeseries timeseries) {
+        return groupedTimeseriesRequest(dashboard, GroupedTimeseries.builder()
+                .metric(timeseries.getMetric())
+                .aggregation(timeseries.getAggregation())
+                .build());
     }
 }

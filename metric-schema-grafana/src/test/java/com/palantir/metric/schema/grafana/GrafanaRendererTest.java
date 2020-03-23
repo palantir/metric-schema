@@ -19,14 +19,12 @@ package com.palantir.metric.schema.grafana;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.contentOf;
 
-import com.google.common.collect.ImmutableSet;
 import com.palantir.metric.schema.Aggregation;
-import com.palantir.metric.schema.AggregationFunction;
 import com.palantir.metric.schema.Cell;
 import com.palantir.metric.schema.CellContent;
 import com.palantir.metric.schema.Dashboard;
+import com.palantir.metric.schema.GroupedTimeseries;
 import com.palantir.metric.schema.Row;
-import com.palantir.metric.schema.Timeseries;
 import com.palantir.metric.schema.TimeseriesCell;
 import com.palantir.metric.schema.grafana.api.GrafanaDashboard;
 import java.io.File;
@@ -44,12 +42,11 @@ class GrafanaRendererTest {
                     .cells(Cell.builder()
                             .title("Client Response P95s")
                             .content(CellContent.timeseries(TimeseriesCell.builder()
-                                    .series(Timeseries.builder()
+                                    .series(GroupedTimeseries.builder()
                                             .metric("client.response.p95")
-                                            .aggregation(Aggregation.of(
-                                                    AggregationFunction.MAX,
-                                                    ImmutableSet.of("host")))
-                                           .build())
+                                            .aggregation(Aggregation.MAX)
+                                            .groupBy("host")
+                                            .build())
                                     .build()))
                             .build())
                     .build())

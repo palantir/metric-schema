@@ -40,25 +40,6 @@ public interface GraphPanel extends Panel {
 
     List<Target> targets();
 
-    @Value.Immutable
-    @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    @JsonDeserialize(as = ImmutableTarget.class)
-    @JsonSerialize(as = ImmutableTarget.class)
-    interface Target {
-
-        String expr();
-
-        @Value.Default
-        default String refId() {
-            return "A";
-        }
-
-        static Target of(String expr) {
-            return ImmutableTarget.builder().expr(expr).build();
-        }
-
-    }
-
     static Builder builder() {
         return new Builder();
     }

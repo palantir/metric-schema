@@ -14,34 +14,33 @@
  * limitations under the License.
  */
 
-package com.palantir.metric.schema.datadog.api;
+package com.palantir.metric.schema.grafana.api.panels;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import java.util.Optional;
 import org.immutables.value.Value;
 
 @Value.Immutable
-@JsonDeserialize(as = ImmutableRequest.class)
-@JsonSerialize(as = ImmutableRequest.class)
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
-public interface Request {
+@JsonDeserialize(as = ImmutableTarget.class)
+@JsonSerialize(as = ImmutableTarget.class)
+public interface Target {
 
-    @JsonProperty("q")
-    String query();
+    String expr();
 
-    @JsonProperty("display_type")
-    Optional<DisplayType> displayType();
+    @Value.Default
+    default String refId() {
+        return "A";
+    }
 
-    Optional<Aggregator> aggregator();
-
-    Optional<Style> style();
+    static Target of(String expr) {
+        return builder().expr(expr).build();
+    }
 
     static Builder builder() {
         return new Builder();
     }
 
-    class Builder extends ImmutableRequest.Builder {}
+    class Builder extends ImmutableTarget.Builder {}
 }

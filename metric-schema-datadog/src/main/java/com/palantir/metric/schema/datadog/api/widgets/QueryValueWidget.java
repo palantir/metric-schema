@@ -14,34 +14,49 @@
  * limitations under the License.
  */
 
-package com.palantir.metric.schema.datadog.api;
+package com.palantir.metric.schema.datadog.api.widgets;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.palantir.metric.schema.datadog.api.Request;
+import java.util.List;
 import java.util.Optional;
 import org.immutables.value.Value;
 
+/**
+ * https://docs.datadoghq.com/graphing/widgets/timeseries/.
+ *
+ * <p>Not yet supported: yaxis, events, markers
+ */
 @Value.Immutable
-@JsonDeserialize(as = ImmutableRequest.class)
-@JsonSerialize(as = ImmutableRequest.class)
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
-public interface Request {
+@JsonDeserialize(as = ImmutableQueryValueWidget.class)
+@JsonSerialize(as = ImmutableQueryValueWidget.class)
+public interface QueryValueWidget extends BaseWidget {
 
-    @JsonProperty("q")
-    String query();
+    String TYPE = "query_value";
 
-    @JsonProperty("display_type")
-    Optional<DisplayType> displayType();
+    @Override
+    @Value.Default
+    default String type() {
+        return TYPE;
+    }
 
-    Optional<Aggregator> aggregator();
+    Optional<String> title();
 
-    Optional<Style> style();
+    List<Request> requests();
+
+    @Value.Check
+    default void check() {
+        if (requests().size() != 1) {
+            throw new IllegalArgumentException();
+        }
+    }
 
     static Builder builder() {
         return new Builder();
     }
 
-    class Builder extends ImmutableRequest.Builder {}
+    class Builder extends ImmutableQueryValueWidget.Builder {}
 }

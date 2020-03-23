@@ -20,9 +20,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.palantir.metric.schema.Cell;
 import com.palantir.metric.schema.CellContent;
 import com.palantir.metric.schema.Dashboard;
+import com.palantir.metric.schema.GroupedTimeseries;
 import com.palantir.metric.schema.Row;
-import com.palantir.metric.schema.Timeseries;
 import com.palantir.metric.schema.TimeseriesCell;
+import com.palantir.metric.schema.ValueCell;
 import com.palantir.metric.schema.api.QueryBuilder;
 import com.palantir.metric.schema.grafana.api.GrafanaDashboard;
 import com.palantir.metric.schema.grafana.api.TemplateVariable;
@@ -31,6 +32,8 @@ import com.palantir.metric.schema.grafana.api.panels.GraphPanel;
 import com.palantir.metric.schema.grafana.api.panels.GridPosition;
 import com.palantir.metric.schema.grafana.api.panels.Panel;
 import com.palantir.metric.schema.grafana.api.panels.RowPanel;
+import com.palantir.metric.schema.grafana.api.panels.SingleStatPanel;
+import com.palantir.metric.schema.grafana.api.panels.Target;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -95,14 +98,26 @@ public final class GrafanaRenderer {
             }
 
             @Override
+            public Panel visitValue(ValueCell value) {
+                return SingleStatPanel.builder()
+                        .title(cell.getTitle())
+                        .gridPos(gridPosition)
+                        .target(timeseriesRequest(dashboard, GroupedTimeseries.builder()
+                                .metric(value.getSeries().getMetric())
+                                .aggregation(value.getSeries().getAggregation())
+                                .build()))
+                        .build();
+            }
+
+            @Override
             public Panel visitUnknown(String _unknownType) {
                 throw new UnsupportedOperationException();
             }
         });
     }
 
-    static GraphPanel.Target timeseriesRequest(Dashboard dashboard, Timeseries timeseries) {
-        return GraphPanel.Target.of(QueryBuilder.create(
+    static Target timeseriesRequest(Dashboard dashboard, GroupedTimeseries timeseries) {
+        return Target.of(QueryBuilder.create(
                 queryBuilder,
                 timeseries,
                 dashboard.getSelectedTags(),

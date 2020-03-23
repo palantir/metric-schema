@@ -22,7 +22,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY)
 @JsonSubTypes({
     @JsonSubTypes.Type(value = GroupWidget.class, name = GroupWidget.TYPE),
-    @JsonSubTypes.Type(value = TimeseriesWidget.class, name = TimeseriesWidget.TYPE)
+    @JsonSubTypes.Type(value = TimeseriesWidget.class, name = TimeseriesWidget.TYPE),
+    @JsonSubTypes.Type(value = QueryValueWidget.class, name = QueryValueWidget.TYPE)
 })
 public interface BaseWidget {
 

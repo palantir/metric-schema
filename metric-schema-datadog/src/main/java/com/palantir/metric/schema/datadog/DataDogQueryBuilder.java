@@ -72,14 +72,14 @@ public final class DataDogQueryBuilder implements QueryBuilder {
         }
 
         @Override
-        public QueryBuilder.AggregatedMetric aggregate(Aggregation aggregation) {
+        public QueryBuilder.AggregatedMetric aggregate(Aggregation aggregation, Set<String> groupBy) {
             StringBuilder sb = new StringBuilder();
-            sb.append(aggregation.getFunction().toString().toLowerCase());
+            sb.append(aggregation.toString().toLowerCase());
             sb.append(":");
             sb.append(query);
-            if (!aggregation.getGroupBy().isEmpty()) {
+            if (!groupBy.isEmpty()) {
                 sb.append(" by {");
-                sb.append(Joiner.on(',').join(aggregation.getGroupBy()));
+                sb.append(Joiner.on(',').join(groupBy));
                 sb.append("}");
             }
             return sb::toString;

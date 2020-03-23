@@ -58,27 +58,38 @@ types:
       CellContent:
         union:
           timeseries: TimeseriesCell
+          value: ValueCell
 
       TimeseriesCell:
         fields:
-          series: list<Timeseries>
+          series: list<GroupedTimeseries>
+      ValueCell:
+        fields:
+          series: Timeseries
+          selection: Selection
 
       Timeseries:
         fields:
           metric: string
           aggregation: Aggregation
-      Aggregation:
+      GroupedTimeseries:
         fields:
-          function: AggregationFunction
-          groupBy:
-            docs: The set of tags to group by.
-            type: set<string>
-      AggregationFunction:
+          metric: string
+          aggregation: Aggregation
+          groupBy: set<string>
+      Aggregation:
         values:
           - AVG
           - SUM
           - MIN
           - MAX
+      Selection:
+        values:
+          - AVG
+          - SUM
+          - MIN
+          - MAX
+          - LAST
 
       Documentation:
         docs: Documentation describing an associated component. Markdown syntax may be used.

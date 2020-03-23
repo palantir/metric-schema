@@ -19,15 +19,17 @@ package com.palantir.metric.schema.grafana.api.panels;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.collect.ImmutableList;
+import java.util.List;
 import org.immutables.value.Value;
 
 @Value.Immutable
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
-@JsonDeserialize(as = ImmutableTextPanel.class)
-@JsonSerialize(as = ImmutableTextPanel.class)
-public interface TextPanel extends Panel {
+@JsonDeserialize(as = ImmutableSingleStatPanel.class)
+@JsonSerialize(as = ImmutableSingleStatPanel.class)
+public interface SingleStatPanel extends Panel {
 
-    String TYPE = "text";
+    String TYPE = "singlestat";
 
     @Override
     @Value.Default
@@ -37,16 +39,16 @@ public interface TextPanel extends Panel {
 
     String title();
 
-    @Value.Default
-    default String mode() {
-        return "markdown";
-    }
+    Target target();
 
-    String content();
+    @Value.Default
+    default List<Target> targets() {
+        return ImmutableList.of(target());
+    }
 
     static Builder builder() {
         return new Builder();
     }
 
-    class Builder extends ImmutableTextPanel.Builder {}
+    class Builder extends ImmutableSingleStatPanel.Builder {}
 }

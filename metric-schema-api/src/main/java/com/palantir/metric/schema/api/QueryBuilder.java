@@ -18,7 +18,7 @@ package com.palantir.metric.schema.api;
 
 import com.google.common.collect.ImmutableSet;
 import com.palantir.metric.schema.Aggregation;
-import com.palantir.metric.schema.Timeseries;
+import com.palantir.metric.schema.GroupedTimeseries;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,7 +34,7 @@ public interface QueryBuilder {
 
     static String create(
             QueryBuilder queryBuilder,
-            Timeseries timeseries,
+            GroupedTimeseries timeseries,
             Map<String, String> selectedTags,
             List<String> templateVariables) {
         return queryBuilder.of(timeseries.getMetric())
@@ -46,7 +46,7 @@ public interface QueryBuilder {
                                 .map(queryBuilder::templateSelector)
                                 .collect(Collectors.toSet()))
                         .build())
-                .aggregate(timeseries.getAggregation())
+                .aggregate(timeseries.getAggregation(), timeseries.getGroupBy())
                 .build();
     }
 
@@ -56,7 +56,7 @@ public interface QueryBuilder {
     }
 
     interface SelectedMetric {
-        AggregatedMetric aggregate(Aggregation aggregation);
+        AggregatedMetric aggregate(Aggregation aggregation, Set<String> tags);
     }
 
     interface AggregatedMetric {

@@ -23,8 +23,8 @@ import org.immutables.value.Value;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY)
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = TextPanel.class, name = TextPanel.TYPE),
-    @JsonSubTypes.Type(value = GraphPanel.class, name = GraphPanel.TYPE)
+    @JsonSubTypes.Type(value = GraphPanel.class, name = GraphPanel.TYPE),
+    @JsonSubTypes.Type(value = SingleStatPanel.class, name = SingleStatPanel.TYPE)
 })
 public interface Panel {
 

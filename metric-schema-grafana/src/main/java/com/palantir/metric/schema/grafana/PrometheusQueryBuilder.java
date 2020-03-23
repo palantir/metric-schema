@@ -71,10 +71,10 @@ public final class PrometheusQueryBuilder implements QueryBuilder {
         }
 
         @Override
-        public AggregatedMetric aggregate(Aggregation aggregation) {
-            return () -> aggregation.getFunction().toString().toLowerCase()
+        public AggregatedMetric aggregate(Aggregation aggregation, Set<String> groupBy) {
+            return () -> aggregation.toString().toLowerCase()
                     + " by "
-                    + "(" + Joiner.on(',').join(aggregation.getGroupBy()) + ")"
+                    + "(" + Joiner.on(',').join(groupBy) + ")"
                     + " ("
                     + query
                     + ")";
