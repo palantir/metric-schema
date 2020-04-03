@@ -218,6 +218,11 @@ final class UtilityGenerator {
                                 .returns(ClassName.bestGuess(Custodian.anyToUpperCamel(metricName) + "Builder"))
                                 .addParameter(String.class, Custodian.sanitizeName(tag))
                                 .addStatement(
+                                        "$1T.checkState(this.$2L == null, $3S)",
+                                        Preconditions.class,
+                                        Custodian.sanitizeName(tag),
+                                        tag + " is already set")
+                                .addStatement(
                                         "this.$1L = $2T.checkNotNull($1L, $3S)",
                                         Custodian.sanitizeName(tag),
                                         Preconditions.class,

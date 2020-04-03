@@ -90,18 +90,21 @@ public final class ReservedConflictMetrics {
 
         @Override
         public IntBuilder int_(String int_) {
+            Preconditions.checkState(this.int_ == null, "int is already set");
             this.int_ = Preconditions.checkNotNull(int_, "int is required");
             return this;
         }
 
         @Override
         public IntBuilder registry_(String registry_) {
+            Preconditions.checkState(this.registry_ == null, "registry is already set");
             this.registry_ = Preconditions.checkNotNull(registry_, "registry is required");
             return this;
         }
 
         @Override
         public IntBuilder long_(String long_) {
+            Preconditions.checkState(this.long_ == null, "long is already set");
             this.long_ = Preconditions.checkNotNull(long_, "long is required");
             return this;
         }
@@ -130,6 +133,7 @@ public final class ReservedConflictMetrics {
 
         @Override
         public DoubleBuilder int_(String int_) {
+            Preconditions.checkState(this.int_ == null, "int is already set");
             this.int_ = Preconditions.checkNotNull(int_, "int is required");
             return this;
         }

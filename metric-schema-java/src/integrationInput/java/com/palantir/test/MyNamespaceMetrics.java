@@ -69,12 +69,14 @@ public final class MyNamespaceMetrics {
 
         @Override
         public ResponseSizeBuilder serviceName(String serviceName) {
+            Preconditions.checkState(this.serviceName == null, "service-name is already set");
             this.serviceName = Preconditions.checkNotNull(serviceName, "service-name is required");
             return this;
         }
 
         @Override
         public ResponseSizeBuilder endpoint(String endpoint) {
+            Preconditions.checkState(this.endpoint == null, "endpoint is already set");
             this.endpoint = Preconditions.checkNotNull(endpoint, "endpoint is required");
             return this;
         }
