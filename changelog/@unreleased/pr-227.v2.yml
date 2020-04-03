@@ -1,0 +1,19 @@
+type: improvement
+improvement:
+  description: |-
+    Make builders "strict"
+
+    ## Before this PR
+    You can hold onto an earlier builder state and re-finish building the metric differently.
+
+    If a consumer doesn't realize that there's only one object implementing all stages and assumes that they can reuse a half built builder, certain usages will corrupt themselves.
+
+    Generally, folks (e.g. @carterkozak :) ) are nervous that people could cause issues by holding onto a builder.
+
+    ## After this PR
+    That's no longer possible. You can only mutate each step of a builder once.
+
+    ## Possible downsides?
+    If someone is already doing the above, it will now throw. Odds are that if they're doing that, it's already buggy, but it's theoretically possible to have done it safely.
+  links:
+  - https://github.com/palantir/metric-schema/pull/227
