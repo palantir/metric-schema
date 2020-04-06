@@ -64,12 +64,14 @@ final class VisibilityMetrics {
 
         @Override
         public ComplexBuilder foo(String foo) {
+            Preconditions.checkState(this.foo == null, "foo is already set");
             this.foo = Preconditions.checkNotNull(foo, "foo is required");
             return this;
         }
 
         @Override
         public ComplexBuilder bar(String bar) {
+            Preconditions.checkState(this.bar == null, "bar is already set");
             this.bar = Preconditions.checkNotNull(bar, "bar is required");
             return this;
         }
