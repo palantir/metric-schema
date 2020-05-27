@@ -66,7 +66,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                 createCompileSchemaTask(project, metricSchemaDir, sourceSet);
         createManifestTask(project, metricSchemaDir, compileSchemaTask);
         project.getPluginManager()
-                .withPlugin("com.palantir.sls-java-service-distribution", plugin -> project.getPluginManager()
+                .withPlugin("com.palantir.sls-java-service-distribution", _plugin -> project.getPluginManager()
                         .apply(MetricSchemaMarkdownPlugin.class));
     }
 
@@ -127,7 +127,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
     }
 
     private static void configureEclipse(Project project, TaskProvider<? extends Task> generateMetrics) {
-        project.getPluginManager().withPlugin("eclipse", plugin -> {
+        project.getPluginManager().withPlugin("eclipse", _plugin -> {
             Task task = project.getTasks().findByName("eclipseClasspath");
             if (task != null) {
                 task.dependsOn(generateMetrics);
@@ -137,7 +137,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
 
     private static void configureIdea(
             Project project, TaskProvider<? extends Task> generateMetrics, Provider<Directory> outputDir) {
-        project.getPluginManager().withPlugin("idea", plugin -> {
+        project.getPluginManager().withPlugin("idea", _plugin -> {
             project.getTasks().getByName("ideaModule", task -> task.dependsOn(generateMetrics));
             project.getExtensions().configure(IdeaModel.class, idea -> {
                 IdeaModule module = idea.getModule();
