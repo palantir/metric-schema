@@ -81,7 +81,8 @@ final class Validator {
                 .ifPresent(shortName -> Preconditions.checkArgument(
                         SHORT_NAME_PREDICATE.matcher(shortName).matches(),
                         "ShortName must match pattern",
-                        SafeArg.of("pattern", SHORT_NAME_PATTERN)));
+                        SafeArg.of("pattern", SHORT_NAME_PATTERN),
+                        SafeArg.of("invalidShortName", shortName)));
     }
 
     private static void validateDocumentation(Documentation documentation) {
