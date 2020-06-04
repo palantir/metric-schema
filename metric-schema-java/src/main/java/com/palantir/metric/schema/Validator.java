@@ -47,12 +47,14 @@ final class Validator {
         validateShortName(namespaceValue);
         validateDocumentation(namespaceValue.getDocs());
         namespaceValue.getMetrics().forEach((name, definition) -> {
+            Preconditions.checkNotNull(definition, "MetricDefinition is required", SafeArg.of("namespace", namespace));
             Preconditions.checkArgument(
                     !name.isEmpty(), "MetricDefinition names must not be empty", SafeArg.of("namespace", namespace));
             Preconditions.checkArgument(
                     NAME_PREDICATE.matcher(name).matches(),
                     "MetricDefinition names must match pattern",
-                    SafeArg.of("pattern", NAME_PATTERN));
+                    SafeArg.of("pattern", NAME_PATTERN),
+                    SafeArg.of("invalidTagName", name));
             Preconditions.checkArgument(
                     MetricType.Value.UNKNOWN != definition.getType().get(),
                     "Unknown metric type",
@@ -79,7 +81,8 @@ final class Validator {
                 .ifPresent(shortName -> Preconditions.checkArgument(
                         SHORT_NAME_PREDICATE.matcher(shortName).matches(),
                         "ShortName must match pattern",
-                        SafeArg.of("pattern", SHORT_NAME_PATTERN)));
+                        SafeArg.of("pattern", SHORT_NAME_PATTERN),
+                        SafeArg.of("invalidShortName", shortName)));
     }
 
     private static void validateDocumentation(Documentation documentation) {

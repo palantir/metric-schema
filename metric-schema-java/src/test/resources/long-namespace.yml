@@ -1,6 +1,6 @@
 namespaces:
   com.palantir.very.long.namespace:
-    shortName: myNamespace
+    shortName: MyNamespace
     docs: General web server metrics.
     metrics:
       response.size:

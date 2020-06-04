@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Suppliers;
-import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
@@ -29,7 +28,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 final class SchemaParser {
 
@@ -44,23 +42,11 @@ final class SchemaParser {
 
     MetricSchema parseFile(Path file) {
         try (InputStream stream = Files.newInputStream(file)) {
-            return yamlMapper.readValue(stream, MetricSchema.class);
+            MetricSchema schema = yamlMapper.readValue(stream, MetricSchema.class);
+            Validator.validate(schema);
+            return schema;
         } catch (IOException e) {
             throw new SafeRuntimeException("Failed to parse file", e, SafeArg.of("file", file));
-        }
-    }
-
-    ImmutableList<MetricSchema> parseDirectory(Path directory) {
-        if (!Files.isDirectory(directory)) {
-            return ImmutableList.of();
-        }
-        try (Stream<Path> steam = Files.list(directory)) {
-            return steam.filter(Files::isRegularFile)
-                    .filter(file -> file.toString().endsWith(".yml"))
-                    .map(this::parseFile)
-                    .collect(ImmutableList.toImmutableList());
-        } catch (IOException e) {
-            throw new SafeRuntimeException("Failed to parse files in directory", e, SafeArg.of("directory", directory));
         }
     }
 }

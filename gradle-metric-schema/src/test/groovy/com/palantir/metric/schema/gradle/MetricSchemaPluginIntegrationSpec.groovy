@@ -17,6 +17,7 @@
 package com.palantir.metric.schema.gradle
 
 import com.fasterxml.jackson.core.type.TypeReference
+import com.google.common.base.Throwables
 import com.palantir.metric.schema.MetricSchema
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -39,6 +40,19 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
               worker.utilization:
                 type: gauge
                 docs: A gauge of the ratio of active workers to the number of workers.
+        """.stripIndent()
+
+    public static final String METRICS_INVALID = """
+        namespaces:
+          server:
+            docs: General web server metrics.
+            metrics:
+              response.size:
+                type: histogram
+                tags:
+                  - service_name
+                  - endpoint
+                docs: A histogram of the number of bytes written into the response.
         """.stripIndent()
 
     void setup() {
@@ -72,6 +86,32 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         def result = runTasksSuccessfully('classes')
         result.wasExecuted(':generateMetrics')
         fileExists("build/metricSchema/generated_src/com/palantir/test/ServerMetrics.java")
+    }
+
+    def 'invalid schema results in task failure'() {
+        when:
+        file('src/main/metrics/metrics.yml') << METRICS_INVALID
+
+        then:
+        def result = runTasksWithFailure('classes')
+        result.wasExecuted(':generateMetrics')
+        Throwables.getRootCause(result.getFailure()).getMessage().contains("tags must match pattern")
+    }
+
+    def 'missing definition results in task failure'() {
+        when:
+        file('src/main/metrics/metrics.yml') << """
+            namespaces:
+              aa.namespace:
+                docs: test metrics
+                metrics:
+                  my.custom.metric:
+            """
+
+        then:
+        def result = runTasksWithFailure('classes')
+        result.wasExecuted(':generateMetrics')
+        Throwables.getRootCause(result.getFailure()).getMessage().contains("MetricDefinition is required")
     }
 
     def 'embeds metrics into jar'() {
