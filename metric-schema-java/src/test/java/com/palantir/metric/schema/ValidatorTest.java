@@ -17,6 +17,7 @@
 package com.palantir.metric.schema;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import org.junit.jupiter.api.Test;
@@ -178,5 +179,23 @@ class ValidatorTest {
                         .build()))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("ShortName must match pattern");
+    }
+
+    @Test
+    void testMetricNameWithNumbers() {
+        assertThatCode(() -> Validator.validate(MetricSchema.builder()
+                        .namespaces(
+                                "os",
+                                MetricNamespace.builder()
+                                        .docs(DOCS)
+                                        .metrics(
+                                                "load.1",
+                                                MetricDefinition.builder()
+                                                        .docs(DOCS)
+                                                        .type(MetricType.GAUGE)
+                                                        .build())
+                                        .build())
+                        .build()))
+                .doesNotThrowAnyException();
     }
 }

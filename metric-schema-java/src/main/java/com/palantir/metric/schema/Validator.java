@@ -24,7 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 final class Validator {
 
     private static final String SHORT_NAME_PATTERN = "[A-Z][a-zA-Z0-9]+";
-    private static final String NAME_SEGMENT_PATTERN = "[a-z][a-zA-Z0-9\\-]+";
+    private static final String NAME_SEGMENT_PATTERN = "[a-z0-9][a-zA-Z0-9\\-]*";
     private static final String NAME_PATTERN = "(" + NAME_SEGMENT_PATTERN + "\\.)*" + NAME_SEGMENT_PATTERN;
     private static final Pattern NAME_PREDICATE = Pattern.compile(NAME_PATTERN);
     private static final Pattern SHORT_NAME_PREDICATE = Pattern.compile(SHORT_NAME_PATTERN);
