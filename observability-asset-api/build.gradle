@@ -1,0 +1,12 @@
+apply plugin: 'com.palantir.conjure'
+apply plugin: 'com.palantir.conjure-publish'
+
+conjure {
+    java {
+        strictObjects = true
+    }
+}
+
+configure(subprojects) {
+    apply from: "$rootDir/gradle/publish-jar.gradle"
+}

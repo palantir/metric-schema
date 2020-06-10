@@ -1,0 +1,122 @@
+types:
+  definitions:
+    default-package: com.palantir.metric.monitor
+    objects:
+      MonitorDefinition:
+        fields:
+          definition: AbstractDefinition
+          evaluationWindow: TimeWindow
+          severity: Severity
+          # this has to be tied to the Standard or NoData query themselves
+          # and inferred for Conditional queries
+          # threshold: MonitorThreshold
+
+      AbstractDefinition:
+        union:
+          query: AbstractQuery
+          noData: NoDataDefinition
+
+      AbstractQuery:
+        union:
+          query: StandardQuery
+          conditional: ConditionalQuery
+
+      # TODO
+      StandardQuery:
+        union:
+          template: TemplateQuery
+          direct: DirectQuery
+
+      TemplateQuery:
+        union:
+          rate: RateQuery
+          equality: EqualityQuery
+          simple: SimpleQuery
+
+      # TODO
+      RateQuery:
+        fields:
+          stuff: string
+
+      EqualityQuery:
+        fields:
+          metric: string #MetricName
+          value: integer
+
+      # TODO
+      SimpleQuery:
+        fields:
+          stuff: string
+
+      # used to break out of DSL and directly write queries
+      # you'd be expected to build both downstream equivalents
+      DirectQuery:
+        fields:
+          datadog: DatadogQuery
+          prometheus: PrometheusQuery
+
+      # dummy for now
+      DatadogQuery:
+        fields:
+          stuff: string
+
+      # dummy for now
+      PrometheusQuery:
+        fields:
+          stuff: string
+
+      ConditionalQuery:
+        fields:
+          left: AbstractQuery
+          right: AbstractQuery
+          operator: ConditionalOperator
+
+      # TODO
+      # do we need to get complex with operator support?
+      # e.g. in near term OR can be represented with two separate monitors
+      ConditionalOperator:
+        values:
+        - AND
+
+      # is an implied OR across metrics
+      # could just be a single metric and end user has multiple definitions
+      NoDataDefinition:
+        fields:
+          metrics: list<string> #list<MetricName>
+
+      #TODO
+      TimeWindow:
+        fields:
+          stuff: string
+
+      MetricAggregator:
+        values:
+        - AVG
+        - MIN
+        - MAX
+        - SUM
+
+      Threshold:
+        fields:
+          comparator: Comparator
+          # hard to know what type is needed here at runtime: long, int, double, etc.
+          threshold: string
+
+      Comparator:
+        values:
+        - GREATER_THAN
+        - GREATER_THAN_OR_EQUAL
+        - LESS_THAN
+        - LESS_THAN_OR_EQUAL
+
+      # this should line up with outcome of Notification Types RFC
+      Severity:
+        fields:
+          priority: Priority
+          tracked: boolean
+
+      Priority:
+        values:
+        - P0
+        - P1
+        - P2
