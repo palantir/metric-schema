@@ -18,33 +18,27 @@ package com.palantir.observability.monitor;
 
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import com.palantir.metric.monitor.EqualityQuery;
 import com.palantir.metric.monitor.RateQuery;
 import com.palantir.metric.monitor.SimpleQuery;
 import com.palantir.metric.monitor.TemplateQuery;
 
-enum DatadogTemplateQueryVisitor implements TemplateQuery.Visitor<DatadogMonitorTemplate> {
+enum DatadogTemplateQueryVisitor implements TemplateQuery.Visitor<FlatQuery> {
     INSTANCE;
 
     @Override
-    public DatadogMonitorTemplate visitRate(RateQuery _value) {
+    public FlatQuery visitRate(RateQuery _value) {
         // TODO(tpetracca): impl
         throw new SafeIllegalArgumentException("RateQuery is not yet supported");
     }
 
     @Override
-    public DatadogMonitorTemplate visitEquality(EqualityQuery value) {
-        return Utilities.createFlatMonitor(Utilities.flattenEqualityQuery(value));
-    }
-
-    @Override
-    public DatadogMonitorTemplate visitSimple(SimpleQuery _value) {
+    public FlatQuery visitSimple(SimpleQuery _value) {
         // TODO(tpetracca): impl
         throw new SafeIllegalArgumentException("SimpleQuery is not yet supported");
     }
 
     @Override
-    public DatadogMonitorTemplate visitUnknown(String unknownType) {
+    public FlatQuery visitUnknown(String unknownType) {
         throw new SafeIllegalArgumentException("Unknown TemplateQuery value", SafeArg.of("type", unknownType));
     }
 }

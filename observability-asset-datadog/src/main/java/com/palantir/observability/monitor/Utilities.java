@@ -16,7 +16,7 @@
 
 package com.palantir.observability.monitor;
 
-import com.palantir.metric.monitor.EqualityQuery;
+import com.palantir.observability.monitor.IndividualDatadogMonitorTemplate.DatadogComparator;
 
 final class Utilities {
     private Utilities() {
@@ -48,12 +48,12 @@ final class Utilities {
      * @param monitor The monitor to flatten
      * @return The same monitor represented as a flat query
      */
-    static String flattenQuery(DatadogMonitorTemplate monitor) {
-        String difference = monitor.comparator().isLessThan()
-                ? difference(monitor.threshold().toString(), monitor.query())
-                : difference(monitor.query(), monitor.threshold().toString());
+    static String flattenNonEqualToQuery(String query, Double threshold, DatadogComparator comparator) {
+        String difference = comparator.isLessThan()
+                ? difference(threshold.toString(), query)
+                : difference(query, threshold.toString());
         String heaviside = heaviside(difference);
-        String defaultOnEqualityValue = monitor.comparator().isEqual() ? "1" : "0";
+        String defaultOnEqualityValue = comparator.isEqual() ? "1" : "0";
         return String.format("default(%s, %s)", heaviside, defaultOnEqualityValue);
     }
 
@@ -75,16 +75,16 @@ final class Utilities {
      * @param query The equality query to flatten
      * @return The same query represented as a flat query
      */
-    static String flattenEqualityQuery(EqualityQuery query) {
-        String difference = difference(query.getMetric(), Integer.toString(query.getValue()));
+    static String flattenEqualToQuery(String query, Double threshold) {
+        String difference = difference(query, threshold.toString());
         String nonEqualMapToZero = String.format("((%s)/(%s))-1", difference, difference);
         return String.format("default(%s, %s)", nonEqualMapToZero, "1");
     }
 
-    static DatadogMonitorTemplate createFlatMonitor(String flatQuery) {
-        return ImmutableDatadogMonitorTemplate.builder()
+    static IndividualDatadogMonitorTemplate createFlatMonitor(String flatQuery) {
+        return ImmutableIndividualDatadogMonitorTemplate.builder()
                 .query(flatQuery)
-                .comparator(DatadogMonitorTemplate.MonitorComparator.GREATER)
+                .comparator(IndividualDatadogMonitorTemplate.DatadogComparator.GREATER)
                 .threshold(FlatQueryValue.ZERO.getValue())
                 .build();
     }

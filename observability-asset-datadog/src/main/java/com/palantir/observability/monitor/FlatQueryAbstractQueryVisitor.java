@@ -22,24 +22,24 @@ import com.palantir.metric.monitor.AbstractQuery;
 import com.palantir.metric.monitor.ConditionalQuery;
 import com.palantir.metric.monitor.StandardQuery;
 
-enum DatadogAbstractQueryVisitor implements AbstractQuery.Visitor<DatadogMonitorTemplate> {
+enum FlatQueryAbstractQueryVisitor implements AbstractQuery.Visitor<FlatQuery> {
     INSTANCE;
 
     @Override
-    public DatadogMonitorTemplate visitQuery(StandardQuery value) {
+    public FlatQuery visitQuery(StandardQuery value) {
         return value.accept(DatadogStandardQueryVisitor.INSTANCE);
     }
 
     @Override
-    public DatadogMonitorTemplate visitConditional(ConditionalQuery value) {
-        DatadogMonitorTemplate left = value.getLeft().accept(DatadogAbstractQueryVisitor.INSTANCE);
-        DatadogMonitorTemplate right = value.getRight().accept(DatadogAbstractQueryVisitor.INSTANCE);
-        DatadogConditionalOperatorVisitor operatorVisitor = new DatadogConditionalOperatorVisitor(left, right);
+    public FlatQuery visitConditional(ConditionalQuery value) {
+        FlatQuery left = value.getLeft().accept(FlatQueryAbstractQueryVisitor.INSTANCE);
+        FlatQuery right = value.getRight().accept(FlatQueryAbstractQueryVisitor.INSTANCE);
+        DatadogSingleMonitorConditionalOperatorVisitor operatorVisitor = new DatadogSingleMonitorConditionalOperatorVisitor(left, right);
         return value.getOperator().accept(operatorVisitor);
     }
 
     @Override
-    public DatadogMonitorTemplate visitUnknown(String unknownType) {
+    public FlatQuery visitUnknown(String unknownType) {
         throw new SafeIllegalArgumentException("Unknown AbstractQuery type", SafeArg.of("type", unknownType));
     }
 }

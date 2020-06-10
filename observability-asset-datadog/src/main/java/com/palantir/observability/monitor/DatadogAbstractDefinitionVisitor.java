@@ -22,22 +22,22 @@ import com.palantir.metric.monitor.AbstractDefinition;
 import com.palantir.metric.monitor.AbstractQuery;
 import com.palantir.metric.monitor.NoDataDefinition;
 
-enum DatadogAbstractDefinitionVisitor implements AbstractDefinition.Visitor<DatadogMonitorTemplate> {
+enum DatadogAbstractDefinitionVisitor implements AbstractDefinition.Visitor<IndividualDatadogMonitorTemplate> {
     INSTANCE;
 
     @Override
-    public DatadogMonitorTemplate visitQuery(AbstractQuery value) {
-        return value.accept(DatadogAbstractQueryVisitor.INSTANCE);
+    public IndividualDatadogMonitorTemplate visitQuery(AbstractQuery value) {
+        return value.accept(FlatQueryAbstractQueryVisitor.INSTANCE).monitor();
     }
 
     @Override
-    public DatadogMonitorTemplate visitNoData(NoDataDefinition _value) {
+    public IndividualDatadogMonitorTemplate visitNoData(NoDataDefinition _value) {
         // TODO(tpetracca): impl
         throw new SafeIllegalArgumentException("not sure how no data monitors work in vmp yet");
     }
 
     @Override
-    public DatadogMonitorTemplate visitUnknown(String unknownType) {
+    public IndividualDatadogMonitorTemplate visitUnknown(String unknownType) {
         throw new SafeIllegalArgumentException("Unknown AbstractDefinition type", SafeArg.of("type", unknownType));
     }
 }

@@ -30,18 +30,12 @@ types:
       TemplateQuery:
         union:
           rate: RateQuery
-          equality: EqualityQuery
           simple: SimpleQuery
 
       # TODO
       RateQuery:
         fields:
           stuff: string
-
-      EqualityQuery:
-        fields:
-          metric: string #MetricName
-          value: integer
 
       # TODO
       SimpleQuery:
@@ -100,14 +94,15 @@ types:
         fields:
           comparator: Comparator
           # hard to know what type is needed here at runtime: long, int, double, etc.
-          threshold: string
+          threshold: double
 
       Comparator:
         values:
+        - EQUAL_TO
         - GREATER_THAN
-        - GREATER_THAN_OR_EQUAL
+        - GREATER_THAN_OR_EQUAL_TO
         - LESS_THAN
-        - LESS_THAN_OR_EQUAL
+        - LESS_THAN_OR_EQUAL_TO
 
       # this should line up with outcome of Notification Types RFC
       Severity:

@@ -22,21 +22,21 @@ import com.palantir.metric.monitor.DirectQuery;
 import com.palantir.metric.monitor.StandardQuery;
 import com.palantir.metric.monitor.TemplateQuery;
 
-enum DatadogStandardQueryVisitor implements StandardQuery.Visitor<DatadogMonitorTemplate> {
+enum DatadogStandardQueryVisitor implements StandardQuery.Visitor<FlatQuery> {
     INSTANCE;
 
     @Override
-    public DatadogMonitorTemplate visitTemplate(TemplateQuery value) {
+    public FlatQuery visitTemplate(TemplateQuery value) {
         return value.accept(DatadogTemplateQueryVisitor.INSTANCE);
     }
 
     @Override
-    public DatadogMonitorTemplate visitDirect(DirectQuery _value) {
+    public FlatQuery visitDirect(DirectQuery _value) {
         throw new SafeIllegalArgumentException("DirectQuery are not supported yet");
     }
 
     @Override
-    public DatadogMonitorTemplate visitUnknown(String unknownType) {
+    public FlatQuery visitUnknown(String unknownType) {
         throw new SafeIllegalArgumentException("Unknown StandardQuery value", SafeArg.of("type", unknownType));
     }
 }
