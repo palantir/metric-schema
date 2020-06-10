@@ -47,6 +47,6 @@ final class DatadogConditionalOperatorVisitor implements ConditionalOperator.Vis
 
     @Override
     public DatadogMonitorTemplate visitUnknown(String unknownValue) {
-        throw new SafeIllegalArgumentException("Unknown ConditionalOperator value", SafeArg.of("type", unknownValue));
+        throw new SafeIllegalArgumentException("Unknown ConditionalOperator value", SafeArg.of("value", unknownValue));
     }
 }
