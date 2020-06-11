@@ -2,7 +2,7 @@
  * (c) Copyright 2020 Palantir Technologies Inc. All rights reserved.
  */
 
-package com.palantir.observability.monitor;
+package com.palantir.observability.datadog.monitor;
 
 import org.immutables.value.Value;
 

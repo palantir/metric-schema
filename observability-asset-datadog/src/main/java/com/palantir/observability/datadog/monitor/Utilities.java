@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.palantir.observability.monitor;
+package com.palantir.observability.datadog.monitor;
 
-import com.palantir.observability.monitor.IndividualDatadogMonitorTemplate.DatadogComparator;
+import com.palantir.observability.datadog.monitor.IndividualDatadogMonitorTemplate.DatadogComparator;
 
 final class Utilities {
     private Utilities() {
@@ -79,14 +79,6 @@ final class Utilities {
         String difference = difference(query, threshold.toString());
         String nonEqualMapToZero = String.format("((%s)/(%s))-1", difference, difference);
         return String.format("default(%s, %s)", nonEqualMapToZero, "1");
-    }
-
-    static IndividualDatadogMonitorTemplate createFlatMonitor(String flatQuery) {
-        return ImmutableIndividualDatadogMonitorTemplate.builder()
-                .query(flatQuery)
-                .comparator(IndividualDatadogMonitorTemplate.DatadogComparator.GREATER)
-                .threshold(FlatQueryValue.ZERO.getValue())
-                .build();
     }
 
     private static String difference(String left, String right) {

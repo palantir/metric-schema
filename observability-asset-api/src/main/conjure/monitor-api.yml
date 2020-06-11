@@ -29,13 +29,17 @@ types:
 
       TemplateQuery:
         union:
-          rate: RateQuery
+          differenceOverTime: DifferenceOverTime
           simple: SimpleQuery
 
-      # TODO
-      RateQuery:
+      DifferenceOverTime:
         fields:
-          stuff: string
+          buckets: optional<integer>
+          query: string
+          comparator: Comparator
+          delta: safelong
+          # seconds
+          timeWindow: safelong
 
       # TODO
       SimpleQuery:

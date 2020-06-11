@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.observability.monitor;
+package com.palantir.observability.datadog.monitor;
 
 enum FlatQueryValue {
     ZERO(Double.valueOf("0")),

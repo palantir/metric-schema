@@ -2,13 +2,13 @@
  * (c) Copyright 2020 Palantir Technologies Inc. All rights reserved.
  */
 
-package com.palantir.observability.monitor;
+package com.palantir.observability.datadog.monitor;
 
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.metric.monitor.Comparator;
 import com.palantir.metric.monitor.Threshold;
-import com.palantir.observability.monitor.IndividualDatadogMonitorTemplate.DatadogComparator;
+import com.palantir.observability.datadog.monitor.IndividualDatadogMonitorTemplate.DatadogComparator;
 import org.immutables.value.Value;
 
 /**

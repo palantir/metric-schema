@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
-package com.palantir.observability.monitor;
+package com.palantir.observability.datadog.monitor;
 
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import com.palantir.metric.monitor.RateQuery;
-import com.palantir.metric.monitor.SimpleQuery;
-import com.palantir.metric.monitor.TemplateQuery;
+import com.palantir.metric.monitor.AbstractDefinition;
+import com.palantir.metric.monitor.AbstractQuery;
+import com.palantir.metric.monitor.NoDataDefinition;
 
-enum DatadogTemplateQueryVisitor implements TemplateQuery.Visitor<FlatQuery> {
+enum DatadogAbstractDefinitionVisitor implements AbstractDefinition.Visitor<IndividualDatadogMonitorTemplate> {
     INSTANCE;
 
     @Override
-    public FlatQuery visitRate(RateQuery _value) {
-        // TODO(tpetracca): impl
-        throw new SafeIllegalArgumentException("RateQuery is not yet supported");
+    public IndividualDatadogMonitorTemplate visitQuery(AbstractQuery value) {
+        return value.accept(FlatQueryAbstractQueryVisitor.INSTANCE).monitor();
     }
 
     @Override
-    public FlatQuery visitSimple(SimpleQuery _value) {
+    public IndividualDatadogMonitorTemplate visitNoData(NoDataDefinition _value) {
         // TODO(tpetracca): impl
-        throw new SafeIllegalArgumentException("SimpleQuery is not yet supported");
+        throw new SafeIllegalArgumentException("not sure how no data monitors work in vmp yet");
     }
 
     @Override
-    public FlatQuery visitUnknown(String unknownType) {
-        throw new SafeIllegalArgumentException("Unknown TemplateQuery value", SafeArg.of("type", unknownType));
+    public IndividualDatadogMonitorTemplate visitUnknown(String unknownType) {
+        throw new SafeIllegalArgumentException("Unknown AbstractDefinition type", SafeArg.of("type", unknownType));
     }
 }

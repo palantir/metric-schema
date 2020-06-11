@@ -14,32 +14,29 @@
  * limitations under the License.
  */
 
-package com.palantir.observability.monitor;
+package com.palantir.observability.datadog.monitor;
 
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import com.palantir.metric.monitor.AbstractQuery;
-import com.palantir.metric.monitor.ConditionalQuery;
+import com.palantir.metric.monitor.DirectQuery;
 import com.palantir.metric.monitor.StandardQuery;
+import com.palantir.metric.monitor.TemplateQuery;
 
-enum FlatQueryAbstractQueryVisitor implements AbstractQuery.Visitor<FlatQuery> {
+enum DatadogStandardQueryVisitor implements StandardQuery.Visitor<FlatQuery> {
     INSTANCE;
 
     @Override
-    public FlatQuery visitQuery(StandardQuery value) {
-        return value.accept(DatadogStandardQueryVisitor.INSTANCE);
+    public FlatQuery visitTemplate(TemplateQuery value) {
+        return value.accept(DatadogTemplateQueryVisitor.INSTANCE);
     }
 
     @Override
-    public FlatQuery visitConditional(ConditionalQuery value) {
-        FlatQuery left = value.getLeft().accept(FlatQueryAbstractQueryVisitor.INSTANCE);
-        FlatQuery right = value.getRight().accept(FlatQueryAbstractQueryVisitor.INSTANCE);
-        DatadogSingleMonitorConditionalOperatorVisitor operatorVisitor = new DatadogSingleMonitorConditionalOperatorVisitor(left, right);
-        return value.getOperator().accept(operatorVisitor);
+    public FlatQuery visitDirect(DirectQuery _value) {
+        throw new SafeIllegalArgumentException("DirectQuery are not supported yet");
     }
 
     @Override
     public FlatQuery visitUnknown(String unknownType) {
-        throw new SafeIllegalArgumentException("Unknown AbstractQuery type", SafeArg.of("type", unknownType));
+        throw new SafeIllegalArgumentException("Unknown StandardQuery value", SafeArg.of("type", unknownType));
     }
 }
