@@ -26,7 +26,7 @@ after metrics are generated, IntelliJ IDEA users can run the `idea` task.
 ```
 
 Metric documentation is updated using the `generateMetricsMarkdown` gradle task or by running 
-`./gradlew --write-locks`. The gradle plugin will ensure that the metrics markdown is always up to date.
+`./gradlew generateMetricsMarkdown --write-locks`. The gradle plugin will ensure that the metrics markdown is always up to date.
 
 All metric definitions will be embedded within the output JAR as a resource located `metric-schema/metrics.json`.
 

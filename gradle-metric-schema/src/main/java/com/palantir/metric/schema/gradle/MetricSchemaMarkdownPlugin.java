@@ -16,9 +16,6 @@
 
 package com.palantir.metric.schema.gradle;
 
-import com.google.common.collect.ImmutableList;
-import java.util.List;
-import org.gradle.StartParameter;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskProvider;
@@ -41,16 +38,5 @@ public final class MetricSchemaMarkdownPlugin implements Plugin<Project> {
                     task.dependsOn(createMetricsManifest);
                 });
         project.getTasks().named("check", check -> check.dependsOn(generateMetricsMarkdown));
-
-        // Wire up dependencies so running `./gradlew --write-locks` will update the markdown
-        StartParameter startParam = project.getGradle().getStartParameter();
-        if (startParam.isWriteDependencyLocks()
-                && !startParam.getTaskNames().contains(MetricSchemaPlugin.GENERATE_METRICS_MARKDOWN)) {
-            List<String> taskNames = ImmutableList.<String>builder()
-                    .addAll(startParam.getTaskNames())
-                    .add(MetricSchemaPlugin.GENERATE_METRICS_MARKDOWN)
-                    .build();
-            startParam.setTaskNames(taskNames);
-        }
     }
 }

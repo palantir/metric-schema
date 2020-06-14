@@ -60,7 +60,7 @@ class GenerateMetricMarkdownIntegrationSpec extends IntegrationSpec {
         file('src/main/metrics/metrics.yml') << METRICS
 
         then:
-        def result = runTasksSuccessfully('--write-locks')
+        def result = runTasksSuccessfully(':generateMetricsMarkdown', '--write-locks')
         result.wasExecuted(':generateMetricsMarkdown')
         fileExists("metrics.md")
     }
@@ -80,7 +80,7 @@ class GenerateMetricMarkdownIntegrationSpec extends IntegrationSpec {
         file('src/main/metrics/metrics.yml') << METRICS
 
         then:
-        def result1 = runTasksSuccessfully('--write-locks')
+        def result1 = runTasksSuccessfully(':generateMetricsMarkdown', '--write-locks')
         result1.wasExecuted(':generateMetricsMarkdown')
         fileExists("metrics.md")
 
