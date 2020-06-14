@@ -1,0 +1,7 @@
+type: improvement
+improvement:
+  description: Running `./gradlew --write-locks` no longer runs `generateMetricsMarkdown`
+    implicitly. To update your generated markdown, you need to run `./gradlew generateMetricsMarkdown
+    --write-locks` explicitly.
+  links:
+  - https://github.com/palantir/metric-schema/pull/283
