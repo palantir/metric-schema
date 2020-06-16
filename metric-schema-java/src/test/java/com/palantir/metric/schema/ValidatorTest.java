@@ -168,6 +168,13 @@ class ValidatorTest {
     }
 
     @Test
+    void testLastSegmentStartsWithUppercase() {
+        Validator.validate(MetricSchema.builder()
+                .namespaces("test0.Test", MetricNamespace.builder().docs(DOCS).build())
+                .build());
+    }
+
+    @Test
     void testLowerCamelShortName() {
         assertThatThrownBy(() -> Validator.validate(MetricSchema.builder()
                         .namespaces(
