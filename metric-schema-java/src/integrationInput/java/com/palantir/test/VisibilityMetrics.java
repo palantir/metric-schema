@@ -5,9 +5,16 @@ import com.codahale.metrics.Gauge;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.util.Optional;
 
 /** Tests we respect javaVisibility */
 final class VisibilityMetrics {
+    private static final String LIBRARY_NAME = "witchcraft";
+
+    private static final String LIBRARY_VERSION =
+            Optional.ofNullable(VisibilityMetrics.class.getPackage().getImplementationVersion())
+                    .orElse("unknown");
+
     private final TaggedMetricRegistry registry;
 
     private VisibilityMetrics(TaggedMetricRegistry registry) {
@@ -20,7 +27,12 @@ final class VisibilityMetrics {
 
     /** just a metric */
     Counter test() {
-        return registry.counter(MetricName.builder().safeName("visibility.test").build());
+        return registry.counter(
+                MetricName.builder()
+                        .safeName("visibility.test")
+                        .putSafeTags("libraryName", LIBRARY_NAME)
+                        .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                        .build());
     }
 
     /** Tagged gauge metric. */
@@ -58,6 +70,8 @@ final class VisibilityMetrics {
                             .safeName("visibility.complex")
                             .putSafeTags("foo", foo)
                             .putSafeTags("bar", bar)
+                            .putSafeTags("libraryName", LIBRARY_NAME)
+                            .putSafeTags("libraryVersion", LIBRARY_VERSION)
                             .build(),
                     gauge);
         }

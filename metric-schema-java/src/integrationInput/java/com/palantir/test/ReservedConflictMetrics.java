@@ -6,9 +6,17 @@ import com.codahale.metrics.Meter;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.util.Optional;
 
 /** Tests that reserved words are escaped. */
 public final class ReservedConflictMetrics {
+    private static final String LIBRARY_NAME = "witchcraft";
+
+    private static final String LIBRARY_VERSION =
+            Optional.ofNullable(
+                            ReservedConflictMetrics.class.getPackage().getImplementationVersion())
+                    .orElse("unknown");
+
     private final TaggedMetricRegistry registry;
 
     private ReservedConflictMetrics(TaggedMetricRegistry registry) {
@@ -31,13 +39,20 @@ public final class ReservedConflictMetrics {
                 MetricName.builder()
                         .safeName("reserved.conflict.long")
                         .putSafeTags("int", int_)
+                        .putSafeTags("libraryName", LIBRARY_NAME)
+                        .putSafeTags("libraryVersion", LIBRARY_VERSION)
                         .build());
     }
 
     /** Gauge metric with a single no tags. */
     public void float_(Gauge<?> gauge) {
         registry.registerWithReplacement(
-                MetricName.builder().safeName("reserved.conflict.float").build(), gauge);
+                MetricName.builder()
+                        .safeName("reserved.conflict.float")
+                        .putSafeTags("libraryName", LIBRARY_NAME)
+                        .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                        .build(),
+                gauge);
     }
 
     /** Gauge metric with a single tag. */
@@ -85,6 +100,8 @@ public final class ReservedConflictMetrics {
                             .putSafeTags("int", int_)
                             .putSafeTags("registry", registry_)
                             .putSafeTags("long", long_)
+                            .putSafeTags("libraryName", LIBRARY_NAME)
+                            .putSafeTags("libraryVersion", LIBRARY_VERSION)
                             .build());
         }
 
@@ -127,6 +144,8 @@ public final class ReservedConflictMetrics {
                     MetricName.builder()
                             .safeName("reserved.conflict.double")
                             .putSafeTags("int", int_)
+                            .putSafeTags("libraryName", LIBRARY_NAME)
+                            .putSafeTags("libraryVersion", LIBRARY_VERSION)
                             .build(),
                     gauge);
         }

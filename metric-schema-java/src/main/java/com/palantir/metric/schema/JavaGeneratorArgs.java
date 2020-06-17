@@ -16,8 +16,13 @@
 
 package com.palantir.metric.schema;
 
+import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.SafeArg;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import org.immutables.value.Value;
 
 @Value.Immutable
@@ -27,6 +32,9 @@ import org.immutables.value.Value;
         jdkOnly = true,
         get = {"get*", "is*"})
 public abstract class JavaGeneratorArgs {
+
+    private static final Predicate<String> LIBRARY_NAME =
+            Pattern.compile("[a-z0-9]+(-[a-z0-9]+)*").asPredicate();
 
     /**
      * Input directory for metric schema files with the
@@ -40,8 +48,23 @@ public abstract class JavaGeneratorArgs {
     /** Output directory for generated java code. */
     abstract Path output();
 
+    /** Used to add the libraryName tag to all metrics. */
+    abstract Optional<String> libraryName();
+
     /** The default Java package name for generated classes. */
     abstract String defaultPackageName();
+
+    @Value.Check
+    final void check() {
+        libraryName().ifPresent(value -> {
+            Preconditions.checkArgument(
+                    value.length() < 128,
+                    "libraryName must be less than 128 chars",
+                    SafeArg.of("length", value.length()));
+            Preconditions.checkArgument(
+                    LIBRARY_NAME.test(value), "libraryName must be lower kebab case", SafeArg.of("value", value));
+        });
+    }
 
     public static final class Builder extends ImmutableJavaGeneratorArgs.Builder {}
 

@@ -5,9 +5,16 @@ import com.codahale.metrics.Histogram;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.util.Optional;
 
 /** General web server metrics. */
 public final class MyNamespaceMetrics {
+    private static final String LIBRARY_NAME = "witchcraft";
+
+    private static final String LIBRARY_VERSION =
+            Optional.ofNullable(MyNamespaceMetrics.class.getPackage().getImplementationVersion())
+                    .orElse("unknown");
+
     private final TaggedMetricRegistry registry;
 
     private MyNamespaceMetrics(TaggedMetricRegistry registry) {
@@ -28,6 +35,8 @@ public final class MyNamespaceMetrics {
         registry.registerWithReplacement(
                 MetricName.builder()
                         .safeName("com.palantir.very.long.namespace.worker.utilization")
+                        .putSafeTags("libraryName", LIBRARY_NAME)
+                        .putSafeTags("libraryVersion", LIBRARY_VERSION)
                         .build(),
                 gauge);
     }
@@ -64,6 +73,8 @@ public final class MyNamespaceMetrics {
                             .safeName("com.palantir.very.long.namespace.response.size")
                             .putSafeTags("service-name", serviceName)
                             .putSafeTags("endpoint", endpoint)
+                            .putSafeTags("libraryName", LIBRARY_NAME)
+                            .putSafeTags("libraryVersion", LIBRARY_VERSION)
                             .build());
         }
 

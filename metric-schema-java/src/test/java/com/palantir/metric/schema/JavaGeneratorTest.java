@@ -43,6 +43,7 @@ public class JavaGeneratorTest {
                         .output(tempDir)
                         .inputs(listFiles(Paths.get("src/test/resources")))
                         .defaultPackageName("com.palantir.test")
+                        .libraryName("witchcraft")
                         .build())
                 .stream()
                 .map(tempDir::relativize)
