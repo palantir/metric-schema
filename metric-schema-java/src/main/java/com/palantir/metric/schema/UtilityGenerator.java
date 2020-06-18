@@ -31,13 +31,18 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.lang.model.element.Modifier;
 
 final class UtilityGenerator {
 
     static JavaFile generateUtilityClass(
-            String namespace, MetricNamespace metrics, String packageName, ImplementationVisibility visibility) {
+            String namespace,
+            MetricNamespace metrics,
+            Optional<String> libraryName,
+            String packageName,
+            ImplementationVisibility visibility) {
         ClassName className =
                 ClassName.get(packageName, className(metrics.getShortName().orElse(namespace)));
         TypeSpec.Builder builder = TypeSpec.classBuilder(className.simpleName())
@@ -52,18 +57,36 @@ final class UtilityGenerator {
                                 Preconditions.class)
                         .returns(className)
                         .build())
-                .addField(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME, Modifier.PRIVATE, Modifier.FINAL)
-                .addMethod(MethodSpec.constructorBuilder()
-                        .addModifiers(Modifier.PRIVATE)
-                        .addParameter(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME)
-                        .addStatement("this.$1L = $1L", ReservedNames.REGISTRY_NAME)
-                        .build());
+                .addField(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME, Modifier.PRIVATE, Modifier.FINAL);
+        if (libraryName.isPresent()) {
+            builder.addField(FieldSpec.builder(
+                            String.class, ReservedNames.LIBRARY_NAME, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                    .initializer("$S", libraryName.get())
+                    .build());
+            builder.addField(FieldSpec.builder(
+                            String.class,
+                            ReservedNames.LIBRARY_VERSION,
+                            Modifier.PRIVATE,
+                            Modifier.STATIC,
+                            Modifier.FINAL)
+                    .initializer(
+                            "$T.ofNullable($T.class.getPackage().getImplementationVersion()).orElse(\"unknown\")",
+                            Optional.class,
+                            className)
+                    .build());
+        }
+
+        builder.addMethod(MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PRIVATE)
+                .addParameter(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME)
+                .addStatement("this.$1L = $1L", ReservedNames.REGISTRY_NAME)
+                .build());
 
         // metrics
         for (Map.Entry<String, MetricDefinition> entry : metrics.getMetrics().entrySet()) {
             String metricName = entry.getKey();
             MetricDefinition definition = entry.getValue();
-            generateMetricFactory(namespace, metricName, definition, builder, visibility);
+            generateMetricFactory(namespace, metricName, libraryName, definition, builder, visibility);
         }
 
         builder.addMethod(generateToString(className));
@@ -78,10 +101,15 @@ final class UtilityGenerator {
         return Custodian.anyToUpperCamel(namespace) + "Metrics";
     }
 
-    private static CodeBlock metricName(String namespace, String metricName, Set<String> tagNames) {
+    private static CodeBlock metricName(
+            String namespace, String metricName, Optional<String> libraryName, Set<String> tagNames) {
         String safeName = namespace + '.' + metricName;
         CodeBlock.Builder builder = CodeBlock.builder().add("$T.builder().safeName($S)", MetricName.class, safeName);
         tagNames.forEach(tagName -> builder.add(".putSafeTags($S, $L)", tagName, Custodian.sanitizeName(tagName)));
+        if (libraryName.isPresent()) {
+            builder.add(".putSafeTags(\"libraryName\", $L)", ReservedNames.LIBRARY_NAME);
+            builder.add(".putSafeTags(\"libraryVersion\", $L)", ReservedNames.LIBRARY_VERSION);
+        }
         return builder.add(".build()").build();
     }
 
@@ -100,18 +128,23 @@ final class UtilityGenerator {
     private static void generateMetricFactory(
             String namespace,
             String metricName,
+            Optional<String> libraryName,
             MetricDefinition definition,
             TypeSpec.Builder builder,
             ImplementationVisibility visibility) {
         if (numArgs(definition) <= 1) {
-            builder.addMethod(generateSimpleMetricFactory(namespace, metricName, definition, visibility));
+            builder.addMethod(generateSimpleMetricFactory(namespace, metricName, libraryName, definition, visibility));
         } else {
-            generateMetricFactoryBuilder(namespace, metricName, definition, builder, visibility);
+            generateMetricFactoryBuilder(namespace, metricName, libraryName, definition, builder, visibility);
         }
     }
 
     private static MethodSpec generateSimpleMetricFactory(
-            String namespace, String metricName, MetricDefinition definition, ImplementationVisibility visibility) {
+            String namespace,
+            String metricName,
+            Optional<String> libraryName,
+            MetricDefinition definition,
+            ImplementationVisibility visibility) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(Custodian.sanitizeName(metricName))
                 .addModifiers(visibility.apply())
                 .returns(MetricTypes.type(definition.getType()))
@@ -120,7 +153,7 @@ final class UtilityGenerator {
                                 .build())
                         .collect(ImmutableList.toImmutableList()))
                 .addJavadoc(Javadoc.render(definition.getDocs()));
-        CodeBlock metricNameBlock = metricName(namespace, metricName, definition.getTags());
+        CodeBlock metricNameBlock = metricName(namespace, metricName, libraryName, definition.getTags());
         String metricRegistryMethod = MetricTypes.registryAccessor(definition.getType());
         if (MetricType.GAUGE.equals(definition.getType())) {
             methodBuilder.addParameter(
@@ -144,6 +177,7 @@ final class UtilityGenerator {
     private static void generateMetricFactoryBuilder(
             String namespaceName,
             String metricName,
+            Optional<String> libraryName,
             MetricDefinition definition,
             TypeSpec.Builder outerBuilder,
             ImplementationVisibility visibility) {
@@ -174,7 +208,7 @@ final class UtilityGenerator {
                             .build())
                     .build());
         }
-        CodeBlock metricNameBlock = metricName(namespaceName, metricName, definition.getTags());
+        CodeBlock metricNameBlock = metricName(namespaceName, metricName, libraryName, definition.getTags());
         String metricRegistryMethod = MetricTypes.registryAccessor(definition.getType());
 
         MethodSpec.Builder buildMethodBuilder = MethodSpec.methodBuilder("build")

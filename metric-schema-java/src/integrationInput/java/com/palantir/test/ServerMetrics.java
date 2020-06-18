@@ -5,9 +5,16 @@ import com.codahale.metrics.Histogram;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.util.Optional;
 
 /** General web server metrics. */
 public final class ServerMetrics {
+    private static final String LIBRARY_NAME = "witchcraft";
+
+    private static final String LIBRARY_VERSION =
+            Optional.ofNullable(ServerMetrics.class.getPackage().getImplementationVersion())
+                    .orElse("unknown");
+
     private final TaggedMetricRegistry registry;
 
     private ServerMetrics(TaggedMetricRegistry registry) {
@@ -26,7 +33,12 @@ public final class ServerMetrics {
     /** A gauge of the ratio of active workers to the number of workers. */
     public void workerUtilization(Gauge<?> gauge) {
         registry.registerWithReplacement(
-                MetricName.builder().safeName("server.worker.utilization").build(), gauge);
+                MetricName.builder()
+                        .safeName("server.worker.utilization")
+                        .putSafeTags("libraryName", LIBRARY_NAME)
+                        .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                        .build(),
+                gauge);
     }
 
     @Override
@@ -61,6 +73,8 @@ public final class ServerMetrics {
                             .safeName("server.response.size")
                             .putSafeTags("service-name", serviceName)
                             .putSafeTags("endpoint", endpoint)
+                            .putSafeTags("libraryName", LIBRARY_NAME)
+                            .putSafeTags("libraryVersion", LIBRARY_VERSION)
                             .build());
         }
 
