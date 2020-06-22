@@ -47,6 +47,8 @@ final class VisibilityMetrics {
 
     interface ComplexBuildStage {
         void build(Gauge<?> gauge);
+
+        MetricName buildMetricName();
     }
 
     interface ComplexBuilderFooStage {
@@ -74,6 +76,17 @@ final class VisibilityMetrics {
                             .putSafeTags("libraryVersion", LIBRARY_VERSION)
                             .build(),
                     gauge);
+        }
+
+        @Override
+        public MetricName buildMetricName() {
+            return MetricName.builder()
+                    .safeName("visibility.complex")
+                    .putSafeTags("foo", foo)
+                    .putSafeTags("bar", bar)
+                    .putSafeTags("libraryName", LIBRARY_NAME)
+                    .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .build();
         }
 
         @Override

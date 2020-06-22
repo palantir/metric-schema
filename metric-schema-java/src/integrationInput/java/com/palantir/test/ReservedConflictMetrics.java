@@ -129,6 +129,8 @@ public final class ReservedConflictMetrics {
 
     public interface DoubleBuildStage {
         void build(Gauge<?> gauge);
+
+        MetricName buildMetricName();
     }
 
     public interface DoubleBuilderIntStage {
@@ -148,6 +150,16 @@ public final class ReservedConflictMetrics {
                             .putSafeTags("libraryVersion", LIBRARY_VERSION)
                             .build(),
                     gauge);
+        }
+
+        @Override
+        public MetricName buildMetricName() {
+            return MetricName.builder()
+                    .safeName("reserved.conflict.double")
+                    .putSafeTags("int", int_)
+                    .putSafeTags("libraryName", LIBRARY_NAME)
+                    .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .build();
         }
 
         @Override

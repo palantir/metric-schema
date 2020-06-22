@@ -30,7 +30,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.lang.model.element.Modifier;
@@ -82,12 +82,14 @@ final class UtilityGenerator {
                 .addStatement("this.$1L = $1L", ReservedNames.REGISTRY_NAME)
                 .build());
 
-        // metrics
-        for (Map.Entry<String, MetricDefinition> entry : metrics.getMetrics().entrySet()) {
-            String metricName = entry.getKey();
-            MetricDefinition definition = entry.getValue();
-            generateMetricFactory(namespace, metricName, libraryName, definition, builder, visibility);
-        }
+        metrics.getMetrics().forEach((metricName, definition) -> {
+            if (numArgs(definition) <= 1) {
+                builder.addMethod(
+                        generateSimpleMetricFactory(namespace, metricName, libraryName, definition, visibility));
+            } else {
+                generateMetricFactoryBuilder(namespace, metricName, libraryName, definition, builder, visibility);
+            }
+        });
 
         builder.addMethod(generateToString(className));
 
@@ -125,20 +127,6 @@ final class UtilityGenerator {
                 .build();
     }
 
-    private static void generateMetricFactory(
-            String namespace,
-            String metricName,
-            Optional<String> libraryName,
-            MetricDefinition definition,
-            TypeSpec.Builder builder,
-            ImplementationVisibility visibility) {
-        if (numArgs(definition) <= 1) {
-            builder.addMethod(generateSimpleMetricFactory(namespace, metricName, libraryName, definition, visibility));
-        } else {
-            generateMetricFactoryBuilder(namespace, metricName, libraryName, definition, builder, visibility);
-        }
-    }
-
     private static MethodSpec generateSimpleMetricFactory(
             String namespace,
             String metricName,
@@ -174,6 +162,7 @@ final class UtilityGenerator {
         return methodBuilder.build();
     }
 
+    /** Produce a private staged builder, which implements public interfaces. */
     private static void generateMetricFactoryBuilder(
             String namespaceName,
             String metricName,
@@ -190,9 +179,18 @@ final class UtilityGenerator {
                     ParameterizedTypeName.get(ClassName.get(Gauge.class), WildcardTypeName.subtypeOf(Object.class)),
                     ReservedNames.GAUGE_NAME);
         }
+        MethodSpec abstractBuildMethod = abstractBuildMethodBuilder.build();
+        MethodSpec abstractBuildMetricName = MethodSpec.methodBuilder("buildMetricName")
+                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                .returns(MetricName.class)
+                .build();
+        List<MethodSpec> abstractBuildMethods = isGauge
+                ? ImmutableList.of(abstractBuildMethod, abstractBuildMetricName)
+                : ImmutableList.of(abstractBuildMethod);
+
         outerBuilder.addType(TypeSpec.interfaceBuilder(buildStage(metricName))
                 .addModifiers(visibility.apply())
-                .addMethod(abstractBuildMethodBuilder.build())
+                .addMethods(abstractBuildMethods)
                 .build());
         ImmutableList<String> tagList = ImmutableList.copyOf(definition.getTags());
         for (int i = 0; i < tagList.size(); i++) {
@@ -210,6 +208,13 @@ final class UtilityGenerator {
         }
         CodeBlock metricNameBlock = metricName(namespaceName, metricName, libraryName, definition.getTags());
         String metricRegistryMethod = MetricTypes.registryAccessor(definition.getType());
+
+        MethodSpec buildMetricName = MethodSpec.methodBuilder("buildMetricName")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .returns(MetricName.class)
+                .addStatement("return $L", metricNameBlock)
+                .build();
 
         MethodSpec.Builder buildMethodBuilder = MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC)
@@ -233,6 +238,9 @@ final class UtilityGenerator {
             buildMethodBuilder.addStatement(
                     "return $L.$L($L)", ReservedNames.REGISTRY_NAME, metricRegistryMethod, metricNameBlock);
         }
+        MethodSpec buildMethod = buildMethodBuilder.build();
+        List<MethodSpec> buildMethods =
+                isGauge ? ImmutableList.of(buildMethod, buildMetricName) : ImmutableList.of(buildMethod);
 
         outerBuilder.addType(TypeSpec.classBuilder(Custodian.anyToUpperCamel(metricName) + "Builder")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
@@ -244,7 +252,7 @@ final class UtilityGenerator {
                         .map(tag -> FieldSpec.builder(String.class, Custodian.sanitizeName(tag), Modifier.PRIVATE)
                                 .build())
                         .collect(ImmutableList.toImmutableList()))
-                .addMethod(buildMethodBuilder.build())
+                .addMethods(buildMethods)
                 .addMethods(tagList.stream()
                         .map(tag -> MethodSpec.methodBuilder(Custodian.sanitizeName(tag))
                                 .addModifiers(Modifier.PUBLIC)
