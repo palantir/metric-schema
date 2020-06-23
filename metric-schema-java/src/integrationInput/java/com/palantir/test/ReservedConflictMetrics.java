@@ -46,13 +46,15 @@ public final class ReservedConflictMetrics {
 
     /** Gauge metric with a single no tags. */
     public void float_(Gauge<?> gauge) {
-        registry.registerWithReplacement(
-                MetricName.builder()
-                        .safeName("reserved.conflict.float")
-                        .putSafeTags("libraryName", LIBRARY_NAME)
-                        .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                        .build(),
-                gauge);
+        registry.registerWithReplacement(floatMetricName(), gauge);
+    }
+
+    public MetricName floatMetricName() {
+        return MetricName.builder()
+                .safeName("reserved.conflict.float")
+                .putSafeTags("libraryName", LIBRARY_NAME)
+                .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .build();
     }
 
     /** Gauge metric with a single tag. */
@@ -129,6 +131,8 @@ public final class ReservedConflictMetrics {
 
     public interface DoubleBuildStage {
         void build(Gauge<?> gauge);
+
+        MetricName buildMetricName();
     }
 
     public interface DoubleBuilderIntStage {
@@ -140,14 +144,17 @@ public final class ReservedConflictMetrics {
 
         @Override
         public void build(Gauge<?> gauge) {
-            registry.registerWithReplacement(
-                    MetricName.builder()
-                            .safeName("reserved.conflict.double")
-                            .putSafeTags("int", int_)
-                            .putSafeTags("libraryName", LIBRARY_NAME)
-                            .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                            .build(),
-                    gauge);
+            registry.registerWithReplacement(buildMetricName(), gauge);
+        }
+
+        @Override
+        public MetricName buildMetricName() {
+            return MetricName.builder()
+                    .safeName("reserved.conflict.double")
+                    .putSafeTags("int", int_)
+                    .putSafeTags("libraryName", LIBRARY_NAME)
+                    .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .build();
         }
 
         @Override
