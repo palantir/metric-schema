@@ -240,10 +240,10 @@ final class UtilityGenerator {
                     // TODO(ckozak): Update to use a method which can log a warning and replace existing gauges.
                     // See MetricRegistries.registerWithReplacement.
                     .addStatement(
-                            "$L.$L($L, $L)",
+                            "$L.$L($L(), $L)",
                             ReservedNames.REGISTRY_NAME,
                             metricRegistryMethod,
-                            metricNameBlock,
+                            buildMetricName.name,
                             ReservedNames.GAUGE_NAME);
         } else {
             buildMethodBuilder.addStatement(

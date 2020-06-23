@@ -144,14 +144,7 @@ public final class ReservedConflictMetrics {
 
         @Override
         public void build(Gauge<?> gauge) {
-            registry.registerWithReplacement(
-                    MetricName.builder()
-                            .safeName("reserved.conflict.double")
-                            .putSafeTags("int", int_)
-                            .putSafeTags("libraryName", LIBRARY_NAME)
-                            .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                            .build(),
-                    gauge);
+            registry.registerWithReplacement(buildMetricName(), gauge);
         }
 
         @Override

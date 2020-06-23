@@ -67,15 +67,7 @@ final class VisibilityMetrics {
 
         @Override
         public void build(Gauge<?> gauge) {
-            registry.registerWithReplacement(
-                    MetricName.builder()
-                            .safeName("visibility.complex")
-                            .putSafeTags("foo", foo)
-                            .putSafeTags("bar", bar)
-                            .putSafeTags("libraryName", LIBRARY_NAME)
-                            .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                            .build(),
-                    gauge);
+            registry.registerWithReplacement(buildMetricName(), gauge);
         }
 
         @Override
