@@ -32,13 +32,15 @@ public final class MyNamespaceMetrics {
 
     /** A gauge of the ratio of active workers to the number of workers. */
     public void workerUtilization(Gauge<?> gauge) {
-        registry.registerWithReplacement(
-                MetricName.builder()
-                        .safeName("com.palantir.very.long.namespace.worker.utilization")
-                        .putSafeTags("libraryName", LIBRARY_NAME)
-                        .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                        .build(),
-                gauge);
+        registry.registerWithReplacement(workerUtilizationMetricName(), gauge);
+    }
+
+    public MetricName workerUtilizationMetricName() {
+        return MetricName.builder()
+                .safeName("com.palantir.very.long.namespace.worker.utilization")
+                .putSafeTags("libraryName", LIBRARY_NAME)
+                .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .build();
     }
 
     @Override

@@ -84,7 +84,7 @@ final class UtilityGenerator {
 
         metrics.getMetrics().forEach((metricName, definition) -> {
             if (numArgs(definition) <= 1) {
-                builder.addMethod(
+                builder.addMethods(
                         generateSimpleMetricFactory(namespace, metricName, libraryName, definition, visibility));
             } else {
                 generateMetricFactoryBuilder(namespace, metricName, libraryName, definition, builder, visibility);
@@ -127,12 +127,14 @@ final class UtilityGenerator {
                 .build();
     }
 
-    private static MethodSpec generateSimpleMetricFactory(
+    private static List<MethodSpec> generateSimpleMetricFactory(
             String namespace,
             String metricName,
             Optional<String> libraryName,
             MetricDefinition definition,
             ImplementationVisibility visibility) {
+        boolean isGauge = MetricType.GAUGE.equals(definition.getType());
+
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(Custodian.sanitizeName(metricName))
                 .addModifiers(visibility.apply())
                 .returns(MetricTypes.type(definition.getType()))
@@ -141,25 +143,34 @@ final class UtilityGenerator {
                                 .build())
                         .collect(ImmutableList.toImmutableList()))
                 .addJavadoc(Javadoc.render(definition.getDocs()));
+
         CodeBlock metricNameBlock = metricName(namespace, metricName, libraryName, definition.getTags());
+        MethodSpec metricNameMethod = MethodSpec.methodBuilder(Custodian.sanitizeName(metricName + "MetricName"))
+                .addModifiers(visibility.apply())
+                .returns(MetricName.class)
+                .addCode("return $L;", metricNameBlock)
+                .build();
+
         String metricRegistryMethod = MetricTypes.registryAccessor(definition.getType());
-        if (MetricType.GAUGE.equals(definition.getType())) {
+        if (isGauge) {
             methodBuilder.addParameter(
                     ParameterizedTypeName.get(ClassName.get(Gauge.class), WildcardTypeName.subtypeOf(Object.class)),
                     ReservedNames.GAUGE_NAME);
             // TODO(ckozak): Update to use a method which can log a warning and replace existing gauges.
             // See MetricRegistries.registerWithReplacement.
             methodBuilder.addStatement(
-                    "$L.$L($L, $L)",
+                    "$L.$L($L(), $L)",
                     ReservedNames.REGISTRY_NAME,
                     metricRegistryMethod,
-                    metricNameBlock,
+                    metricNameMethod.name,
                     ReservedNames.GAUGE_NAME);
         } else {
             methodBuilder.addStatement(
                     "return $L.$L($L)", ReservedNames.REGISTRY_NAME, metricRegistryMethod, metricNameBlock);
         }
-        return methodBuilder.build();
+        MethodSpec method = methodBuilder.build();
+
+        return isGauge ? ImmutableList.of(method, metricNameMethod) : ImmutableList.of(method);
     }
 
     /** Produce a private staged builder, which implements public interfaces. */
