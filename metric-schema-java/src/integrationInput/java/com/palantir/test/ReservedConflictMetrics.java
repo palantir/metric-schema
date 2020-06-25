@@ -49,7 +49,7 @@ public final class ReservedConflictMetrics {
         registry.registerWithReplacement(floatMetricName(), gauge);
     }
 
-    public MetricName floatMetricName() {
+    public static MetricName floatMetricName() {
         return MetricName.builder()
                 .safeName("reserved.conflict.float")
                 .putSafeTags("libraryName", LIBRARY_NAME)
