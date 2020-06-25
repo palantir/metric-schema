@@ -147,6 +147,7 @@ final class UtilityGenerator {
         CodeBlock metricNameBlock = metricName(namespace, metricName, libraryName, definition.getTags());
         MethodSpec metricNameMethod = MethodSpec.methodBuilder(Custodian.sanitizeName(metricName + "MetricName"))
                 .addModifiers(visibility.apply())
+                .addModifiers(Modifier.STATIC)
                 .returns(MetricName.class)
                 .addCode("return $L;", metricNameBlock)
                 .build();

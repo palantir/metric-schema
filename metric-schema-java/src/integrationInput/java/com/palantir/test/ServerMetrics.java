@@ -35,7 +35,7 @@ public final class ServerMetrics {
         registry.registerWithReplacement(workerUtilizationMetricName(), gauge);
     }
 
-    public MetricName workerUtilizationMetricName() {
+    public static MetricName workerUtilizationMetricName() {
         return MetricName.builder()
                 .safeName("server.worker.utilization")
                 .putSafeTags("libraryName", LIBRARY_NAME)
