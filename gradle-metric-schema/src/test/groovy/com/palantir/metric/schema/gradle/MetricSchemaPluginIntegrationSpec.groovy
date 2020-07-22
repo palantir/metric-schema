@@ -16,9 +16,8 @@
 
 package com.palantir.metric.schema.gradle
 
-import com.fasterxml.jackson.core.type.TypeReference
+
 import com.google.common.base.Throwables
-import com.palantir.metric.schema.MetricSchema
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import nebula.test.IntegrationSpec
@@ -128,9 +127,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         def result = runTasksSuccessfully(':unJar')
         result.wasExecuted(':compileMetricSchema')
         fileExists("unjar/metric-schema/metrics.json")
-        !CreateMetricsManifestTask.mapper.readValue(
-                file('unjar/metric-schema/metrics.json'),
-                new TypeReference<List<MetricSchema>>() {}).isEmpty()
+        !ObjectMappers.loadMetricSchema(file('unjar/metric-schema/metrics.json')).isEmpty()
     }
 
     def "createManifest discovers metric schema"() {
@@ -152,7 +149,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
             maven {url "file:///${mavenRepo.getAbsolutePath()}"}
         }
         dependencies {
-            compile 'a:a:1.0'
+            implementation 'a:a:1.0'
         }
         """.stripIndent()
 
@@ -162,7 +159,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         then:
         fileExists('build/metricSchema/manifest.json')
 
-        def manifest = CreateMetricsManifestTask.mapper.readValue(file("build/metricSchema/manifest.json"), Map.class)
+        def manifest = ObjectMappers.mapper.readValue(file("build/metricSchema/manifest.json"), Map.class)
         !manifest.isEmpty()
         manifest['a:a:1.0'] != null
     }
@@ -183,11 +180,11 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
         then:
         result.wasExecuted(":foo-lib:compileMetricSchema")
+        !result.wasExecuted(':foo-lib:jar')
         result.wasExecuted(":foo-server:compileMetricSchema")
-        !result.wasExecuted(':bar-lib:jar')
 
         fileExists('foo-server/build/metricSchema/manifest.json')
-        def manifest = CreateMetricsManifestTask.mapper.readValue(file("foo-server/build/metricSchema/manifest.json"), Map.class)
+        def manifest = ObjectMappers.mapper.readValue(file("foo-server/build/metricSchema/manifest.json"), Map.class)
         !manifest.isEmpty()
         manifest['com.palantir.test:foo-lib:$projectVersion'] != null
     }
