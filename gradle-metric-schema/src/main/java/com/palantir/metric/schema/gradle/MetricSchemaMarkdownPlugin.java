@@ -34,7 +34,7 @@ public final class MetricSchemaMarkdownPlugin implements Plugin<Project> {
         TaskProvider<CreateMetricsManifestTask> createMetricsManifest =
                 project.getTasks().named(MetricSchemaPlugin.CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class);
 
-        project.getTasks()
+        TaskProvider<GenerateMetricMarkdownTask> generateMetricsMarkdown = project.getTasks()
                 .register(MetricSchemaPlugin.GENERATE_METRICS_MARKDOWN, GenerateMetricMarkdownTask.class, task -> {
                     task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
                     task.getOutputFile().set(project.file("metrics.md"));
@@ -46,6 +46,8 @@ public final class MetricSchemaMarkdownPlugin implements Plugin<Project> {
                     task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
                     task.setMarkdownFile(project.file("metrics.md"));
                     task.dependsOn(createMetricsManifest);
+                    // Avoid a race when both checkMetricsMarkdown and generateMetricsMarkdown are requested
+                    task.mustRunAfter(generateMetricsMarkdown);
                 });
 
         project.getTasks().named("check", check -> check.dependsOn(checkMetricsMarkdown));
