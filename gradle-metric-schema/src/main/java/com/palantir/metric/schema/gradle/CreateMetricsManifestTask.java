@@ -34,6 +34,8 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
+import org.gradle.api.artifacts.component.ComponentSelector;
+import org.gradle.api.artifacts.component.ModuleComponentSelector;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
@@ -179,12 +181,23 @@ public class CreateMetricsManifestTask extends DefaultTask {
         return String.format("%s:%s:$projectVersion", project.getGroup(), project.getName());
     }
 
-    static Configuration removeProjectDependencies(Project project, Configuration config) {
-        Configuration files = config.copyRecursive();
-        project.getRootProject().getAllprojects().forEach(sibling -> {
-            files.exclude(ImmutableMap.of("group", sibling.getGroup().toString(), "module", sibling.getName()));
+    static Configuration removeProjectDependencies(Project project, Configuration parentConf) {
+        Configuration existingConfig = project.getConfigurations().findByName("metricManifestDependencies");
+        if (existingConfig != null) {
+            return existingConfig;
+        }
+
+        Configuration conf = project.getConfigurations().create("metricManifestDependencies");
+        parentConf.getIncoming().getResolutionResult().getAllDependencies().forEach(dependency -> {
+            ComponentSelector selector = dependency.getRequested();
+            if (selector instanceof ModuleComponentSelector) {
+                ModuleComponentSelector mod = (ModuleComponentSelector) selector;
+                conf.getDependencies()
+                        .add(project.getDependencies()
+                                .create(mod.getGroup() + ":" + mod.getModule() + ":" + mod.getVersion()));
+            }
         });
 
-        return files;
+        return conf;
     }
 }

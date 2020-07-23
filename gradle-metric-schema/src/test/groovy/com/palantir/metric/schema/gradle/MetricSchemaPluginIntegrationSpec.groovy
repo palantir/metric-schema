@@ -189,4 +189,41 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         manifest['com.palantir.test:foo-lib:$projectVersion'] != null
     }
 
+    def 'createManifest discovers transitive external metric schema'() {
+        when:
+        def dependencyGraph = new DependencyGraph('a:a:1.0')
+        GradleDependencyGenerator generator = new GradleDependencyGenerator(
+                dependencyGraph, new File(projectDir, "build/testrepogen").toString())
+        def mavenRepo = generator.generateTestMavenRepo()
+
+        Files.copy(
+                MetricSchemaPluginIntegrationSpec.getResourceAsStream("/a-1.0.jar"),
+                new File(mavenRepo, "a/a/1.0/a-1.0.jar").toPath(),
+                StandardCopyOption.REPLACE_EXISTING)
+
+        addSubproject("foo-lib", """
+        repositories {
+            maven {url "file:///${mavenRepo.getAbsolutePath()}"}
+        }
+
+        dependencies { implementation 'a:a:1.0' }
+        """.stripIndent())
+
+        buildFile << """
+        repositories {
+            maven {url "file:///${mavenRepo.getAbsolutePath()}"}
+        }
+        dependencies { implementation project(':foo-lib') }
+        """.stripIndent()
+
+        then:
+        def result = runTasksSuccessfully(':createMetricsManifest')
+        !result.wasExecuted(':foo-lib:jar')
+        fileExists('build/metricSchema/manifest.json')
+
+        def manifest = ObjectMappers.mapper.readValue(file("build/metricSchema/manifest.json"), Map.class)
+        !manifest.isEmpty()
+        manifest['a:a:1.0'] != null
+    }
+
 }
