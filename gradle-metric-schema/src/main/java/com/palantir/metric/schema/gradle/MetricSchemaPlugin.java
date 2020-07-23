@@ -37,6 +37,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
     public static final String METRIC_SCHEMA_RESOURCE = "metric-schema/metrics.json";
 
     public static final String COMPILE_METRIC_SCHEMA = "compileMetricSchema";
+    public static final String CHECK_METRICS_MARKDOWN = "checkMetricsMarkdown";
     public static final String GENERATE_METRICS_MARKDOWN = "generateMetricsMarkdown";
     public static final String CREATE_METRICS_MANIFEST = "createMetricsManifest";
 

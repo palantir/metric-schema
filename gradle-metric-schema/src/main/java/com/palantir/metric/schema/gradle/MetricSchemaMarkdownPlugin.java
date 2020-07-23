@@ -34,13 +34,21 @@ public final class MetricSchemaMarkdownPlugin implements Plugin<Project> {
         TaskProvider<CreateMetricsManifestTask> createMetricsManifest =
                 project.getTasks().named(MetricSchemaPlugin.CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class);
 
-        TaskProvider<GenerateMetricMarkdownTask> generateMetricsMarkdown = project.getTasks()
+        project.getTasks()
                 .register(MetricSchemaPlugin.GENERATE_METRICS_MARKDOWN, GenerateMetricMarkdownTask.class, task -> {
                     task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
                     task.getOutputFile().set(project.file("metrics.md"));
                     task.dependsOn(createMetricsManifest);
                 });
-        project.getTasks().named("check", check -> check.dependsOn(generateMetricsMarkdown));
+
+        TaskProvider<CheckMetricMarkdownTask> checkMetricsMarkdown = project.getTasks()
+                .register(MetricSchemaPlugin.CHECK_METRICS_MARKDOWN, CheckMetricMarkdownTask.class, task -> {
+                    task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
+                    task.setMarkdownFile(project.file("metrics.md"));
+                    task.dependsOn(createMetricsManifest);
+                });
+
+        project.getTasks().named("check", check -> check.dependsOn(checkMetricsMarkdown));
 
         // Wire up dependencies so running `./gradlew --write-locks` will update the markdown
         StartParameter startParam = project.getGradle().getStartParameter();

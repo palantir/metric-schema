@@ -71,7 +71,7 @@ class GenerateMetricMarkdownIntegrationSpec extends IntegrationSpec {
 
         then:
         def result = runTasksWithFailure(':check')
-        result.wasExecuted(':generateMetricsMarkdown')
+        result.wasExecuted(':checkMetricsMarkdown')
         result.standardError.contains("metrics.md does not exist")
     }
 
