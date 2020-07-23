@@ -17,6 +17,7 @@
 package com.palantir.metric.schema.gradle;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.base.Preconditions;
 import com.palantir.metric.schema.MetricSchema;
 import com.palantir.metric.schema.markdown.MarkdownRenderer;
 import java.io.File;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.GradleException;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
@@ -32,15 +34,14 @@ import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.Optional;
-import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.GFileUtils;
 
 @CacheableTask
-public class GenerateMetricMarkdownTask extends DefaultTask {
-    private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
+public class CheckMetricMarkdownTask extends DefaultTask {
+    private final RegularFileProperty markdownFile = getProject().getObjects().fileProperty();
     private final RegularFileProperty manifestFile = getProject().getObjects().fileProperty();
     private final Property<String> localCoordinates = getProject()
             .getObjects()
@@ -59,7 +60,7 @@ public class GenerateMetricMarkdownTask extends DefaultTask {
     @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
     public final Provider<RegularFile> getMarkdownFile() {
-        return ProviderUtils.filterNonExistentFile(getProject(), outputFile);
+        return ProviderUtils.filterNonExistentFile(getProject(), markdownFile);
     }
 
     @Input
@@ -67,14 +68,12 @@ public class GenerateMetricMarkdownTask extends DefaultTask {
         return localCoordinates;
     }
 
-    @OutputFile
-    public final RegularFileProperty getOutputFile() {
-        return outputFile;
+    final void setMarkdownFile(File value) {
+        markdownFile.set(value);
     }
 
     @TaskAction
-    public final void generate() throws IOException {
-        File markdown = outputFile.get().getAsFile();
+    public final void check() throws IOException {
         File manifest = getManifestFile().getAsFile().get();
 
         Map<String, List<MetricSchema>> schemas =
@@ -83,7 +82,21 @@ public class GenerateMetricMarkdownTask extends DefaultTask {
             return;
         }
 
+        File markdown = markdownFile.get().getAsFile();
         String upToDateContents = MarkdownRenderer.render(localCoordinates.get(), schemas);
-        GFileUtils.writeFile(upToDateContents, markdown);
+
+        if (!markdown.exists()) {
+            throw new GradleException(String.format(
+                    "%s does not exist, please run `./gradlew %s` or "
+                            + "`./gradlew --write-locks` and commit the resultant file",
+                    markdown.getName(), getName()));
+        } else {
+            String fromDisk = GFileUtils.readFile(markdown);
+            Preconditions.checkState(
+                    fromDisk.equals(upToDateContents),
+                    "%s is out of date, please run `./gradlew %s` or `./gradlew --write-locks` to update it.",
+                    markdown.getName(),
+                    getName());
+        }
     }
 }
