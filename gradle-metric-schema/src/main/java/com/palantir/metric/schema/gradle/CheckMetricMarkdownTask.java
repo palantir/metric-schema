@@ -87,13 +87,14 @@ public class CheckMetricMarkdownTask extends DefaultTask {
 
         if (!markdown.exists()) {
             throw new GradleException(String.format(
-                    "%s does not exist, please run `./gradlew %s --write-locks` and commit the resultant file",
+                    "%s does not exist, please run `./gradlew %s` or "
+                            + "`./gradlew --write-locks` and commit the resultant file",
                     markdown.getName(), getName()));
         } else {
             String fromDisk = GFileUtils.readFile(markdown);
             Preconditions.checkState(
                     fromDisk.equals(upToDateContents),
-                    "%s is out of date, please run `./gradlew %s --write-locks` to update it.",
+                    "%s is out of date, please run `./gradlew %s` or `./gradlew --write-locks` to update it.",
                     markdown.getName(),
                     getName());
         }
