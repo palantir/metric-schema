@@ -18,13 +18,10 @@ package com.palantir.metric.schema.gradle;
 
 import com.google.common.collect.ImmutableSet;
 import java.io.File;
-import java.util.stream.Collectors;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.component.ProjectComponentSelector;
-import org.gradle.api.artifacts.result.DependencyResult;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.SourceDirectorySet;
@@ -90,17 +87,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                                     ? project.provider(() -> file)
                                     : project.getObjects().fileProperty()));
             task.getOutputFile().set(manifestFile);
-            task.getConfiguration()
-                    .set(project.provider(
-                            () -> CreateMetricsManifestTask.removeProjectDependencies(project, runtimeClasspath)));
-            task.getProjectDependencies()
-                    .set(project.provider(
-                            () -> runtimeClasspath.getIncoming().getResolutionResult().getAllDependencies().stream()
-                                    .map(DependencyResult::getRequested)
-                                    .filter(ProjectComponentSelector.class::isInstance)
-                                    .map(ProjectComponentSelector.class::cast)
-                                    .map(ProjectComponentSelector::getProjectPath)
-                                    .collect(Collectors.toSet())));
+            task.getConfiguration().set(runtimeClasspath);
             task.dependsOn(compileSchemaTask);
         });
     }

@@ -27,6 +27,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.gradle.api.DefaultTask;
@@ -34,17 +37,19 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
-import org.gradle.api.artifacts.component.ComponentSelector;
-import org.gradle.api.artifacts.component.ModuleComponentSelector;
+import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
+import org.gradle.api.artifacts.result.ComponentResult;
+import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.provider.Property;
-import org.gradle.api.provider.SetProperty;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.CacheableTask;
-import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
@@ -58,8 +63,6 @@ public class CreateMetricsManifestTask extends DefaultTask {
     private final Property<Configuration> configuration =
             getProject().getObjects().property(Configuration.class);
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
-    private final SetProperty<String> projectDependencies =
-            getProject().getObjects().setProperty(String.class);
 
     @org.gradle.api.tasks.Optional
     @InputFile
@@ -68,14 +71,18 @@ public class CreateMetricsManifestTask extends DefaultTask {
         return metricsFile;
     }
 
-    @Classpath
+    @Internal
     public final Property<Configuration> getConfiguration() {
         return configuration;
     }
 
     @Input
-    public final SetProperty<String> getProjectDependencies() {
-        return projectDependencies;
+    final Set<String> getProductDependenciesConfig() {
+        // HACKHACK serializable way of representing all dependencies
+        return configuration.get().getIncoming().getResolutionResult().getAllComponents().stream()
+                .map(ComponentResult::getId)
+                .map(ComponentIdentifier::getDisplayName)
+                .collect(Collectors.toSet());
     }
 
     @OutputFile
@@ -84,9 +91,34 @@ public class CreateMetricsManifestTask extends DefaultTask {
     }
 
     public CreateMetricsManifestTask() {
-        // Depend on all CompileMetricSchema in the repo just in case since the tasks are relatively cheap
-        getProject().getRootProject().getAllprojects().forEach(sibling -> {
-            dependsOn(sibling.getTasks().withType(CompileMetricSchemaTask.class));
+        dependsOn(otherProjectMetricSchemaTasks());
+    }
+
+    /**
+     * A lazy collection of tasks that ensure the {@link CompileMetricSchemaTask} task of any project dependencies from
+     * {@link #configuration} are executed.
+     */
+    private Provider<FileCollection> otherProjectMetricSchemaTasks() {
+        return getConfiguration().map(productDeps -> {
+            // Using a ConfigurableFileCollection simply because it implements Buildable and provides a convenient API
+            // to wire up task dependencies to it in a lazy way.
+            ConfigurableFileCollection emptyFileCollection = getProject().files();
+            productDeps.getIncoming().getArtifacts().getArtifacts().stream()
+                    .flatMap(artifact -> {
+                        ComponentIdentifier id = artifact.getId().getComponentIdentifier();
+
+                        // Depend on the ConfigureProductDependenciesTask, if it exists, which will wire up the jar
+                        // manifest with recommended product dependencies.
+                        if (id instanceof ProjectComponentIdentifier) {
+                            Project dependencyProject = getProject()
+                                    .getRootProject()
+                                    .project(((ProjectComponentIdentifier) id).getProjectPath());
+                            return Stream.of(dependencyProject.getTasks().withType(CompileMetricSchemaTask.class));
+                        }
+                        return Stream.empty();
+                    })
+                    .forEach(emptyFileCollection::builtBy);
+            return emptyFileCollection;
         });
     }
 
@@ -99,8 +131,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
                 output,
                 ImmutableMap.builder()
                         .putAll(getLocalMetrics())
-                        .putAll(getExternalDiscoveredMetrics())
-                        .putAll(getLocalDiscoveredMetrics())
+                        .putAll(getDiscoveredMetrics())
                         .build());
     }
 
@@ -113,23 +144,21 @@ public class CreateMetricsManifestTask extends DefaultTask {
         return Collections.emptyMap();
     }
 
-    private Map<String, List<MetricSchema>> getExternalDiscoveredMetrics() {
+    private Map<String, List<MetricSchema>> getDiscoveredMetrics() {
         ImmutableMap.Builder<String, List<MetricSchema>> discoveredMetrics = ImmutableMap.builder();
 
         configuration.get().getResolvedConfiguration().getResolvedArtifacts().forEach(artifact -> {
             ComponentIdentifier id = artifact.getId().getComponentIdentifier();
-            getExternalMetrics(id, artifact).ifPresent(metrics -> discoveredMetrics.put(id.toString(), metrics));
+
+            if (id instanceof ProjectComponentIdentifier) {
+                Project dependencyProject = getProject().project(((ProjectComponentIdentifier) id).getProjectPath());
+                getProjectDependencyMetrics(dependencyProject)
+                        .ifPresent(metrics -> discoveredMetrics.put(getProjectCoordinates(dependencyProject), metrics));
+            } else {
+                getExternalMetrics(id, artifact).ifPresent(metrics -> discoveredMetrics.put(id.toString(), metrics));
+            }
         });
 
-        return discoveredMetrics.build();
-    }
-
-    private Map<String, List<MetricSchema>> getLocalDiscoveredMetrics() {
-        ImmutableMap.Builder<String, List<MetricSchema>> discoveredMetrics = ImmutableMap.builder();
-        getProjectDependencies().get().stream().map(getProject()::project).forEach(project -> {
-            getProjectDependencyMetrics(project)
-                    .ifPresent(metrics -> discoveredMetrics.put(getProjectCoordinates(project), metrics));
-        });
         return discoveredMetrics.build();
     }
 
@@ -179,25 +208,5 @@ public class CreateMetricsManifestTask extends DefaultTask {
         // We explicitly exclude the version for project dependencies so that the output of the task does not depend on
         // project version and is more likely to be cached
         return String.format("%s:%s:$projectVersion", project.getGroup(), project.getName());
-    }
-
-    static Configuration removeProjectDependencies(Project project, Configuration parentConf) {
-        Configuration existingConfig = project.getConfigurations().findByName("metricManifestDependencies");
-        if (existingConfig != null) {
-            return existingConfig;
-        }
-
-        Configuration conf = project.getConfigurations().create("metricManifestDependencies");
-        parentConf.getIncoming().getResolutionResult().getAllDependencies().forEach(dependency -> {
-            ComponentSelector selector = dependency.getRequested();
-            if (selector instanceof ModuleComponentSelector) {
-                ModuleComponentSelector mod = (ModuleComponentSelector) selector;
-                conf.getDependencies()
-                        .add(project.getDependencies()
-                                .create(mod.getGroup() + ":" + mod.getModule() + ":" + mod.getVersion()));
-            }
-        });
-
-        return conf;
     }
 }
