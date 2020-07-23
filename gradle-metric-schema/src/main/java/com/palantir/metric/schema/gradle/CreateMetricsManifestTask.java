@@ -17,10 +17,8 @@
 package com.palantir.metric.schema.gradle;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
-import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.metric.schema.MetricSchema;
 import java.io.File;
 import java.io.IOException;
@@ -28,14 +26,19 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
+import org.gradle.api.artifacts.result.ComponentResult;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.RegularFileProperty;
@@ -44,9 +47,9 @@ import org.gradle.api.logging.Logging;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.CacheableTask;
-import org.gradle.api.tasks.Classpath;
+import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
-import org.gradle.api.tasks.Optional;
+import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
@@ -55,23 +58,31 @@ import org.gradle.api.tasks.TaskAction;
 @CacheableTask
 public class CreateMetricsManifestTask extends DefaultTask {
     private static final Logger log = Logging.getLogger(CreateMetricsManifestTask.class);
-    static final ObjectMapper mapper = ObjectMappers.newClientObjectMapper();
 
     private final RegularFileProperty metricsFile = getProject().getObjects().fileProperty();
     private final Property<Configuration> configuration =
             getProject().getObjects().property(Configuration.class);
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
 
-    @Optional
+    @org.gradle.api.tasks.Optional
     @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
     public final RegularFileProperty getMetricsFile() {
         return metricsFile;
     }
 
-    @Classpath
+    @Internal
     public final Property<Configuration> getConfiguration() {
         return configuration;
+    }
+
+    @Input
+    final Set<String> getProductDependenciesConfig() {
+        // HACKHACK serializable way of representing all dependencies
+        return configuration.get().getIncoming().getResolutionResult().getAllComponents().stream()
+                .map(ComponentResult::getId)
+                .map(ComponentIdentifier::getDisplayName)
+                .collect(Collectors.toSet());
     }
 
     @OutputFile
@@ -97,8 +108,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
                         ComponentIdentifier id = artifact.getId().getComponentIdentifier();
 
                         // Depend on the ConfigureProductDependenciesTask, if it exists, which will wire up the jar
-                        // manifest
-                        // with recommended product dependencies.
+                        // manifest with recommended product dependencies.
                         if (id instanceof ProjectComponentIdentifier) {
                             Project dependencyProject = getProject()
                                     .getRootProject()
@@ -117,87 +127,81 @@ public class CreateMetricsManifestTask extends DefaultTask {
         File output = getOutputFile().getAsFile().get();
         getProject().mkdir(output.getParent());
 
-        mapper.writeValue(
+        ObjectMappers.mapper.writeValue(
                 output,
                 ImmutableMap.builder()
                         .putAll(getLocalMetrics())
-                        .putAll(discoverMetricSchema())
+                        .putAll(getDiscoveredMetrics())
                         .build());
     }
 
-    private Map<String, List<MetricSchema>> getLocalMetrics() throws IOException {
+    private Map<String, List<MetricSchema>> getLocalMetrics() {
         if (getMetricsFile().getAsFile().isPresent()) {
             return ImmutableMap.of(
                     getProjectCoordinates(getProject()),
-                    mapper.readValue(getMetricsFile().getAsFile().get(), new TypeReference<List<MetricSchema>>() {}));
+                    ObjectMappers.loadMetricSchema(getMetricsFile().getAsFile().get()));
         }
         return Collections.emptyMap();
     }
 
-    private Map<String, List<MetricSchema>> discoverMetricSchema() {
+    private Map<String, List<MetricSchema>> getDiscoveredMetrics() {
         ImmutableMap.Builder<String, List<MetricSchema>> discoveredMetrics = ImmutableMap.builder();
 
-        configuration.get().getIncoming().getArtifacts().getArtifacts().forEach(artifact -> {
-            String artifactName = artifact.getId().getDisplayName();
+        configuration.get().getResolvedConfiguration().getResolvedArtifacts().forEach(artifact -> {
             ComponentIdentifier id = artifact.getId().getComponentIdentifier();
-            String sourceCoordinates;
-            InputStream metricSchemaStream;
 
-            try {
-                if (id instanceof ProjectComponentIdentifier) {
-                    Project dependencyProject =
-                            getProject().getRootProject().project(((ProjectComponentIdentifier) id).getProjectPath());
-                    if (!dependencyProject.getPlugins().hasPlugin(MetricSchemaPlugin.class)) {
-                        return;
-                    }
-                    CompileMetricSchemaTask compileMetricSchemaTask = (CompileMetricSchemaTask)
-                            dependencyProject.getTasks().getByName(MetricSchemaPlugin.COMPILE_METRIC_SCHEMA);
-
-                    File file = compileMetricSchemaTask.getOutputFile().get().getAsFile();
-                    if (!file.isFile()) {
-                        log.debug("File {} does not exist", file);
-                        return;
-                    }
-                    sourceCoordinates = getProjectCoordinates(dependencyProject);
-                    metricSchemaStream = Files.asByteSource(file).openStream();
-                } else {
-                    if (!artifact.getFile().exists()) {
-                        log.debug("Artifact did not exist: {}", artifact.getFile());
-                        return;
-                    } else if (!Files.getFileExtension(artifact.getFile().getName())
-                            .equals("jar")) {
-                        log.debug("Artifact is not jar: {}", artifact.getFile());
-                        return;
-                    }
-
-                    ZipFile zipFile = new ZipFile(artifact.getFile());
-                    ZipEntry manifestEntry = zipFile.getEntry(MetricSchemaPlugin.METRIC_SCHEMA_RESOURCE);
-                    if (manifestEntry == null) {
-                        log.debug("Manifest file does not exist in jar: {}", id);
-                        return;
-                    }
-
-                    sourceCoordinates = id.toString();
-                    metricSchemaStream = zipFile.getInputStream(manifestEntry);
-                }
-            } catch (IOException e) {
-                log.warn(
-                        "IOException encountered when processing artifact '{}', file '{}', {}",
-                        artifactName,
-                        artifact.getFile(),
-                        e);
-                return;
-            }
-
-            try (InputStream is = metricSchemaStream) {
-                discoveredMetrics.put(
-                        sourceCoordinates, mapper.readValue(is, new TypeReference<List<MetricSchema>>() {}));
-            } catch (IOException | IllegalArgumentException e) {
-                log.debug("Failed to load metric schema for artifact '{}', file '{}', '{}'", artifactName, artifact, e);
+            if (id instanceof ProjectComponentIdentifier) {
+                Project dependencyProject = getProject().project(((ProjectComponentIdentifier) id).getProjectPath());
+                getProjectDependencyMetrics(dependencyProject)
+                        .ifPresent(metrics -> discoveredMetrics.put(getProjectCoordinates(dependencyProject), metrics));
+            } else {
+                getExternalMetrics(id, artifact).ifPresent(metrics -> discoveredMetrics.put(id.toString(), metrics));
             }
         });
 
         return discoveredMetrics.build();
+    }
+
+    private static Optional<List<MetricSchema>> getProjectDependencyMetrics(Project dependencyProject) {
+        if (!dependencyProject.getPlugins().hasPlugin(MetricSchemaPlugin.class)) {
+            return Optional.empty();
+        }
+        CompileMetricSchemaTask compileMetricSchemaTask = (CompileMetricSchemaTask)
+                dependencyProject.getTasks().getByName(MetricSchemaPlugin.COMPILE_METRIC_SCHEMA);
+
+        File file = compileMetricSchemaTask.getOutputFile().get().getAsFile();
+        if (!file.isFile()) {
+            log.debug("File {} does not exist", file);
+            return Optional.empty();
+        }
+        return Optional.of(ObjectMappers.loadMetricSchema(file));
+    }
+
+    private static java.util.Optional<List<MetricSchema>> getExternalMetrics(
+            ComponentIdentifier id, ResolvedArtifact artifact) {
+        if (!artifact.getFile().exists()) {
+            log.debug("Artifact did not exist: {}", artifact.getFile());
+            return java.util.Optional.empty();
+        } else if (!Files.getFileExtension(artifact.getFile().getName()).equals("jar")) {
+            log.debug("Artifact is not jar: {}", artifact.getFile());
+            return java.util.Optional.empty();
+        }
+
+        try {
+            ZipFile zipFile = new ZipFile(artifact.getFile());
+            ZipEntry manifestEntry = zipFile.getEntry(MetricSchemaPlugin.METRIC_SCHEMA_RESOURCE);
+            if (manifestEntry == null) {
+                log.debug("Manifest file does not exist in JAR: {}", id);
+                return java.util.Optional.empty();
+            }
+
+            try (InputStream is = zipFile.getInputStream(manifestEntry)) {
+                return java.util.Optional.of(
+                        ObjectMappers.mapper.readValue(is, new TypeReference<List<MetricSchema>>() {}));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load external monitors");
+        }
     }
 
     private static String getProjectCoordinates(Project project) {

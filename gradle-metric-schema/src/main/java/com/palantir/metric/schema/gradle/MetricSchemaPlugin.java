@@ -21,6 +21,7 @@ import java.io.File;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.SourceDirectorySet;
@@ -75,6 +76,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
             Provider<Directory> metricSchemaDir,
             TaskProvider<CompileMetricSchemaTask> compileSchemaTask) {
         Provider<RegularFile> manifestFile = metricSchemaDir.map(dir -> dir.file("manifest.json"));
+        Configuration runtimeClasspath = project.getConfigurations().getByName("runtimeClasspath");
         project.getTasks().register(CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class, task -> {
             // Need to set to empty if compileSchemaTask didn't execute
             task.getMetricsFile()
@@ -85,7 +87,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                                     ? project.provider(() -> file)
                                     : project.getObjects().fileProperty()));
             task.getOutputFile().set(manifestFile);
-            task.getConfiguration().set(project.getConfigurations().getByName("runtimeClasspath"));
+            task.getConfiguration().set(runtimeClasspath);
             task.dependsOn(compileSchemaTask);
         });
     }
