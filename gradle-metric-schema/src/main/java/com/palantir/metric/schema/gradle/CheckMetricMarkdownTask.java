@@ -96,7 +96,7 @@ public class CheckMetricMarkdownTask extends DefaultTask {
                     fromDisk.equals(upToDateContents),
                     "%s is out of date, please run `./gradlew %s` or `./gradlew --write-locks` to update it.",
                     markdown.getName(),
-                    getName());
+                    MetricSchemaPlugin.GENERATE_METRICS_MARKDOWN);
         }
     }
 }
