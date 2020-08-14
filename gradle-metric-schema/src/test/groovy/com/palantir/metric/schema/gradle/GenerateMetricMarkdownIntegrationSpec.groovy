@@ -86,6 +86,7 @@ class GenerateMetricMarkdownIntegrationSpec extends IntegrationSpec {
 
         file('metrics.md') << "foo"
         def result2 = runTasksWithFailure(':check')
-        result2.standardError.contains("metrics.md is out of date")
+        result2.standardError.contains("metrics.md is out of date, please run `./gradlew generateMetricsMarkdown` "
+                + "or `./gradlew --write-locks` to update it.")
     }
 }
