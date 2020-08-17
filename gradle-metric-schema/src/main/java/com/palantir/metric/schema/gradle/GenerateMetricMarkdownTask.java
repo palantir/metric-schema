@@ -80,6 +80,9 @@ public class GenerateMetricMarkdownTask extends DefaultTask {
         Map<String, List<MetricSchema>> schemas =
                 ObjectMappers.mapper.readValue(manifest, new TypeReference<Map<String, List<MetricSchema>>>() {});
         if (schemas.isEmpty()) {
+            if (markdown.exists()) {
+                markdown.delete();
+            }
             return;
         }
 
