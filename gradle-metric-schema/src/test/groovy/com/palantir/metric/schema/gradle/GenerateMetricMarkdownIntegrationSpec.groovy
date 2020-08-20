@@ -75,7 +75,7 @@ class GenerateMetricMarkdownIntegrationSpec extends IntegrationSpec {
         fileExists("metrics.md")
     }
 
-    def 'fails if markdown does not exist'() {
+    def 'fails if markdown does not exist when it should'() {
         expect:
         def result = runTasksWithFailure(':check')
         result.wasExecuted(':checkMetricsMarkdown')
@@ -107,10 +107,10 @@ class GenerateMetricMarkdownIntegrationSpec extends IntegrationSpec {
         then:
         def result2 = runTasksSuccessfully('--write-locks')
         result2.wasExecuted(':generateMetricsMarkdown')
-        !file('metrics.md')
+        !fileExists('metrics.md')
     }
 
-    def 'markdown is cached correctly'() {
+    def 'markdown is updated correctly'() {
         when:
         def result1 = runTasksSuccessfully('--write-locks')
 
@@ -124,6 +124,6 @@ class GenerateMetricMarkdownIntegrationSpec extends IntegrationSpec {
         then:
         def result2 = runTasksSuccessfully('--write-locks')
         result2.wasExecuted(':generateMetricsMarkdown')
-        !fileExists('metrics.md')
+        !file('metrics.md').text.contains('worker.utilization')
     }
 }

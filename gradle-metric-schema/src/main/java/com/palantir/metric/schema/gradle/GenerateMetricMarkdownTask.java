@@ -79,7 +79,7 @@ public class GenerateMetricMarkdownTask extends DefaultTask {
 
         Map<String, List<MetricSchema>> schemas =
                 ObjectMappers.mapper.readValue(manifest, new TypeReference<Map<String, List<MetricSchema>>>() {});
-        if (schemas.isEmpty()) {
+        if (isEmpty(schemas)) {
             if (markdown.exists()) {
                 markdown.delete();
             }
@@ -88,5 +88,9 @@ public class GenerateMetricMarkdownTask extends DefaultTask {
 
         String upToDateContents = MarkdownRenderer.render(localCoordinates.get(), schemas);
         GFileUtils.writeFile(upToDateContents, markdown);
+    }
+
+    private static boolean isEmpty(Map<String, List<MetricSchema>> schemas) {
+        return schemas.isEmpty() || schemas.values().stream().allMatch(List::isEmpty);
     }
 }
