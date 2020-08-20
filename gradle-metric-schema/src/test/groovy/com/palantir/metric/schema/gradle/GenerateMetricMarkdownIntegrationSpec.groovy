@@ -19,7 +19,7 @@ package com.palantir.metric.schema.gradle
 import nebula.test.IntegrationSpec
 
 class GenerateMetricMarkdownIntegrationSpec extends IntegrationSpec {
-    public static final String METRICS = """
+    private static final String METRICS = """
         namespaces:
           server:
             docs: General web server metrics.
@@ -34,6 +34,18 @@ class GenerateMetricMarkdownIntegrationSpec extends IntegrationSpec {
                 type: gauge
                 docs: A gauge of the ratio of active workers to the number of workers.
         """.stripIndent()
+    private static final String SHORT_METRICS = """
+    namespaces:
+      server:
+        docs: General web server metrics.
+        metrics:
+          response.size:
+            type: histogram
+            tags:
+              - service-name
+              - endpoint
+            docs: A histogram of the number of bytes written into the response.
+    """.stripIndent()
 
     void setup() {
         buildFile << """
@@ -53,33 +65,25 @@ class GenerateMetricMarkdownIntegrationSpec extends IntegrationSpec {
             }
         }
         """.stripIndent()
+        file('src/main/metrics/metrics.yml') << METRICS
     }
 
     def 'generate markdown'() {
-        when:
-        file('src/main/metrics/metrics.yml') << METRICS
-
-        then:
+        expect:
         def result = runTasksSuccessfully('--write-locks')
         result.wasExecuted(':generateMetricsMarkdown')
         fileExists("metrics.md")
     }
 
-    def 'fails if markdown does not exist'() {
-        when:
-        file('src/main/metrics/metrics.yml') << METRICS
-
-        then:
+    def 'fails if markdown does not exist when it should'() {
+        expect:
         def result = runTasksWithFailure(':check')
         result.wasExecuted(':checkMetricsMarkdown')
         result.standardError.contains("metrics.md does not exist")
     }
 
     def 'fails if markdown is out of date'() {
-        when:
-        file('src/main/metrics/metrics.yml') << METRICS
-
-        then:
+        expect:
         def result1 = runTasksSuccessfully('--write-locks')
         result1.wasExecuted(':generateMetricsMarkdown')
         fileExists("metrics.md")
@@ -88,5 +92,41 @@ class GenerateMetricMarkdownIntegrationSpec extends IntegrationSpec {
         def result2 = runTasksWithFailure(':check')
         result2.standardError.contains("metrics.md is out of date, please run `./gradlew generateMetricsMarkdown` "
                 + "or `./gradlew --write-locks` to update it.")
+    }
+
+    def 'markdown is cleaned up correctly'() {
+        when:
+        def result1 = runTasksSuccessfully('--write-locks')
+
+        then:
+        result1.wasExecuted(':generateMetricsMarkdown')
+        fileExists("metrics.md")
+
+        when:
+        file('src/main/metrics/metrics.yml').delete()
+
+        then:
+        def result2 = runTasksSuccessfully('--write-locks')
+        result2.wasExecuted(':generateMetricsMarkdown')
+        !fileExists('metrics.md')
+    }
+
+    def 'markdown is updated correctly'() {
+        when:
+        def result1 = runTasksSuccessfully('--write-locks')
+
+        then:
+        result1.wasExecuted(':generateMetricsMarkdown')
+        fileExists("metrics.md")
+        file('metrics.md').text.contains('worker.utilization')
+
+
+        when:
+        file('src/main/metrics/metrics.yml').text = SHORT_METRICS;
+
+        then:
+        def result2 = runTasksSuccessfully('--write-locks')
+        result2.wasExecuted(':generateMetricsMarkdown')
+        !file('metrics.md').text.contains('worker.utilization')
     }
 }
