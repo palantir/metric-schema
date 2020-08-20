@@ -117,6 +117,8 @@ class GenerateMetricMarkdownIntegrationSpec extends IntegrationSpec {
         then:
         result1.wasExecuted(':generateMetricsMarkdown')
         fileExists("metrics.md")
+        file('metrics.md').text.contains('worker.utilization')
+
 
         when:
         file('src/main/metrics/metrics.yml').text = SHORT_METRICS;
