@@ -18,7 +18,6 @@ package com.palantir.metric.schema.gradle;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.serialization.ObjectMappers;
@@ -27,32 +26,34 @@ import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import com.palantir.metric.schema.MetricSchema;
 import java.io.File;
 import java.io.IOException;
+import org.gradle.api.DefaultTask;
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.tasks.CacheableTask;
+import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputFile;
-import org.gradle.api.tasks.SourceTask;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
 
 @CacheableTask
-public class CompileMetricSchemaTask extends SourceTask {
+public abstract class CompileMetricSchemaTask extends DefaultTask {
     private static final ObjectReader reader = ObjectMappers.withDefaultModules(new ObjectMapper(new YAMLFactory()))
             .readerFor(MetricSchema.class);
-    private static final ObjectWriter writer =
-            ObjectMappers.newServerObjectMapper().writer();
 
-    private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public abstract ConfigurableFileCollection getSource();
 
     @OutputFile
-    public final RegularFileProperty getOutputFile() {
-        return outputFile;
-    }
+    public abstract RegularFileProperty getOutputFile();
 
     @TaskAction
     public final void action() throws IOException {
         File output = getOutputFile().getAsFile().get();
         getProject().mkdir(output.getParent());
 
-        writer.writeValue(
+        com.palantir.metric.schema.gradle.ObjectMappers.mapper.writeValue(
                 output,
                 getSource().getFiles().stream()
                         .map(CompileMetricSchemaTask::readFile)

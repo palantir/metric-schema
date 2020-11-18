@@ -79,14 +79,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         Provider<RegularFile> manifestFile = metricSchemaDir.map(dir -> dir.file("manifest.json"));
         Configuration runtimeClasspath = project.getConfigurations().getByName("runtimeClasspath");
         project.getTasks().register(CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class, task -> {
-            // Need to set to empty if compileSchemaTask didn't execute
-            task.getMetricsFile()
-                    .set(compileSchemaTask
-                            .get()
-                            .getOutputFile()
-                            .flatMap(file -> file.getAsFile().exists()
-                                    ? project.provider(() -> file)
-                                    : project.getObjects().fileProperty()));
+            task.getMetricsFile().set(compileSchemaTask.flatMap(CompileMetricSchemaTask::getOutputFile));
             task.getOutputFile().set(manifestFile);
             task.getConfiguration().set(runtimeClasspath);
             task.dependsOn(compileSchemaTask);
@@ -99,7 +92,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         JavaPluginConvention javaPlugin = project.getConvention().getPlugin(JavaPluginConvention.class);
         TaskProvider<CompileMetricSchemaTask> compileMetricSchema = project.getTasks()
                 .register(COMPILE_METRIC_SCHEMA, CompileMetricSchemaTask.class, task -> {
-                    task.setSource(sourceSet);
+                    task.getSource().from(sourceSet);
                     task.getOutputFile().set(schemaFile);
                 });
         project.getTasks()

@@ -48,6 +48,7 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
@@ -55,12 +56,17 @@ import org.gradle.api.tasks.TaskAction;
 public class CreateMetricsManifestTask extends DefaultTask {
     private static final Logger log = Logging.getLogger(CreateMetricsManifestTask.class);
 
+    private final Provider<FileCollection> projectDependencyMetrics;
     private final RegularFileProperty metricsFile = getProject().getObjects().fileProperty();
     private final Property<Configuration> configuration =
             getProject().getObjects().property(Configuration.class);
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
 
-    @org.gradle.api.tasks.Optional
+    @InputFiles
+    public final Provider<FileCollection> getProjectDependencyMetrics() {
+        return projectDependencyMetrics;
+    }
+
     @InputFile
     public final RegularFileProperty getMetricsFile() {
         return metricsFile;
@@ -86,7 +92,8 @@ public class CreateMetricsManifestTask extends DefaultTask {
     }
 
     public CreateMetricsManifestTask() {
-        dependsOn(otherProjectMetricSchemaTasks());
+        this.projectDependencyMetrics = otherProjectMetricSchemaTasks();
+        dependsOn(projectDependencyMetrics);
     }
 
     /**
@@ -112,7 +119,10 @@ public class CreateMetricsManifestTask extends DefaultTask {
                         }
                         return Stream.empty();
                     })
-                    .forEach(emptyFileCollection::builtBy);
+                    .forEach(tasks -> {
+                        emptyFileCollection.from(tasks);
+                        emptyFileCollection.builtBy(tasks);
+                    });
             return emptyFileCollection;
         });
     }
@@ -147,7 +157,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
 
             if (id instanceof ProjectComponentIdentifier) {
                 Project dependencyProject = getProject().project(((ProjectComponentIdentifier) id).getProjectPath());
-                getProjectDependencyMetrics(dependencyProject)
+                inferProjectDependencyMetrics(dependencyProject)
                         .ifPresent(metrics -> discoveredMetrics.put(getProjectCoordinates(dependencyProject), metrics));
             } else {
                 getExternalMetrics(id, artifact).ifPresent(metrics -> discoveredMetrics.put(id.toString(), metrics));
@@ -157,7 +167,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
         return discoveredMetrics.build();
     }
 
-    private static Optional<List<MetricSchema>> getProjectDependencyMetrics(Project dependencyProject) {
+    private static Optional<List<MetricSchema>> inferProjectDependencyMetrics(Project dependencyProject) {
         if (!dependencyProject.getPlugins().hasPlugin(MetricSchemaPlugin.class)) {
             return Optional.empty();
         }

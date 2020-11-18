@@ -186,7 +186,41 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         fileExists('foo-server/build/metricSchema/manifest.json')
         def manifest = ObjectMappers.mapper.readValue(file("foo-server/build/metricSchema/manifest.json"), Map.class)
         !manifest.isEmpty()
-        manifest['com.palantir.test:foo-lib:$projectVersion'] != null
+        manifest['com.palantir.test:foo-lib:$projectVersion'] != []
+    }
+
+    def 'createManifest respects project dependency changes'() {
+        setup:
+        addSubproject("foo-lib", "")
+        def libMetrics = file('foo-lib/src/main/metrics/metric.yml')
+        libMetrics << METRICS
+
+        addSubproject("foo-server", """
+            dependencies {
+                compile project(':foo-lib')
+            }
+        """.stripIndent())
+
+        when:
+        def result1 = runTasksSuccessfully(':foo-server:createMetricsManifest')
+
+        then:
+        result1.wasExecuted(":foo-lib:compileMetricSchema")
+        !result1.wasExecuted(':foo-lib:jar')
+        result1.wasExecuted(":foo-server:compileMetricSchema")
+
+        when:
+        libMetrics.delete()
+        def result2 = runTasksSuccessfully(':foo-server:createMetricsManifest')
+
+        then:
+        result2.wasExecuted(":foo-lib:compileMetricSchema")
+        !result2.wasExecuted(':foo-lib:jar')
+        result2.wasExecuted(":foo-server:compileMetricSchema")
+
+        fileExists('foo-server/build/metricSchema/manifest.json')
+        def manifest = ObjectMappers.mapper.readValue(file("foo-server/build/metricSchema/manifest.json"), Map.class)
+        manifest['com.palantir.test:foo-lib:$projectVersion'] == []
     }
 
     def 'createManifest discovers transitive external metric schema'() {
