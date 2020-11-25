@@ -22,10 +22,15 @@ import com.palantir.metric.schema.JavaGeneratorArgs;
 import java.io.File;
 import java.util.Optional;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.file.FileTree;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputDirectory;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
+import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.GFileUtils;
@@ -39,13 +44,13 @@ public class GenerateMetricSchemaTask extends SourceTask {
         libraryName.set(defaultLibraryName());
     }
 
-    // @Override
-    // @InputFiles
-    // @SkipWhenEmpty
-    // @PathSensitive(PathSensitivity.RELATIVE)
-    // public final FileTree getSource() {
-    //     return super.getSource();
-    // }
+    @Override
+    @InputFiles
+    @SkipWhenEmpty
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public final FileTree getSource() {
+        return super.getSource();
+    }
 
     @Input
     public final Property<String> getLibraryName() {
