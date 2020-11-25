@@ -39,6 +39,14 @@ public class GenerateMetricSchemaTask extends SourceTask {
         libraryName.set(defaultLibraryName());
     }
 
+    // @Override
+    // @InputFiles
+    // @SkipWhenEmpty
+    // @PathSensitive(PathSensitivity.RELATIVE)
+    // public final FileTree getSource() {
+    //     return super.getSource();
+    // }
+
     @Input
     public final Property<String> getLibraryName() {
         return libraryName;
