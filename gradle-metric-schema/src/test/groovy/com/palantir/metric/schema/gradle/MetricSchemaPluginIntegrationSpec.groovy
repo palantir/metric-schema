@@ -16,13 +16,15 @@
 
 package com.palantir.metric.schema.gradle
 
-
 import com.google.common.base.Throwables
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import nebula.test.IntegrationSpec
 import nebula.test.dependencies.DependencyGraph
 import nebula.test.dependencies.GradleDependencyGenerator
+import nebula.test.functional.ExecutionResult
+import org.apache.commons.io.FileUtils
+import org.gradle.util.GFileUtils
 
 class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
     public static final String METRICS = """
@@ -85,6 +87,28 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         def result = runTasksSuccessfully('classes')
         result.wasExecuted(':generateMetrics')
         fileExists("build/metricSchema/generated_src/com/palantir/test/ServerMetrics.java")
+    }
+
+    def 'build cache works'() {
+        when:
+        file("gradle.properties") << "org.gradle.caching=true"
+        file('src/main/metrics/metrics.yml') << METRICS
+
+        runTasksSuccessfully('generateMetrics')
+        fileExists("build/metricSchema/generated_src/com/palantir/test/ServerMetrics.java")
+
+        // we want cache hits no matter where the project is checked out on disk
+        File originalProjectDir = getProjectDir()
+        File newProjectDir = getProjectDir().toPath().getParent().resolve(
+                originalProjectDir.getName() + "-relocated").toFile()
+        FileUtils.copyDirectory(originalProjectDir, newProjectDir)
+        setProjectDir(newProjectDir)
+        GFileUtils.deleteDirectory(originalProjectDir)
+        GFileUtils.deleteDirectory(file("build/metricSchema/generated_src/"))
+
+        then:
+        ExecutionResult result = runTasksSuccessfully('generateMetrics')
+        result.standardOutput.contains("> Task :generateMetrics FROM-CACHE")
     }
 
     def 'invalid schema results in task failure'() {
