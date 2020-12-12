@@ -3,6 +3,7 @@ package com.palantir.test;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -34,6 +35,7 @@ public final class ReservedConflictMetrics {
     }
 
     /** Meter with a single tag. */
+    @CheckReturnValue
     public Meter long_(String int_) {
         return registry.meter(
                 MetricName.builder()
@@ -68,6 +70,7 @@ public final class ReservedConflictMetrics {
     }
 
     public interface IntBuildStage {
+        @CheckReturnValue
         Histogram build();
     }
 

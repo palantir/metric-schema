@@ -18,6 +18,7 @@ package com.palantir.metric.schema;
 
 import com.codahale.metrics.Gauge;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -166,6 +167,7 @@ final class UtilityGenerator {
                     metricNameMethod.name,
                     ReservedNames.GAUGE_NAME);
         } else {
+            methodBuilder.addAnnotation(CheckReturnValue.class);
             methodBuilder.addStatement(
                     "return $L.$L($L)", ReservedNames.REGISTRY_NAME, metricRegistryMethod, metricNameBlock);
         }
@@ -190,6 +192,8 @@ final class UtilityGenerator {
             abstractBuildMethodBuilder.addParameter(
                     ParameterizedTypeName.get(ClassName.get(Gauge.class), WildcardTypeName.subtypeOf(Object.class)),
                     ReservedNames.GAUGE_NAME);
+        } else {
+            abstractBuildMethodBuilder.addAnnotation(CheckReturnValue.class);
         }
         MethodSpec abstractBuildMethod = abstractBuildMethodBuilder.build();
         MethodSpec abstractBuildMetricName = MethodSpec.methodBuilder("buildMetricName")

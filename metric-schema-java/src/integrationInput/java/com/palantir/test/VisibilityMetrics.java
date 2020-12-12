@@ -2,6 +2,7 @@ package com.palantir.test;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -26,6 +27,7 @@ final class VisibilityMetrics {
     }
 
     /** just a metric */
+    @CheckReturnValue
     Counter test() {
         return registry.counter(
                 MetricName.builder()

@@ -2,6 +2,7 @@ package com.palantir.test;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -49,6 +50,7 @@ public final class MyNamespaceMetrics {
     }
 
     public interface ResponseSizeBuildStage {
+        @CheckReturnValue
         Histogram build();
     }
 
