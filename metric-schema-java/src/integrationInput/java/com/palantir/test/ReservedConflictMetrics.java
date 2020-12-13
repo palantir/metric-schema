@@ -3,6 +3,7 @@ package com.palantir.test;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -29,11 +30,13 @@ public final class ReservedConflictMetrics {
     }
 
     /** Uh-oh! */
+    @CheckReturnValue
     public IntBuilderIntStage int_() {
         return new IntBuilder();
     }
 
     /** Meter with a single tag. */
+    @CheckReturnValue
     public Meter long_(String int_) {
         return registry.meter(
                 MetricName.builder()
@@ -58,6 +61,7 @@ public final class ReservedConflictMetrics {
     }
 
     /** Gauge metric with a single tag. */
+    @CheckReturnValue
     public DoubleBuilderIntStage double_() {
         return new DoubleBuilder();
     }
@@ -68,18 +72,22 @@ public final class ReservedConflictMetrics {
     }
 
     public interface IntBuildStage {
+        @CheckReturnValue
         Histogram build();
     }
 
     public interface IntBuilderIntStage {
+        @CheckReturnValue
         IntBuilderRegistryStage int_(String int_);
     }
 
     public interface IntBuilderRegistryStage {
+        @CheckReturnValue
         IntBuilderLongStage registry_(String registry_);
     }
 
     public interface IntBuilderLongStage {
+        @CheckReturnValue
         IntBuildStage long_(String long_);
     }
 
@@ -136,6 +144,7 @@ public final class ReservedConflictMetrics {
     }
 
     public interface DoubleBuilderIntStage {
+        @CheckReturnValue
         DoubleBuildStage int_(String int_);
     }
 
