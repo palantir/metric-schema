@@ -217,6 +217,7 @@ final class UtilityGenerator {
                     .addMethod(MethodSpec.methodBuilder(Custodian.sanitizeName(tag))
                             .addParameter(String.class, Custodian.sanitizeName(tag))
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                            .addAnnotation(CheckReturnValue.class)
                             .returns(ClassName.bestGuess(
                                     lastTag ? buildStage(metricName) : stageName(metricName, tagList.get(i + 1))))
                             .build())
@@ -293,6 +294,7 @@ final class UtilityGenerator {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(Custodian.sanitizeName(metricName))
                 .addModifiers(visibility.apply())
                 .returns(ClassName.bestGuess(stageName(metricName, tagList.get(0))))
+                .addAnnotation(CheckReturnValue.class)
                 .addStatement("return new $T()", ClassName.bestGuess(Custodian.anyToUpperCamel(metricName) + "Builder"))
                 .addJavadoc(Javadoc.render(definition.getDocs()));
         outerBuilder.addMethod(methodBuilder.build());

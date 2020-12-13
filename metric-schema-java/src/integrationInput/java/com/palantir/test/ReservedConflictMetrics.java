@@ -30,6 +30,7 @@ public final class ReservedConflictMetrics {
     }
 
     /** Uh-oh! */
+    @CheckReturnValue
     public IntBuilderIntStage int_() {
         return new IntBuilder();
     }
@@ -60,6 +61,7 @@ public final class ReservedConflictMetrics {
     }
 
     /** Gauge metric with a single tag. */
+    @CheckReturnValue
     public DoubleBuilderIntStage double_() {
         return new DoubleBuilder();
     }
@@ -75,14 +77,17 @@ public final class ReservedConflictMetrics {
     }
 
     public interface IntBuilderIntStage {
+        @CheckReturnValue
         IntBuilderRegistryStage int_(String int_);
     }
 
     public interface IntBuilderRegistryStage {
+        @CheckReturnValue
         IntBuilderLongStage registry_(String registry_);
     }
 
     public interface IntBuilderLongStage {
+        @CheckReturnValue
         IntBuildStage long_(String long_);
     }
 
@@ -139,6 +144,7 @@ public final class ReservedConflictMetrics {
     }
 
     public interface DoubleBuilderIntStage {
+        @CheckReturnValue
         DoubleBuildStage int_(String int_);
     }
 

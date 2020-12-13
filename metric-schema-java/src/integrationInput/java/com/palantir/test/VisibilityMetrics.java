@@ -38,6 +38,7 @@ final class VisibilityMetrics {
     }
 
     /** Tagged gauge metric. */
+    @CheckReturnValue
     ComplexBuilderFooStage complex() {
         return new ComplexBuilder();
     }
@@ -54,10 +55,12 @@ final class VisibilityMetrics {
     }
 
     interface ComplexBuilderFooStage {
+        @CheckReturnValue
         ComplexBuilderBarStage foo(String foo);
     }
 
     interface ComplexBuilderBarStage {
+        @CheckReturnValue
         ComplexBuildStage bar(String bar);
     }
 

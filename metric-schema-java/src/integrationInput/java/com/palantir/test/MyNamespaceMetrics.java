@@ -27,6 +27,7 @@ public final class MyNamespaceMetrics {
     }
 
     /** A histogram of the number of bytes written into the response. */
+    @CheckReturnValue
     public ResponseSizeBuilderServiceNameStage responseSize() {
         return new ResponseSizeBuilder();
     }
@@ -55,10 +56,12 @@ public final class MyNamespaceMetrics {
     }
 
     public interface ResponseSizeBuilderServiceNameStage {
+        @CheckReturnValue
         ResponseSizeBuilderEndpointStage serviceName(String serviceName);
     }
 
     public interface ResponseSizeBuilderEndpointStage {
+        @CheckReturnValue
         ResponseSizeBuildStage endpoint(String endpoint);
     }
 
