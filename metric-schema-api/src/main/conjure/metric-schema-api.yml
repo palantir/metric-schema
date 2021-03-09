@@ -23,6 +23,7 @@ types:
         fields:
           type: MetricType
           tags: set<string>
+          values: map<string, set<string>>
           docs: Documentation
       MetricType:
         values:

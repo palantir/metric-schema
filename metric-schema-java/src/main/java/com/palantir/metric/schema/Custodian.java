@@ -40,6 +40,13 @@ final class Custodian {
                 "", CaseFormat.LOWER_CAMEL.converterTo(CaseFormat.UPPER_CAMEL).convertAll(splitter.split(input)));
     }
 
+    static String anyToUpperUnderscore(String input) {
+        Preconditions.checkNotNull(input, "Input string is required");
+        return String.join(
+                "",
+                CaseFormat.LOWER_CAMEL.converterTo(CaseFormat.UPPER_UNDERSCORE).convertAll(splitter.split(input)));
+    }
+
     private static String escapeIfNecessary(String input) {
         Preconditions.checkNotNull(input, "Input string is required");
         Preconditions.checkArgument(!input.isEmpty(), "Input must not be empty");

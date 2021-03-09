@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
@@ -27,6 +28,7 @@ import com.palantir.metric.schema.MetricSchema;
 import java.io.File;
 import java.io.IOException;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.GradleException;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.tasks.CacheableTask;
@@ -57,7 +59,22 @@ public abstract class CompileMetricSchemaTask extends DefaultTask {
                 output,
                 getSource().getFiles().stream()
                         .map(CompileMetricSchemaTask::readFile)
+                        .peek(CompileMetricSchemaTask::validate)
                         .collect(ImmutableSet.toImmutableSet()));
+    }
+
+    private static void validate(MetricSchema schema) {
+        schema.getNamespaces().forEach((name, namespace) -> {
+            namespace.getMetrics().forEach((metricName, metricDefinition) -> {
+                Sets.SetView<String> valuesWithoutTags =
+                        Sets.difference(metricDefinition.getValues().keySet(), metricDefinition.getTags());
+                if (!valuesWithoutTags.isEmpty()) {
+                    throw new GradleException(String.format(
+                            "metric '%s' in namespace '%s' has values %s without corresponding tags",
+                            metricName, name, valuesWithoutTags));
+                }
+            });
+        });
     }
 
     private static MetricSchema readFile(File file) {
