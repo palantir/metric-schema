@@ -1,0 +1,10 @@
+apply from: "$rootDir/gradle/publish-jar.gradle"
+
+dependencies {
+    implementation project(':metric-schema-api:metric-schema-api-objects')
+    implementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+
+    annotationProcessor 'org.immutables:value'
+    compileOnly 'org.immutables:value::annotations'
+}

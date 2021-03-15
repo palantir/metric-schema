@@ -25,6 +25,7 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import com.palantir.metric.schema.MetricSchema;
+import com.palantir.metric.schema.lang.LangConverter;
 import java.io.File;
 import java.io.IOException;
 import org.gradle.api.DefaultTask;
@@ -41,7 +42,7 @@ import org.gradle.api.tasks.TaskAction;
 @CacheableTask
 public abstract class CompileMetricSchemaTask extends DefaultTask {
     private static final ObjectReader reader = ObjectMappers.withDefaultModules(new ObjectMapper(new YAMLFactory()))
-            .readerFor(MetricSchema.class);
+            .readerFor(com.palantir.metric.schema.lang.MetricSchema.class);
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
@@ -79,7 +80,7 @@ public abstract class CompileMetricSchemaTask extends DefaultTask {
 
     private static MetricSchema readFile(File file) {
         try {
-            return reader.readValue(file);
+            return LangConverter.toApi(reader.readValue(file));
         } catch (IOException e) {
             throw new SafeRuntimeException("Failed to deserialize file", e, SafeArg.of("file", file));
         }

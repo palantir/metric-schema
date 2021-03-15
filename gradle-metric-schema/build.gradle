@@ -5,9 +5,10 @@ apply plugin: 'groovy'
 apply from: "$rootDir/gradle/publish-jar.gradle"
 
 dependencies {
-    implementation project(':metric-schema-java')
-    implementation project(':metric-schema-markdown')
     implementation project(':metric-schema-api:metric-schema-api-objects')
+    implementation project(':metric-schema-java')
+    implementation project(':metric-schema-lang')
+    implementation project(':metric-schema-markdown')
     implementation 'com.google.guava:guava'
     implementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'

@@ -79,7 +79,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         """.stripIndent()
     }
 
-    def 'fails on invalid schema'() {
+    def 'handles shorthand schema'() {
         when:
         file('src/main/metrics/metrics.yml') << """
         namespaces:
@@ -89,14 +89,13 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
               response.size:
                 type: histogram
                 docs: A histogram of the number of bytes written into the response.
-                tags: [service_name]
-                values:
-                  endpoint: [foo]
+                tags:
+                  - tagName: service_name
+                    values: [foo]
         """.stripIndent()
 
         then:
-        def result = runTasksWithFailure('compileMetricSchema')
-        Throwables.getRootCause(result.getFailure()).getMessage().contains("metric 'response.size' in namespace 'server' has values [endpoint]")
+        def result = runTasksSuccessfully('compileMetricSchema')
     }
 
     def 'generates java'() {
