@@ -347,7 +347,7 @@ final class UtilityGenerator {
 
     private static ClassName getTagClassName(String metricName, MetricDefinition metricDefinition, String tag) {
         if (hasConstantValue(metricDefinition, tag)) {
-            return ClassName.bestGuess(Custodian.anyToUpperCamel(metricName) + Custodian.anyToUpperCamel(tag));
+            return ClassName.bestGuess(Custodian.anyToUpperCamel(metricName) + "_" + Custodian.anyToUpperCamel(tag));
         }
         return ClassName.get(String.class);
     }

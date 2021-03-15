@@ -36,14 +36,14 @@ public final class MonitorsMetrics {
         return "MonitorsMetrics{registry=" + registry + '}';
     }
 
-    public enum ProcessingResult {
+    public enum Processing_Result {
         SUCCESS("success"),
 
         FAILURE("failure");
 
         private final String value;
 
-        ProcessingResult(String value) {
+        Processing_Result(String value) {
             this.value = value;
         }
 
@@ -59,7 +59,7 @@ public final class MonitorsMetrics {
 
     public interface ProcessingBuilderResultStage {
         @CheckReturnValue
-        ProcessingBuilderTypeStage result(ProcessingResult result);
+        ProcessingBuilderTypeStage result(Processing_Result result);
     }
 
     public interface ProcessingBuilderTypeStage {
@@ -71,7 +71,7 @@ public final class MonitorsMetrics {
             implements ProcessingBuilderResultStage,
                     ProcessingBuilderTypeStage,
                     ProcessingBuildStage {
-        private ProcessingResult result;
+        private Processing_Result result;
 
         private String type;
 
@@ -88,7 +88,7 @@ public final class MonitorsMetrics {
         }
 
         @Override
-        public ProcessingBuilder result(ProcessingResult result) {
+        public ProcessingBuilder result(Processing_Result result) {
             Preconditions.checkState(this.result == null, "result is already set");
             this.result = Preconditions.checkNotNull(result, "result is required");
             return this;
