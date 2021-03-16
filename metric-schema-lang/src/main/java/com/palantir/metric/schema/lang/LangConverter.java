@@ -16,11 +16,13 @@
 
 package com.palantir.metric.schema.lang;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.palantir.metric.schema.Documentation;
 import com.palantir.metric.schema.MetricDefinition;
 import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
+import com.palantir.metric.schema.TagValue;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,8 +49,11 @@ public final class LangConverter {
         return MetricDefinition.builder()
                 .type(definition.type())
                 .tags(normalizedTags.keySet())
-                .values(Maps.filterEntries(
-                        normalizedTags, entry -> !entry.getValue().isEmpty()))
+                .values(normalizedTags.entrySet().stream()
+                        .filter(entry -> !entry.getValue().isEmpty())
+                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().stream()
+                                .map(TagValue::of)
+                                .collect(ImmutableSet.toImmutableSet()))))
                 .docs(Documentation.of(definition.docs()))
                 .build();
     }

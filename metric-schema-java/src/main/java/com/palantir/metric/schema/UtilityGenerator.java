@@ -109,7 +109,7 @@ final class UtilityGenerator {
             TypeSpec.Builder enumBuilder = TypeSpec.enumBuilder(getTagClassName(metricName, definition, tagName));
 
             values.forEach(value -> enumBuilder.addEnumConstant(
-                    Custodian.anyToUpperUnderscore(value),
+                    Custodian.anyToUpperUnderscore(value.getValue()),
                     TypeSpec.anonymousClassBuilder("$S", value).build()));
 
             builder.addType(enumBuilder
