@@ -5,6 +5,7 @@ namespaces:
       processing:
         docs: Measures number of installations that were processed
         type: meter
-        tags: [ result, type ]
-        values:
-          result: [success, failure]
+        tags:
+          - tagName: result
+            values: [success, failure]
+          - type

@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2021 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package com.palantir.metric.schema;
+package com.palantir.metric.schema.lang;
 
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.metric.schema.Documentation;
+import com.palantir.metric.schema.MetricNamespace;
+import com.palantir.metric.schema.MetricSchema;
+import com.palantir.metric.schema.MetricType;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
@@ -35,7 +39,7 @@ final class Validator {
         schema.getNamespaces().forEach(Validator::validateNamespace);
     }
 
-    private static void validateNamespace(String namespace, MetricNamespace namespaceValue) {
+    private static void validateNamespace(String namespace, com.palantir.metric.schema.MetricNamespace namespaceValue) {
         Preconditions.checkArgument(
                 !namespace.isEmpty(),
                 "Namespace must not be empty",

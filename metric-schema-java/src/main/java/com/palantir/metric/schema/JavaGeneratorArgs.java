@@ -20,7 +20,6 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import org.immutables.value.Value;
@@ -37,13 +36,9 @@ public abstract class JavaGeneratorArgs {
             Pattern.compile("[a-z0-9]+(-[a-z0-9]+)*").asPredicate();
 
     /**
-     * Input directory for metric schema files with the
-     *
-     * <pre>yml</pre>
-     *
-     * extension.
+     * Input file with a list of metric schema definitions.
      */
-    abstract Set<Path> inputs();
+    abstract Path input();
 
     /** Output directory for generated java code. */
     abstract Path output();

@@ -16,41 +16,31 @@
 
 package com.palantir.metric.schema.gradle;
 
-import com.google.common.collect.ImmutableSet;
 import com.palantir.metric.schema.JavaGenerator;
 import com.palantir.metric.schema.JavaGeneratorArgs;
 import java.io.File;
 import java.util.Optional;
+import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
-import org.gradle.api.file.FileTree;
+import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
-import org.gradle.api.tasks.SkipWhenEmpty;
-import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.GFileUtils;
 
 @CacheableTask
-public class GenerateMetricSchemaTask extends SourceTask {
-    private final DirectoryProperty outputDirectory = getProject().getObjects().directoryProperty();
-    private final Property<String> libraryName = getProject().getObjects().property(String.class);
+public abstract class GenerateMetricSchemaTask extends DefaultTask {
+    private final Property<String> libraryName =
+            getProject().getObjects().property(String.class).value(defaultLibraryName());
 
-    public GenerateMetricSchemaTask() {
-        libraryName.set(defaultLibraryName());
-    }
-
-    @Override
-    @InputFiles
-    @SkipWhenEmpty
+    @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
-    public final FileTree getSource() {
-        return super.getSource();
-    }
+    public abstract RegularFileProperty getInputFile();
 
     @Input
     public final Property<String> getLibraryName() {
@@ -58,9 +48,7 @@ public class GenerateMetricSchemaTask extends SourceTask {
     }
 
     @OutputDirectory
-    public final DirectoryProperty getOutputDir() {
-        return outputDirectory;
-    }
+    public abstract DirectoryProperty getOutputDir();
 
     @TaskAction
     public final void generate() {
@@ -69,7 +57,7 @@ public class GenerateMetricSchemaTask extends SourceTask {
         getProject().mkdir(output);
 
         JavaGenerator.generate(JavaGeneratorArgs.builder()
-                .inputs(getSource().getFiles().stream().map(File::toPath).collect(ImmutableSet.toImmutableSet()))
+                .input(getInputFile().getAsFile().get().toPath())
                 .output(output.toPath())
                 .libraryName(Optional.ofNullable(libraryName.getOrNull()))
                 // TODO(forozco): probably want something better

@@ -37,9 +37,9 @@ public final class MonitorsMetrics {
     }
 
     public enum Processing_Result {
-        SUCCESS("success"),
+        SUCCESS("TagValue{value: success}"),
 
-        FAILURE("failure");
+        FAILURE("TagValue{value: failure}");
 
         private final String value;
 

@@ -48,13 +48,15 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         Provider<Directory> metricSchemaDir =
                 project.getLayout().getBuildDirectory().dir("metricSchema");
 
-        Provider<Directory> generatedJavaOutputDir = metricSchemaDir.map(file -> file.dir("generated_src"));
+        TaskProvider<CompileMetricSchemaTask> compileSchemaTask =
+                createCompileSchemaTask(project, metricSchemaDir, sourceSet);
 
+        Provider<Directory> generatedJavaOutputDir = metricSchemaDir.map(file -> file.dir("generated_src"));
         TaskProvider<GenerateMetricSchemaTask> generateMetricsTask = project.getTasks()
                 .register("generateMetrics", GenerateMetricSchemaTask.class, task -> {
                     task.setGroup(TASK_GROUP);
                     task.setDescription("Generates bindings for producing well defined metrics");
-                    task.setSource(sourceSet);
+                    task.getInputFile().set(compileSchemaTask.flatMap(CompileMetricSchemaTask::getOutputFile));
                     task.getOutputDir().set(generatedJavaOutputDir);
                 });
         project.getTasks().named("compileJava", compileJava -> compileJava.dependsOn(generateMetricsTask));
@@ -64,8 +66,6 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         configureEclipse(project, generateMetricsTask);
         configureProjectDependencies(project);
 
-        TaskProvider<CompileMetricSchemaTask> compileSchemaTask =
-                createCompileSchemaTask(project, metricSchemaDir, sourceSet);
         createManifestTask(project, metricSchemaDir, compileSchemaTask);
         project.getPluginManager()
                 .withPlugin("com.palantir.sls-java-service-distribution", _plugin -> project.getPluginManager()

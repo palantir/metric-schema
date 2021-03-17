@@ -16,20 +16,11 @@
 
 package com.palantir.metric.schema.gradle;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
-import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeRuntimeException;
-import com.palantir.metric.schema.MetricSchema;
-import com.palantir.metric.schema.lang.LangConverter;
+import com.palantir.metric.schema.lang.MetricSchemaCompiler;
 import java.io.File;
 import java.io.IOException;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.GradleException;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.tasks.CacheableTask;
@@ -41,9 +32,6 @@ import org.gradle.api.tasks.TaskAction;
 
 @CacheableTask
 public abstract class CompileMetricSchemaTask extends DefaultTask {
-    private static final ObjectReader reader = ObjectMappers.withDefaultModules(new ObjectMapper(new YAMLFactory()))
-            .readerFor(com.palantir.metric.schema.lang.MetricSchema.class);
-
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
     public abstract ConfigurableFileCollection getSource();
@@ -56,33 +44,11 @@ public abstract class CompileMetricSchemaTask extends DefaultTask {
         File output = getOutputFile().getAsFile().get();
         getProject().mkdir(output.getParent());
 
-        com.palantir.metric.schema.gradle.ObjectMappers.mapper.writeValue(
+        ObjectMappers.mapper.writeValue(
                 output,
                 getSource().getFiles().stream()
-                        .map(CompileMetricSchemaTask::readFile)
-                        .peek(CompileMetricSchemaTask::validate)
+                        .map(File::toPath)
+                        .map(MetricSchemaCompiler::compile)
                         .collect(ImmutableSet.toImmutableSet()));
-    }
-
-    private static void validate(MetricSchema schema) {
-        schema.getNamespaces().forEach((name, namespace) -> {
-            namespace.getMetrics().forEach((metricName, metricDefinition) -> {
-                Sets.SetView<String> valuesWithoutTags =
-                        Sets.difference(metricDefinition.getValues().keySet(), metricDefinition.getTags());
-                if (!valuesWithoutTags.isEmpty()) {
-                    throw new GradleException(String.format(
-                            "metric '%s' in namespace '%s' has values %s without corresponding tags",
-                            metricName, name, valuesWithoutTags));
-                }
-            });
-        });
-    }
-
-    private static MetricSchema readFile(File file) {
-        try {
-            return LangConverter.toApi(reader.readValue(file));
-        } catch (IOException e) {
-            throw new SafeRuntimeException("Failed to deserialize file", e, SafeArg.of("file", file));
-        }
     }
 }

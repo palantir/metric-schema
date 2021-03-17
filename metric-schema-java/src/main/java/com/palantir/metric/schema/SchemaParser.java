@@ -16,9 +16,8 @@
 
 package com.palantir.metric.schema;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Suppliers;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
@@ -27,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Supplier;
 
 final class SchemaParser {
@@ -37,14 +37,11 @@ final class SchemaParser {
         return SUPPLIER.get();
     }
 
-    private final ObjectMapper yamlMapper = ObjectMappers.withDefaultModules(new ObjectMapper(new YAMLFactory()))
-            .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    private final ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
 
-    MetricSchema parseFile(Path file) {
+    List<MetricSchema> parseFile(Path file) {
         try (InputStream stream = Files.newInputStream(file)) {
-            MetricSchema schema = yamlMapper.readValue(stream, MetricSchema.class);
-            Validator.validate(schema);
-            return schema;
+            return mapper.readValue(stream, new TypeReference<List<MetricSchema>>() {});
         } catch (IOException e) {
             throw new SafeRuntimeException("Failed to parse file", e, SafeArg.of("file", file));
         }

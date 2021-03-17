@@ -31,7 +31,7 @@ public final class ReservedConflictMetrics {
 
     /** Uh-oh! */
     @CheckReturnValue
-    public IntBuilderIntStage int_() {
+    public IntBuilderRegistryStage int_() {
         return new IntBuilder();
     }
 
@@ -76,11 +76,6 @@ public final class ReservedConflictMetrics {
         Histogram build();
     }
 
-    public interface IntBuilderIntStage {
-        @CheckReturnValue
-        IntBuilderRegistryStage int_(String int_);
-    }
-
     public interface IntBuilderRegistryStage {
         @CheckReturnValue
         IntBuilderLongStage registry_(String registry_);
@@ -88,38 +83,36 @@ public final class ReservedConflictMetrics {
 
     public interface IntBuilderLongStage {
         @CheckReturnValue
-        IntBuildStage long_(String long_);
+        IntBuilderIntStage long_(String long_);
+    }
+
+    public interface IntBuilderIntStage {
+        @CheckReturnValue
+        IntBuildStage int_(String int_);
     }
 
     private final class IntBuilder
-            implements IntBuilderIntStage,
-                    IntBuilderRegistryStage,
+            implements IntBuilderRegistryStage,
                     IntBuilderLongStage,
+                    IntBuilderIntStage,
                     IntBuildStage {
-        private String int_;
-
         private String registry_;
 
         private String long_;
+
+        private String int_;
 
         @Override
         public Histogram build() {
             return registry.histogram(
                     MetricName.builder()
                             .safeName("reserved.conflict.int")
-                            .putSafeTags("int", int_)
                             .putSafeTags("registry", registry_)
                             .putSafeTags("long", long_)
+                            .putSafeTags("int", int_)
                             .putSafeTags("libraryName", LIBRARY_NAME)
                             .putSafeTags("libraryVersion", LIBRARY_VERSION)
                             .build());
-        }
-
-        @Override
-        public IntBuilder int_(String int_) {
-            Preconditions.checkState(this.int_ == null, "int is already set");
-            this.int_ = Preconditions.checkNotNull(int_, "int is required");
-            return this;
         }
 
         @Override
@@ -133,6 +126,13 @@ public final class ReservedConflictMetrics {
         public IntBuilder long_(String long_) {
             Preconditions.checkState(this.long_ == null, "long is already set");
             this.long_ = Preconditions.checkNotNull(long_, "long is required");
+            return this;
+        }
+
+        @Override
+        public IntBuilder int_(String int_) {
+            Preconditions.checkState(this.int_ == null, "int is already set");
+            this.int_ = Preconditions.checkNotNull(int_, "int is required");
             return this;
         }
     }

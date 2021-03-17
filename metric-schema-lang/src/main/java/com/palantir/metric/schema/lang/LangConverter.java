@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public final class LangConverter {
-    public static MetricSchema toApi(com.palantir.metric.schema.lang.MetricSchema schema) {
+final class LangConverter {
+    static MetricSchema toApi(com.palantir.metric.schema.lang.MetricSchema schema) {
         return MetricSchema.builder()
                 .namespaces(Maps.transformValues(schema.namespaces(), LangConverter::convert))
                 .options(schema.options())

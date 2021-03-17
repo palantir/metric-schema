@@ -90,7 +90,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
                 type: histogram
                 docs: A histogram of the number of bytes written into the response.
                 tags:
-                  - tagName: service_name
+                  - tagName: serviceName
                     values: [foo]
         """.stripIndent()
 
@@ -136,7 +136,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
         then:
         def result = runTasksWithFailure('classes')
-        result.wasExecuted(':generateMetrics')
+        result.wasExecuted(':compileMetricSchema')
         Throwables.getRootCause(result.getFailure()).getMessage().contains("tags must match pattern")
     }
 
@@ -152,8 +152,8 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
         then:
         def result = runTasksWithFailure('classes')
-        result.wasExecuted(':generateMetrics')
-        Throwables.getRootCause(result.getFailure()).getMessage().contains("MetricDefinition is required")
+        result.wasExecuted(':compileMetricSchema')
+        Throwables.getRootCause(result.getFailure()).getMessage().contains("null value in entry: my.custom.metric=null")
     }
 
     def 'embeds metrics into jar'() {
