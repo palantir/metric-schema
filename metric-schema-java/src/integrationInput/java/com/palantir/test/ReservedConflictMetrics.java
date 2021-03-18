@@ -31,7 +31,7 @@ public final class ReservedConflictMetrics {
 
     /** Uh-oh! */
     @CheckReturnValue
-    public IntBuilderRegistryStage int_() {
+    public IntBuilderLongStage int_() {
         return new IntBuilder();
     }
 
@@ -76,14 +76,14 @@ public final class ReservedConflictMetrics {
         Histogram build();
     }
 
-    public interface IntBuilderRegistryStage {
-        @CheckReturnValue
-        IntBuilderLongStage registry_(String registry_);
-    }
-
     public interface IntBuilderLongStage {
         @CheckReturnValue
-        IntBuilderIntStage long_(String long_);
+        IntBuilderRegistryStage long_(String long_);
+    }
+
+    public interface IntBuilderRegistryStage {
+        @CheckReturnValue
+        IntBuilderIntStage registry_(String registry_);
     }
 
     public interface IntBuilderIntStage {
@@ -92,13 +92,13 @@ public final class ReservedConflictMetrics {
     }
 
     private final class IntBuilder
-            implements IntBuilderRegistryStage,
-                    IntBuilderLongStage,
+            implements IntBuilderLongStage,
+                    IntBuilderRegistryStage,
                     IntBuilderIntStage,
                     IntBuildStage {
-        private String registry_;
-
         private String long_;
+
+        private String registry_;
 
         private String int_;
 
@@ -107,8 +107,8 @@ public final class ReservedConflictMetrics {
             return registry.histogram(
                     MetricName.builder()
                             .safeName("reserved.conflict.int")
-                            .putSafeTags("registry", registry_)
                             .putSafeTags("long", long_)
+                            .putSafeTags("registry", registry_)
                             .putSafeTags("int", int_)
                             .putSafeTags("libraryName", LIBRARY_NAME)
                             .putSafeTags("libraryVersion", LIBRARY_VERSION)
@@ -116,23 +116,33 @@ public final class ReservedConflictMetrics {
         }
 
         @Override
-        public IntBuilder registry_(String registry_) {
-            Preconditions.checkState(this.registry_ == null, "registry is already set");
-            this.registry_ = Preconditions.checkNotNull(registry_, "registry is required");
+        public IntBuilder long_(String long_) {
+            Preconditions.checkState(
+                    this.long_ == null, "TagDefinition{name: long, values: []} is already set");
+            this.long_ =
+                    Preconditions.checkNotNull(
+                            long_, "TagDefinition{name: long, values: []} is required");
             return this;
         }
 
         @Override
-        public IntBuilder long_(String long_) {
-            Preconditions.checkState(this.long_ == null, "long is already set");
-            this.long_ = Preconditions.checkNotNull(long_, "long is required");
+        public IntBuilder registry_(String registry_) {
+            Preconditions.checkState(
+                    this.registry_ == null,
+                    "TagDefinition{name: registry, values: []} is already set");
+            this.registry_ =
+                    Preconditions.checkNotNull(
+                            registry_, "TagDefinition{name: registry, values: []} is required");
             return this;
         }
 
         @Override
         public IntBuilder int_(String int_) {
-            Preconditions.checkState(this.int_ == null, "int is already set");
-            this.int_ = Preconditions.checkNotNull(int_, "int is required");
+            Preconditions.checkState(
+                    this.int_ == null, "TagDefinition{name: int, values: []} is already set");
+            this.int_ =
+                    Preconditions.checkNotNull(
+                            int_, "TagDefinition{name: int, values: []} is required");
             return this;
         }
     }
@@ -168,8 +178,11 @@ public final class ReservedConflictMetrics {
 
         @Override
         public DoubleBuilder int_(String int_) {
-            Preconditions.checkState(this.int_ == null, "int is already set");
-            this.int_ = Preconditions.checkNotNull(int_, "int is required");
+            Preconditions.checkState(
+                    this.int_ == null, "TagDefinition{name: int, values: []} is already set");
+            this.int_ =
+                    Preconditions.checkNotNull(
+                            int_, "TagDefinition{name: int, values: []} is required");
             return this;
         }
     }

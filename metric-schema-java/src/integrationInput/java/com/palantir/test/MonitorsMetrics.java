@@ -37,9 +37,9 @@ public final class MonitorsMetrics {
     }
 
     public enum Processing_Result {
-        SUCCESS("TagValue{value: success}"),
+        SUCCESS("success"),
 
-        FAILURE("TagValue{value: failure}");
+        FAILURE("failure");
 
         private final String value;
 
@@ -89,15 +89,23 @@ public final class MonitorsMetrics {
 
         @Override
         public ProcessingBuilder result(Processing_Result result) {
-            Preconditions.checkState(this.result == null, "result is already set");
-            this.result = Preconditions.checkNotNull(result, "result is required");
+            Preconditions.checkState(
+                    this.result == null,
+                    "TagDefinition{name: result, values: [success, failure]} is already set");
+            this.result =
+                    Preconditions.checkNotNull(
+                            result,
+                            "TagDefinition{name: result, values: [success, failure]} is required");
             return this;
         }
 
         @Override
         public ProcessingBuilder type(String type) {
-            Preconditions.checkState(this.type == null, "type is already set");
-            this.type = Preconditions.checkNotNull(type, "type is required");
+            Preconditions.checkState(
+                    this.type == null, "TagDefinition{name: type, values: []} is already set");
+            this.type =
+                    Preconditions.checkNotNull(
+                            type, "TagDefinition{name: type, values: []} is required");
             return this;
         }
     }

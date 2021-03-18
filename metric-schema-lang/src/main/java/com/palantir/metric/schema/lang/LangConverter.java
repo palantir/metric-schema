@@ -22,10 +22,7 @@ import com.palantir.metric.schema.Documentation;
 import com.palantir.metric.schema.MetricDefinition;
 import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
-import com.palantir.metric.schema.TagValue;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.palantir.metric.schema.TagDefinition;
 
 final class LangConverter {
     static MetricSchema toApi(com.palantir.metric.schema.lang.MetricSchema schema) {
@@ -44,16 +41,14 @@ final class LangConverter {
     }
 
     private static MetricDefinition convert(com.palantir.metric.schema.lang.MetricDefinition definition) {
-        Map<String, Set<String>> normalizedTags =
-                definition.tags().stream().collect(Collectors.toMap(TagDefinition::tagName, TagDefinition::values));
         return MetricDefinition.builder()
                 .type(definition.type())
-                .tags(normalizedTags.keySet())
-                .values(normalizedTags.entrySet().stream()
-                        .filter(entry -> !entry.getValue().isEmpty())
-                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().stream()
-                                .map(TagValue::of)
-                                .collect(ImmutableSet.toImmutableSet()))))
+                .tagDefinitions(definition.tags().stream()
+                        .map(tag -> TagDefinition.builder()
+                                .name(tag.name())
+                                .values(tag.values())
+                                .build())
+                        .collect(ImmutableSet.toImmutableSet()))
                 .docs(Documentation.of(definition.docs()))
                 .build();
     }

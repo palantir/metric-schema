@@ -23,17 +23,17 @@ import org.immutables.value.Value.Immutable;
 
 @Immutable
 public interface TagDefinition {
-    String tagName();
+    String name();
 
     Set<String> values();
 
     @JsonCreator
-    static TagDefinition valueOf(String tagName) {
-        return ImmutableTagDefinition.builder().tagName(tagName).build();
+    static TagDefinition valueOf(String name) {
+        return ImmutableTagDefinition.builder().name(name).build();
     }
 
     @JsonCreator
-    static TagDefinition valueOf(@JsonProperty("tagName") String tagName, @JsonProperty("values") Set<String> values) {
-        return ImmutableTagDefinition.builder().tagName(tagName).values(values).build();
+    static TagDefinition valueOf(@JsonProperty("name") String name, @JsonProperty("values") Set<String> values) {
+        return ImmutableTagDefinition.builder().name(name).values(values).build();
     }
 }

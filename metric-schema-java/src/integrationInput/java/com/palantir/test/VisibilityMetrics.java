@@ -88,15 +88,21 @@ final class VisibilityMetrics {
 
         @Override
         public ComplexBuilder bar(String bar) {
-            Preconditions.checkState(this.bar == null, "bar is already set");
-            this.bar = Preconditions.checkNotNull(bar, "bar is required");
+            Preconditions.checkState(
+                    this.bar == null, "TagDefinition{name: bar, values: []} is already set");
+            this.bar =
+                    Preconditions.checkNotNull(
+                            bar, "TagDefinition{name: bar, values: []} is required");
             return this;
         }
 
         @Override
         public ComplexBuilder foo(String foo) {
-            Preconditions.checkState(this.foo == null, "foo is already set");
-            this.foo = Preconditions.checkNotNull(foo, "foo is required");
+            Preconditions.checkState(
+                    this.foo == null, "TagDefinition{name: foo, values: []} is already set");
+            this.foo =
+                    Preconditions.checkNotNull(
+                            foo, "TagDefinition{name: foo, values: []} is required");
             return this;
         }
     }

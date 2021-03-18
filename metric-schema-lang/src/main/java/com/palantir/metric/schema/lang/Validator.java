@@ -22,7 +22,10 @@ import com.palantir.metric.schema.Documentation;
 import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
 import com.palantir.metric.schema.MetricType;
+import com.palantir.metric.schema.TagDefinition;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 final class Validator {
@@ -66,16 +69,31 @@ final class Validator {
                     SafeArg.of("namespace", namespace),
                     SafeArg.of("definition", definition));
             validateDocumentation(definition.getDocs());
-            definition.getTags().forEach(tag -> {
+            Preconditions.checkArgument(definition.getTags().isEmpty(), "tags field is replaced tagDefinition");
+
+            Set<String> uniqueNames = definition.getTagDefinitions().stream()
+                    .map(TagDefinition::getName)
+                    .collect(Collectors.toSet());
+            Preconditions.checkArgument(
+                    uniqueNames.size() == definition.getTagDefinitions().size(), "Encountered duplicate tag names");
+            definition.getTagDefinitions().forEach(tag -> {
                 Preconditions.checkArgument(
-                        !tag.isEmpty(),
+                        !tag.getName().isEmpty(),
                         "MetricDefinition tags must not be empty",
                         SafeArg.of("namespace", namespace),
                         SafeArg.of("definition", definition));
                 Preconditions.checkArgument(
-                        NAME_PREDICATE.matcher(tag).matches(),
+                        NAME_PREDICATE.matcher(tag.getName()).matches(),
                         "MetricDefinition tags must match pattern",
                         SafeArg.of("pattern", NAME_PATTERN));
+                tag.getValues().forEach(tagValue -> {
+                    Preconditions.checkArgument(
+                            NAME_PREDICATE.matcher(tagValue).matches(),
+                            "tag values must match pattern",
+                            SafeArg.of("tag", tag.getName()),
+                            SafeArg.of("tagValue", tagValue),
+                            SafeArg.of("pattern", NAME_PATTERN));
+                });
             });
         });
     }

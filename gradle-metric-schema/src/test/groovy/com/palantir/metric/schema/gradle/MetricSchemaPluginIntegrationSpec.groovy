@@ -90,7 +90,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
                 type: histogram
                 docs: A histogram of the number of bytes written into the response.
                 tags:
-                  - tagName: serviceName
+                  - name: serviceName
                     values: [foo]
         """.stripIndent()
 

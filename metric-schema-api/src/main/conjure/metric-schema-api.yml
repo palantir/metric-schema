@@ -23,7 +23,7 @@ types:
         fields:
           type: MetricType
           tags: set<string>
-          values: map<string, set<TagValue>>
+          tagDefinitions: set<TagDefinition>
           docs: Documentation
       MetricType:
         values:
@@ -35,6 +35,7 @@ types:
       Documentation:
         docs: Documentation describing an associated component. Markdown syntax may be used.
         alias: string
-      TagValue:
+      TagDefinition:
         fields:
-          value: string
+          name: string
+          values: set<string>
