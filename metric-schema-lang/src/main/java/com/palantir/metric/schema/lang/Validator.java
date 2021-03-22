@@ -88,7 +88,7 @@ final class Validator {
                         SafeArg.of("pattern", NAME_PATTERN));
                 tag.getValues().forEach(tagValue -> {
                     Preconditions.checkArgument(
-                            NAME_PREDICATE.matcher(tagValue).matches(),
+                            NAME_PREDICATE.matcher(tagValue.getValue()).matches(),
                             "tag values must match pattern",
                             SafeArg.of("tag", tag.getName()),
                             SafeArg.of("tagValue", tagValue),

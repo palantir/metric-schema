@@ -113,8 +113,9 @@ final class UtilityGenerator {
 
             tagDef.getValues()
                     .forEach(value -> enumBuilder.addEnumConstant(
-                            Custodian.anyToUpperUnderscore(value),
-                            TypeSpec.anonymousClassBuilder("$S", value).build()));
+                            Custodian.anyToUpperUnderscore(value.getValue()),
+                            TypeSpec.anonymousClassBuilder("$S", value.getValue())
+                                    .build()));
 
             builder.addType(enumBuilder
                     .addModifiers(visibility.apply())

@@ -91,11 +91,11 @@ public final class MonitorsMetrics {
         public ProcessingBuilder result(Processing_Result result) {
             Preconditions.checkState(
                     this.result == null,
-                    "TagDefinition{name: result, values: [success, failure]} is already set");
+                    "TagDefinition{name: result, values: [TagValue{value: success}, TagValue{value: failure}]} is already set");
             this.result =
                     Preconditions.checkNotNull(
                             result,
-                            "TagDefinition{name: result, values: [success, failure]} is required");
+                            "TagDefinition{name: result, values: [TagValue{value: success}, TagValue{value: failure}]} is required");
             return this;
         }
 

@@ -23,6 +23,7 @@ import com.palantir.metric.schema.MetricDefinition;
 import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
 import com.palantir.metric.schema.TagDefinition;
+import com.palantir.metric.schema.TagValue;
 
 final class LangConverter {
     static MetricSchema toApi(com.palantir.metric.schema.lang.MetricSchema schema) {
@@ -46,7 +47,7 @@ final class LangConverter {
                 .tagDefinitions(definition.tags().stream()
                         .map(tag -> TagDefinition.builder()
                                 .name(tag.name())
-                                .values(tag.values())
+                                .values(tag.values().stream().map(TagValue::of).collect(ImmutableSet.toImmutableSet()))
                                 .build())
                         .collect(ImmutableSet.toImmutableSet()))
                 .docs(Documentation.of(definition.docs()))

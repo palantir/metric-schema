@@ -38,4 +38,7 @@ types:
       TagDefinition:
         fields:
           name: string
-          values: set<string>
+          values: set<TagValue>
+      TagValue:
+        fields:
+          value: string
