@@ -330,12 +330,12 @@ final class UtilityGenerator {
                                         "$1T.checkState(this.$2L == null, $3S)",
                                         Preconditions.class,
                                         Custodian.sanitizeName(tag.getName()),
-                                        tag + " is already set")
+                                        tag.getName() + " is already set")
                                 .addStatement(
                                         "this.$1L = $2T.checkNotNull($1L, $3S)",
                                         Custodian.sanitizeName(tag.getName()),
                                         Preconditions.class,
-                                        tag + " is required")
+                                        tag.getName() + " is required")
                                 .addStatement("return this")
                                 .build())
                         .collect(ImmutableList.toImmutableList()))
