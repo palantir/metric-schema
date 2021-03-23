@@ -31,6 +31,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
@@ -109,9 +110,10 @@ final class UtilityGenerator {
             if (tagDef.getValues().isEmpty()) {
                 return;
             }
-            TypeSpec.Builder enumBuilder = TypeSpec.enumBuilder(getTagClassName(metricName, tagDef));
 
-            tagDef.getValues()
+            TypeSpec.Builder enumBuilder = TypeSpec.enumBuilder(getTagClassName(metricName, tagDef));
+            tagDef.getValues().stream()
+                    .sorted(Comparator.comparing(TagValue::getValue))
                     .forEach(value -> enumBuilder.addEnumConstant(
                             Custodian.anyToUpperUnderscore(value.getValue()),
                             TypeSpec.anonymousClassBuilder("$S", value.getValue())
@@ -250,7 +252,9 @@ final class UtilityGenerator {
                 .addModifiers(visibility.apply())
                 .addMethods(abstractBuildMethods)
                 .build());
-        ImmutableList<TagDefinition> tagList = ImmutableList.copyOf(definition.getTagDefinitions());
+        ImmutableList<TagDefinition> tagList = definition.getTagDefinitions().stream()
+                .sorted(Comparator.comparing(TagDefinition::getName))
+                .collect(ImmutableList.toImmutableList());
         for (int i = 0; i < tagList.size(); i++) {
             boolean lastTag = i == tagList.size() - 1;
             TagDefinition tag = tagList.get(i);

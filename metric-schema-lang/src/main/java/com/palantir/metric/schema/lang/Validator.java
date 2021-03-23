@@ -42,7 +42,7 @@ final class Validator {
         schema.getNamespaces().forEach(Validator::validateNamespace);
     }
 
-    private static void validateNamespace(String namespace, com.palantir.metric.schema.MetricNamespace namespaceValue) {
+    private static void validateNamespace(String namespace, MetricNamespace namespaceValue) {
         Preconditions.checkArgument(
                 !namespace.isEmpty(),
                 "Namespace must not be empty",

@@ -37,9 +37,9 @@ public final class MonitorsMetrics {
     }
 
     public enum Processing_Result {
-        SUCCESS("success"),
+        FAILURE("failure"),
 
-        FAILURE("failure");
+        SUCCESS("success");
 
         private final String value;
 
