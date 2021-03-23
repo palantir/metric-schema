@@ -18,7 +18,7 @@ package com.palantir.metric.schema.lang;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.metric.schema.MetricType;
-import java.util.Set;
+import java.util.List;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
@@ -26,7 +26,7 @@ import org.immutables.value.Value.Immutable;
 public interface LangMetricDefinition {
     MetricType type();
 
-    Set<TagDefinition> tags();
+    List<TagDefinition> tags();
 
     String docs();
 }

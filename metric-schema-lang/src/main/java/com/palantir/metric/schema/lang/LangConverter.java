@@ -16,7 +16,7 @@
 
 package com.palantir.metric.schema.lang;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.palantir.metric.schema.Documentation;
 import com.palantir.metric.schema.MetricDefinition;
@@ -47,9 +47,11 @@ final class LangConverter {
                 .tagDefinitions(definition.tags().stream()
                         .map(tag -> TagDefinition.builder()
                                 .name(tag.name())
-                                .values(tag.values().stream().map(TagValue::of).collect(ImmutableSet.toImmutableSet()))
+                                .values(tag.values().stream()
+                                        .map(TagValue::of)
+                                        .collect(ImmutableList.toImmutableList()))
                                 .build())
-                        .collect(ImmutableSet.toImmutableSet()))
+                        .collect(ImmutableList.toImmutableList()))
                 .docs(Documentation.of(definition.docs()))
                 .build();
     }
