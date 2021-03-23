@@ -23,7 +23,7 @@ types:
         fields:
           type: MetricType
           tags: set<string>
-          tagDefinitions: set<TagDefinition>
+          tagDefinitions: list<TagDefinition>
           docs: Documentation
       MetricType:
         values:

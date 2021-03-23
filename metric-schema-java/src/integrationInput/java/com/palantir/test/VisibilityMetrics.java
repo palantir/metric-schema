@@ -39,7 +39,7 @@ final class VisibilityMetrics {
 
     /** Tagged gauge metric. */
     @CheckReturnValue
-    ComplexBuilderBarStage complex() {
+    ComplexBuilderFooStage complex() {
         return new ComplexBuilder();
     }
 
@@ -54,21 +54,21 @@ final class VisibilityMetrics {
         MetricName buildMetricName();
     }
 
-    interface ComplexBuilderBarStage {
-        @CheckReturnValue
-        ComplexBuilderFooStage bar(String bar);
-    }
-
     interface ComplexBuilderFooStage {
         @CheckReturnValue
-        ComplexBuildStage foo(String foo);
+        ComplexBuilderBarStage foo(String foo);
+    }
+
+    interface ComplexBuilderBarStage {
+        @CheckReturnValue
+        ComplexBuildStage bar(String bar);
     }
 
     private final class ComplexBuilder
-            implements ComplexBuilderBarStage, ComplexBuilderFooStage, ComplexBuildStage {
-        private String bar;
-
+            implements ComplexBuilderFooStage, ComplexBuilderBarStage, ComplexBuildStage {
         private String foo;
+
+        private String bar;
 
         @Override
         public void build(Gauge<?> gauge) {
@@ -79,24 +79,24 @@ final class VisibilityMetrics {
         public MetricName buildMetricName() {
             return MetricName.builder()
                     .safeName("visibility.complex")
-                    .putSafeTags("bar", bar)
                     .putSafeTags("foo", foo)
+                    .putSafeTags("bar", bar)
                     .putSafeTags("libraryName", LIBRARY_NAME)
                     .putSafeTags("libraryVersion", LIBRARY_VERSION)
                     .build();
         }
 
         @Override
-        public ComplexBuilder bar(String bar) {
-            Preconditions.checkState(this.bar == null, "bar is already set");
-            this.bar = Preconditions.checkNotNull(bar, "bar is required");
+        public ComplexBuilder foo(String foo) {
+            Preconditions.checkState(this.foo == null, "foo is already set");
+            this.foo = Preconditions.checkNotNull(foo, "foo is required");
             return this;
         }
 
         @Override
-        public ComplexBuilder foo(String foo) {
-            Preconditions.checkState(this.foo == null, "foo is already set");
-            this.foo = Preconditions.checkNotNull(foo, "foo is required");
+        public ComplexBuilder bar(String bar) {
+            Preconditions.checkState(this.bar == null, "bar is already set");
+            this.bar = Preconditions.checkNotNull(bar, "bar is required");
             return this;
         }
     }

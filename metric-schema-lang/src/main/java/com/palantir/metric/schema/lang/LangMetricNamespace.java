@@ -22,11 +22,11 @@ import java.util.Optional;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
-@JsonDeserialize(as = ImmutableMetricNamespace.class)
-public interface MetricNamespace {
+@JsonDeserialize(as = ImmutableLangMetricNamespace.class)
+public interface LangMetricNamespace {
     Optional<String> shortName();
 
     String docs();
 
-    Map<String, MetricDefinition> metrics();
+    Map<String, LangMetricDefinition> metrics();
 }

@@ -29,7 +29,7 @@ import java.nio.file.Path;
 
 public final class MetricSchemaCompiler {
     private static final ObjectReader reader = ObjectMappers.withDefaultModules(new ObjectMapper(new YAMLFactory()))
-            .readerFor(com.palantir.metric.schema.lang.MetricSchema.class);
+            .readerFor(LangMetricSchema.class);
 
     public static MetricSchema compile(Path inputFile) {
         MetricSchema metricSchema = readFile(inputFile.toFile());

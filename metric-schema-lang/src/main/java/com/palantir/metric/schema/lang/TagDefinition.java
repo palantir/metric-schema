@@ -18,14 +18,14 @@ package com.palantir.metric.schema.lang;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Set;
+import java.util.List;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
 public interface TagDefinition {
     String name();
 
-    Set<String> values();
+    List<String> values();
 
     @JsonCreator
     static TagDefinition valueOf(String name) {
@@ -33,7 +33,7 @@ public interface TagDefinition {
     }
 
     @JsonCreator
-    static TagDefinition valueOf(@JsonProperty("name") String name, @JsonProperty("values") Set<String> values) {
+    static TagDefinition valueOf(@JsonProperty("name") String name, @JsonProperty("values") List<String> values) {
         return ImmutableTagDefinition.builder().name(name).values(values).build();
     }
 }

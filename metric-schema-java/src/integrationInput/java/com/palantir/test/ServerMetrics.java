@@ -28,7 +28,7 @@ public final class ServerMetrics {
 
     /** A histogram of the number of bytes written into the response. */
     @CheckReturnValue
-    public ResponseSizeBuilderEndpointStage responseSize() {
+    public ResponseSizeBuilderServiceNameStage responseSize() {
         return new ResponseSizeBuilder();
     }
 
@@ -55,23 +55,23 @@ public final class ServerMetrics {
         Histogram build();
     }
 
-    public interface ResponseSizeBuilderEndpointStage {
-        @CheckReturnValue
-        ResponseSizeBuilderServiceNameStage endpoint(String endpoint);
-    }
-
     public interface ResponseSizeBuilderServiceNameStage {
         @CheckReturnValue
-        ResponseSizeBuildStage serviceName(String serviceName);
+        ResponseSizeBuilderEndpointStage serviceName(String serviceName);
+    }
+
+    public interface ResponseSizeBuilderEndpointStage {
+        @CheckReturnValue
+        ResponseSizeBuildStage endpoint(String endpoint);
     }
 
     private final class ResponseSizeBuilder
-            implements ResponseSizeBuilderEndpointStage,
-                    ResponseSizeBuilderServiceNameStage,
+            implements ResponseSizeBuilderServiceNameStage,
+                    ResponseSizeBuilderEndpointStage,
                     ResponseSizeBuildStage {
-        private String endpoint;
-
         private String serviceName;
+
+        private String endpoint;
 
         @Override
         public Histogram build() {
@@ -86,16 +86,16 @@ public final class ServerMetrics {
         }
 
         @Override
-        public ResponseSizeBuilder endpoint(String endpoint) {
-            Preconditions.checkState(this.endpoint == null, "endpoint is already set");
-            this.endpoint = Preconditions.checkNotNull(endpoint, "endpoint is required");
+        public ResponseSizeBuilder serviceName(String serviceName) {
+            Preconditions.checkState(this.serviceName == null, "service-name is already set");
+            this.serviceName = Preconditions.checkNotNull(serviceName, "service-name is required");
             return this;
         }
 
         @Override
-        public ResponseSizeBuilder serviceName(String serviceName) {
-            Preconditions.checkState(this.serviceName == null, "service-name is already set");
-            this.serviceName = Preconditions.checkNotNull(serviceName, "service-name is required");
+        public ResponseSizeBuilder endpoint(String endpoint) {
+            Preconditions.checkState(this.endpoint == null, "endpoint is already set");
+            this.endpoint = Preconditions.checkNotNull(endpoint, "endpoint is required");
             return this;
         }
     }

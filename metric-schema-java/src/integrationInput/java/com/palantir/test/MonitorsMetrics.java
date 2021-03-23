@@ -27,7 +27,7 @@ public final class MonitorsMetrics {
 
     /** Measures number of installations that were processed */
     @CheckReturnValue
-    public ProcessingBuilderResultStage processing() {
+    public ProcessingBuilderTypeStage processing() {
         return new ProcessingBuilder();
     }
 
@@ -37,9 +37,9 @@ public final class MonitorsMetrics {
     }
 
     public enum Processing_Result {
-        FAILURE("failure"),
+        SUCCESS("success"),
 
-        SUCCESS("success");
+        FAILURE("failure");
 
         private final String value;
 
@@ -57,47 +57,47 @@ public final class MonitorsMetrics {
         Meter build();
     }
 
-    public interface ProcessingBuilderResultStage {
-        @CheckReturnValue
-        ProcessingBuilderTypeStage result(Processing_Result result);
-    }
-
     public interface ProcessingBuilderTypeStage {
         @CheckReturnValue
-        ProcessingBuildStage type(String type);
+        ProcessingBuilderResultStage type(String type);
+    }
+
+    public interface ProcessingBuilderResultStage {
+        @CheckReturnValue
+        ProcessingBuildStage result(Processing_Result result);
     }
 
     private final class ProcessingBuilder
-            implements ProcessingBuilderResultStage,
-                    ProcessingBuilderTypeStage,
+            implements ProcessingBuilderTypeStage,
+                    ProcessingBuilderResultStage,
                     ProcessingBuildStage {
-        private Processing_Result result;
-
         private String type;
+
+        private Processing_Result result;
 
         @Override
         public Meter build() {
             return registry.meter(
                     MetricName.builder()
                             .safeName("monitors.processing")
-                            .putSafeTags("result", result.getValue())
                             .putSafeTags("type", type)
+                            .putSafeTags("result", result.getValue())
                             .putSafeTags("libraryName", LIBRARY_NAME)
                             .putSafeTags("libraryVersion", LIBRARY_VERSION)
                             .build());
         }
 
         @Override
-        public ProcessingBuilder result(Processing_Result result) {
-            Preconditions.checkState(this.result == null, "result is already set");
-            this.result = Preconditions.checkNotNull(result, "result is required");
+        public ProcessingBuilder type(String type) {
+            Preconditions.checkState(this.type == null, "type is already set");
+            this.type = Preconditions.checkNotNull(type, "type is required");
             return this;
         }
 
         @Override
-        public ProcessingBuilder type(String type) {
-            Preconditions.checkState(this.type == null, "type is already set");
-            this.type = Preconditions.checkNotNull(type, "type is required");
+        public ProcessingBuilder result(Processing_Result result) {
+            Preconditions.checkState(this.result == null, "result is already set");
+            this.result = Preconditions.checkNotNull(result, "result is required");
             return this;
         }
     }

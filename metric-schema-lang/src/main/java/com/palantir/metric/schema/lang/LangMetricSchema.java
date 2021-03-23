@@ -17,16 +17,13 @@
 package com.palantir.metric.schema.lang;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.palantir.metric.schema.MetricType;
-import java.util.Set;
+import java.util.Map;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
-@JsonDeserialize(as = ImmutableMetricDefinition.class)
-public interface MetricDefinition {
-    MetricType type();
+@JsonDeserialize(as = ImmutableLangMetricSchema.class)
+public interface LangMetricSchema {
+    Map<String, LangMetricNamespace> namespaces();
 
-    Set<TagDefinition> tags();
-
-    String docs();
+    Map<String, String> options();
 }

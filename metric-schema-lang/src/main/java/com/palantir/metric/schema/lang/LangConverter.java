@@ -26,14 +26,14 @@ import com.palantir.metric.schema.TagDefinition;
 import com.palantir.metric.schema.TagValue;
 
 final class LangConverter {
-    static MetricSchema toApi(com.palantir.metric.schema.lang.MetricSchema schema) {
+    static MetricSchema toApi(LangMetricSchema schema) {
         return MetricSchema.builder()
                 .namespaces(Maps.transformValues(schema.namespaces(), LangConverter::convert))
                 .options(schema.options())
                 .build();
     }
 
-    private static MetricNamespace convert(com.palantir.metric.schema.lang.MetricNamespace namespace) {
+    private static MetricNamespace convert(LangMetricNamespace namespace) {
         return MetricNamespace.builder()
                 .shortName(namespace.shortName())
                 .docs(Documentation.of(namespace.docs()))
@@ -41,7 +41,7 @@ final class LangConverter {
                 .build();
     }
 
-    private static MetricDefinition convert(com.palantir.metric.schema.lang.MetricDefinition definition) {
+    private static MetricDefinition convert(LangMetricDefinition definition) {
         return MetricDefinition.builder()
                 .type(definition.type())
                 .tagDefinitions(definition.tags().stream()

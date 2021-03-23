@@ -23,6 +23,7 @@ import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
 import com.palantir.metric.schema.MetricType;
 import com.palantir.metric.schema.TagDefinition;
+import com.palantir.metric.schema.TagValue;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -94,6 +95,10 @@ final class Validator {
                             SafeArg.of("tagValue", tagValue),
                             SafeArg.of("pattern", NAME_PATTERN));
                 });
+                Set<String> uniqueValues =
+                        tag.getValues().stream().map(TagValue::getValue).collect(Collectors.toSet());
+                Preconditions.checkArgument(
+                        uniqueValues.size() == tag.getValues().size(), "Encountered duplicate tag values");
             });
         });
     }
