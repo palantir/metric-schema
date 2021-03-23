@@ -18,10 +18,14 @@ package com.palantir.metric.schema;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.palantir.metric.schema.lang.MetricSchemaCompiler;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,28 +36,33 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 public class JavaGeneratorTest {
+    private final ObjectMapper mapper = ObjectMappers.newClientObjectMapper();
+
     private static final String REFERENCE_FILES_FOLDER = "src/integrationInput/java";
 
     @TempDir
-    public Path tempDir;
+    public Path outputDir;
+
+    @TempDir
+    public Path inputDir;
 
     @Test
     void generates_code() {
         JavaGenerator.generate(JavaGeneratorArgs.builder()
-                        .output(tempDir)
-                        .inputs(listFiles(Paths.get("src/test/resources")))
+                        .output(outputDir)
+                        .input(compileAndEmit(listFiles(Paths.get("src/test/resources"))))
                         .defaultPackageName("com.palantir.test")
                         .libraryName("witchcraft")
                         .build())
                 .stream()
-                .map(tempDir::relativize)
+                .map(outputDir::relativize)
                 .map(Path::toString)
                 .forEach(relativePath ->
-                        assertThatFilesAreTheSame(tempDir.resolve(relativePath), REFERENCE_FILES_FOLDER));
+                        assertThatFilesAreTheSame(outputDir.resolve(relativePath), REFERENCE_FILES_FOLDER));
     }
 
     private void assertThatFilesAreTheSame(Path outputFile, String referenceFilesFolder) {
-        Path relativized = tempDir.relativize(outputFile);
+        Path relativized = outputDir.relativize(outputFile);
         Path expectedFile = Paths.get(referenceFilesFolder, relativized.toString());
         if (Boolean.parseBoolean(System.getProperty("recreate", "false"))) {
             try {
@@ -64,7 +73,7 @@ public class JavaGeneratorTest {
                 throw new SafeRuntimeException("Failed to recreate test data", e);
             }
         }
-        assertThat(outputFile).hasSameContentAs(expectedFile);
+        assertThat(outputFile).hasSameTextualContentAs(expectedFile);
     }
 
     private List<Path> listFiles(Path path) {
@@ -73,6 +82,18 @@ public class JavaGeneratorTest {
             return stream.collect(ImmutableList.toImmutableList());
         } catch (IOException e) {
             throw new SafeRuntimeException("Failed to list directory", e, SafeArg.of("path", path));
+        }
+    }
+
+    private Path compileAndEmit(List<Path> inputFiles) {
+        Path outputFile = inputDir.resolve("metrics.json");
+        try {
+            mapper.writeValue(
+                    outputFile.toFile(),
+                    inputFiles.stream().map(MetricSchemaCompiler::compile).collect(ImmutableSet.toImmutableSet()));
+            return outputFile;
+        } catch (IOException e) {
+            throw new SafeRuntimeException("Failed to compile", e, SafeArg.of("inputFiles", inputFiles));
         }
     }
 }

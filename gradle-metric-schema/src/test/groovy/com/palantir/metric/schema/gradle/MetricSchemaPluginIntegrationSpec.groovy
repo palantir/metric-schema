@@ -79,6 +79,25 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         """.stripIndent()
     }
 
+    def 'handles shorthand schema'() {
+        when:
+        file('src/main/metrics/metrics.yml') << """
+        namespaces:
+          server:
+            docs: General web server metrics.
+            metrics:
+              response.size:
+                type: histogram
+                docs: A histogram of the number of bytes written into the response.
+                tags:
+                  - name: serviceName
+                    values: [foo]
+        """.stripIndent()
+
+        then:
+        def result = runTasksSuccessfully('compileMetricSchema')
+    }
+
     def 'generates java'() {
         when:
         file('src/main/metrics/metrics.yml') << METRICS
@@ -117,7 +136,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
         then:
         def result = runTasksWithFailure('classes')
-        result.wasExecuted(':generateMetrics')
+        result.wasExecuted(':compileMetricSchema')
         Throwables.getRootCause(result.getFailure()).getMessage().contains("tags must match pattern")
     }
 
@@ -133,8 +152,8 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
         then:
         def result = runTasksWithFailure('classes')
-        result.wasExecuted(':generateMetrics')
-        Throwables.getRootCause(result.getFailure()).getMessage().contains("MetricDefinition is required")
+        result.wasExecuted(':compileMetricSchema')
+        Throwables.getRootCause(result.getFailure()).getMessage().contains("null value in entry: my.custom.metric=null")
     }
 
     def 'embeds metrics into jar'() {

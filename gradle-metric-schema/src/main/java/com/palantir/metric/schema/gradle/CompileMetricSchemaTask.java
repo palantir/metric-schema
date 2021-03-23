@@ -16,14 +16,8 @@
 
 package com.palantir.metric.schema.gradle;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.ImmutableSet;
-import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeRuntimeException;
-import com.palantir.metric.schema.MetricSchema;
+import com.palantir.metric.schema.lang.MetricSchemaCompiler;
 import java.io.File;
 import java.io.IOException;
 import org.gradle.api.DefaultTask;
@@ -38,9 +32,6 @@ import org.gradle.api.tasks.TaskAction;
 
 @CacheableTask
 public abstract class CompileMetricSchemaTask extends DefaultTask {
-    private static final ObjectReader reader = ObjectMappers.withDefaultModules(new ObjectMapper(new YAMLFactory()))
-            .readerFor(MetricSchema.class);
-
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
     public abstract ConfigurableFileCollection getSource();
@@ -53,18 +44,11 @@ public abstract class CompileMetricSchemaTask extends DefaultTask {
         File output = getOutputFile().getAsFile().get();
         getProject().mkdir(output.getParent());
 
-        com.palantir.metric.schema.gradle.ObjectMappers.mapper.writeValue(
+        ObjectMappers.mapper.writeValue(
                 output,
                 getSource().getFiles().stream()
-                        .map(CompileMetricSchemaTask::readFile)
+                        .map(File::toPath)
+                        .map(MetricSchemaCompiler::compile)
                         .collect(ImmutableSet.toImmutableSet()));
-    }
-
-    private static MetricSchema readFile(File file) {
-        try {
-            return reader.readValue(file);
-        } catch (IOException e) {
-            throw new SafeRuntimeException("Failed to deserialize file", e, SafeArg.of("file", file));
-        }
     }
 }

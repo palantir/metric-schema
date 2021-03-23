@@ -19,11 +19,11 @@ package com.palantir.metric.schema.markdown;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.palantir.metric.schema.MetricDefinition;
 import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
+import com.palantir.metric.schema.TagDefinition;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -77,7 +77,17 @@ public final class MarkdownRenderer {
         output.append("- `").append(namespace).append('.').append(metricName).append('`');
         if (!metric.getTags().isEmpty()) {
             output.append(" tagged ")
-                    .append(String.join(", ", Collections2.transform(metric.getTags(), value -> '`' + value + '`')));
+                    .append(metric.getTags().stream()
+                            .sorted()
+                            .map(value -> '`' + value + '`')
+                            .collect(Collectors.joining(", ")));
+        } else if (!metric.getTagDefinitions().isEmpty()) {
+            // TODO(forozco): improve markdown to render tag values and docs
+            output.append(" tagged ")
+                    .append(metric.getTagDefinitions().stream()
+                            .sorted(Comparator.comparing(TagDefinition::getName))
+                            .map(value -> '`' + value.getName() + '`')
+                            .collect(Collectors.joining(", ")));
         }
         output.append(" (")
                 .append(metric.getType().toString().toLowerCase(Locale.ENGLISH))

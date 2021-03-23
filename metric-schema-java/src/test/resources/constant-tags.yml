@@ -1,0 +1,11 @@
+namespaces:
+  monitors:
+    docs: General web server metrics.
+    metrics:
+      processing:
+        docs: Measures number of installations that were processed
+        type: meter
+        tags:
+          - name: result
+            values: [success, failure]
+          - type

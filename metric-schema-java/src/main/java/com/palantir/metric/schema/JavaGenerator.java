@@ -32,8 +32,7 @@ public final class JavaGenerator {
 
     @CanIgnoreReturnValue
     public static List<Path> generate(JavaGeneratorArgs args) {
-        return args.inputs().stream()
-                .map(SchemaParser.get()::parseFile)
+        return SchemaParser.get().parseFile(args.input()).stream()
                 .flatMap(schema -> schema.getNamespaces().entrySet().stream().map(entry -> {
                     return UtilityGenerator.generateUtilityClass(
                             entry.getKey(),

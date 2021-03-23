@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2021 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-package com.palantir.metric.schema;
+package com.palantir.metric.schema.lang;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import com.palantir.metric.schema.Documentation;
+import com.palantir.metric.schema.MetricDefinition;
+import com.palantir.metric.schema.MetricNamespace;
+import com.palantir.metric.schema.MetricSchema;
+import com.palantir.metric.schema.MetricType;
+import com.palantir.metric.schema.TagDefinition;
 import org.junit.jupiter.api.Test;
 
 class ValidatorTest {
@@ -113,7 +119,9 @@ class ValidatorTest {
                                                 MetricDefinition.builder()
                                                         .docs(DOCS)
                                                         .type(MetricType.COUNTER)
-                                                        .tags("")
+                                                        .tagDefinitions(TagDefinition.builder()
+                                                                .name("")
+                                                                .build())
                                                         .build())
                                         .build())
                         .build()))

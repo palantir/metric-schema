@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2021 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-package com.palantir.metric.schema;
+package com.palantir.metric.schema.lang;
 
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.metric.schema.Documentation;
+import com.palantir.metric.schema.MetricNamespace;
+import com.palantir.metric.schema.MetricSchema;
+import com.palantir.metric.schema.MetricType;
+import com.palantir.metric.schema.TagDefinition;
+import com.palantir.metric.schema.TagValue;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 final class Validator {
@@ -62,16 +70,35 @@ final class Validator {
                     SafeArg.of("namespace", namespace),
                     SafeArg.of("definition", definition));
             validateDocumentation(definition.getDocs());
-            definition.getTags().forEach(tag -> {
+            Preconditions.checkArgument(definition.getTags().isEmpty(), "tags field is replaced tagDefinition");
+
+            Set<String> uniqueNames = definition.getTagDefinitions().stream()
+                    .map(TagDefinition::getName)
+                    .collect(Collectors.toSet());
+            Preconditions.checkArgument(
+                    uniqueNames.size() == definition.getTagDefinitions().size(), "Encountered duplicate tag names");
+            definition.getTagDefinitions().forEach(tag -> {
                 Preconditions.checkArgument(
-                        !tag.isEmpty(),
+                        !tag.getName().isEmpty(),
                         "MetricDefinition tags must not be empty",
                         SafeArg.of("namespace", namespace),
                         SafeArg.of("definition", definition));
                 Preconditions.checkArgument(
-                        NAME_PREDICATE.matcher(tag).matches(),
+                        NAME_PREDICATE.matcher(tag.getName()).matches(),
                         "MetricDefinition tags must match pattern",
                         SafeArg.of("pattern", NAME_PATTERN));
+                tag.getValues().forEach(tagValue -> {
+                    Preconditions.checkArgument(
+                            NAME_PREDICATE.matcher(tagValue.getValue()).matches(),
+                            "tag values must match pattern",
+                            SafeArg.of("tag", tag.getName()),
+                            SafeArg.of("tagValue", tagValue),
+                            SafeArg.of("pattern", NAME_PATTERN));
+                });
+                Set<String> uniqueValues =
+                        tag.getValues().stream().map(TagValue::getValue).collect(Collectors.toSet());
+                Preconditions.checkArgument(
+                        uniqueValues.size() == tag.getValues().size(), "Encountered duplicate tag values");
             });
         });
     }
