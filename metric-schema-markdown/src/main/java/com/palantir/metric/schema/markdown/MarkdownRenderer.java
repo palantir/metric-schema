@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.metric.schema.MetricDefinition;
 import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
-import com.palantir.metric.schema.TagDefinition;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -78,14 +77,12 @@ public final class MarkdownRenderer {
         if (!metric.getTags().isEmpty()) {
             output.append(" tagged ")
                     .append(metric.getTags().stream()
-                            .sorted()
                             .map(value -> '`' + value + '`')
                             .collect(Collectors.joining(", ")));
         } else if (!metric.getTagDefinitions().isEmpty()) {
             // TODO(forozco): improve markdown to render tag values and docs
             output.append(" tagged ")
                     .append(metric.getTagDefinitions().stream()
-                            .sorted(Comparator.comparing(TagDefinition::getName))
                             .map(value -> '`' + value.getName() + '`')
                             .collect(Collectors.joining(", ")));
         }
