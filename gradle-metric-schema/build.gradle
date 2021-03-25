@@ -2,7 +2,7 @@ apply plugin: 'com.gradle.plugin-publish'
 // java-gradle-plugin MUST be applied before publish-jar.gradle
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'groovy'
-apply from: "$rootDir/gradle/publish-jar.gradle"
+apply plugin: 'com.palantir.external-publish-jar'
 
 dependencies {
     implementation project(':metric-schema-api:metric-schema-api-objects')
