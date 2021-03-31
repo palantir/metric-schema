@@ -56,4 +56,9 @@ class CustodianTest {
     void testSanitize_reservedWord() {
         assertThat(Custodian.sanitizeName("for")).isEqualTo("for_");
     }
+
+    @Test
+    void testSanitize_leadingNumeric() {
+        assertThat(Custodian.sanitizeName("4xx")).isEqualTo("_4xx");
+    }
 }

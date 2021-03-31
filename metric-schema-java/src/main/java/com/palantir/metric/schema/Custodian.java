@@ -50,12 +50,24 @@ final class Custodian {
     private static String escapeIfNecessary(String input) {
         Preconditions.checkNotNull(input, "Input string is required");
         Preconditions.checkArgument(!input.isEmpty(), "Input must not be empty");
-        return ReservedNames.isValid(input) ? input : escape(input);
+        if (ReservedNames.isValid(input)) {
+            return input;
+        }
+        String suffix = escapeSuffix(input);
+        if (ReservedNames.isValid(suffix)) {
+            return suffix;
+        }
+        return escapePrefix(input);
     }
 
-    private static String escape(String input) {
+    private static String escapeSuffix(String input) {
         Preconditions.checkArgument(!input.isEmpty(), "Empty values cannot be escaped");
         return input + '_';
+    }
+
+    private static String escapePrefix(String input) {
+        Preconditions.checkArgument(!input.isEmpty(), "Empty values cannot be escaped");
+        return '_' + input;
     }
 
     private Custodian() {}
