@@ -7,5 +7,6 @@ namespaces:
         type: meter
         tags:
           - name: result
+            docs: The result of processing
             values: [success, failure]
           - type

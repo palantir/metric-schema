@@ -47,6 +47,7 @@ final class LangConverter {
                 .tagDefinitions(definition.tags().stream()
                         .map(tag -> TagDefinition.builder()
                                 .name(tag.name())
+                                .docs(tag.docs().map(Documentation::of))
                                 .values(tag.values().stream()
                                         .map(TagValue::of)
                                         .collect(ImmutableList.toImmutableList()))

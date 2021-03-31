@@ -58,6 +58,7 @@ public final class MonitorsMetrics {
     }
 
     public interface ProcessingBuilderResultStage {
+        /** The result of processing */
         @CheckReturnValue
         ProcessingBuilderTypeStage result(Processing_Result result);
     }
