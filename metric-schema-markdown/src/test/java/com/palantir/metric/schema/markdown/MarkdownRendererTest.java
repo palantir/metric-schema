@@ -184,7 +184,7 @@ class MarkdownRendererTest {
                         + "\n"
                         + "### namespace\n"
                         + "namespace docs\n"
-                        + "- `namespace.metric` tagged `endpoint`, `service` (meter): metric docs");
+                        + "- `namespace.metric` tagged `service`, `endpoint` (meter): metric docs");
     }
 
     @Test
