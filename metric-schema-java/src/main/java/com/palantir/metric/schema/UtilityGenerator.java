@@ -256,9 +256,11 @@ final class UtilityGenerator {
             boolean lastTag = i == tagList.size() - 1;
             TagDefinition tag = tagList.get(i);
             String tagName = tag.getName();
+            MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(Custodian.sanitizeName(tagName));
+            tag.getDocs().ifPresent(docs -> methodBuilder.addJavadoc(Javadoc.render(docs)));
             outerBuilder.addType(TypeSpec.interfaceBuilder(stageName(metricName, tagName))
                     .addModifiers(visibility.apply())
-                    .addMethod(MethodSpec.methodBuilder(Custodian.sanitizeName(tagName))
+                    .addMethod(methodBuilder
                             .addParameter(getTagClassName(metricName, tag), Custodian.sanitizeName(tagName))
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                             .addAnnotation(CheckReturnValue.class)

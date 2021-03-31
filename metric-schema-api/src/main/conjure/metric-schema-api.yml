@@ -38,6 +38,7 @@ types:
       TagDefinition:
         fields:
           name: string
+          docs: optional<Documentation>
           values: set<TagValue>
       TagValue:
         fields:

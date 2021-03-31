@@ -205,6 +205,7 @@ class MarkdownRendererTest {
                                                         .build())
                                                 .tagDefinitions(TagDefinition.builder()
                                                         .name("endpoint")
+                                                        .docs(Documentation.of("Some docs"))
                                                         .build())
                                                 .docs(Documentation.of("metric docs"))
                                                 .build())
@@ -223,7 +224,7 @@ class MarkdownRendererTest {
                         + "namespace docs\n"
                         + "- `namespace.metric` (meter): metric docs\n"
                         + "  - `result` values (`failure`,`success`)\n"
-                        + "  - `endpoint`");
+                        + "  - `endpoint`: Some docs");
     }
 
     @Test

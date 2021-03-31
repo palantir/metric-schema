@@ -16,24 +16,33 @@
 
 package com.palantir.metric.schema.lang;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
+@JsonDeserialize(using = TagDefinition.TagDefinitionDeserializer.class)
 public interface TagDefinition {
     String name();
 
+    Optional<String> docs();
+
     List<String> values();
 
-    @JsonCreator
-    static TagDefinition valueOf(String name) {
-        return ImmutableTagDefinition.builder().name(name).build();
-    }
-
-    @JsonCreator
-    static TagDefinition valueOf(@JsonProperty("name") String name, @JsonProperty("values") List<String> values) {
-        return ImmutableTagDefinition.builder().name(name).values(values).build();
+    class TagDefinitionDeserializer extends JsonDeserializer<TagDefinition> {
+        @Override
+        public TagDefinition deserialize(JsonParser parser, DeserializationContext _ctxt) throws IOException {
+            if (parser.currentToken() == JsonToken.VALUE_STRING) {
+                String name = parser.getValueAsString();
+                return ImmutableTagDefinition.builder().name(name).build();
+            }
+            return ImmutableTagDefinition.fromJson(parser.readValueAs(ImmutableTagDefinition.Json.class));
+        }
     }
 }

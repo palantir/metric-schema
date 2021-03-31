@@ -104,6 +104,9 @@ public final class MarkdownRenderer {
                                     .sorted()
                                     .collect(Collectors.joining("`,`", "(`", "`)")));
                 }
+                tagDefinition.getDocs().ifPresent(docs -> {
+                    output.append(": ").append(docs);
+                });
                 output.append("\n");
             });
         }
