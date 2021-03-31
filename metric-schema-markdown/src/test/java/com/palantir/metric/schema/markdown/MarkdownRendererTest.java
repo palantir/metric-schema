@@ -25,6 +25,8 @@ import com.palantir.metric.schema.MetricDefinition;
 import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
 import com.palantir.metric.schema.MetricType;
+import com.palantir.metric.schema.TagDefinition;
+import com.palantir.metric.schema.TagValue;
 import org.junit.jupiter.api.Test;
 
 class MarkdownRendererTest {
@@ -183,6 +185,45 @@ class MarkdownRendererTest {
                         + "### namespace\n"
                         + "namespace docs\n"
                         + "- `namespace.metric` tagged `endpoint`, `service` (meter): metric docs");
+    }
+
+    @Test
+    void testComplexTagged() {
+        MetricSchema schema = MetricSchema.builder()
+                .namespaces(
+                        "namespace",
+                        MetricNamespace.builder()
+                                .docs(Documentation.of("namespace docs"))
+                                .metrics(
+                                        "metric",
+                                        MetricDefinition.builder()
+                                                .type(MetricType.METER)
+                                                .tagDefinitions(TagDefinition.builder()
+                                                        .name("result")
+                                                        .values(TagValue.of("success"))
+                                                        .values(TagValue.of("failure"))
+                                                        .build())
+                                                .tagDefinitions(TagDefinition.builder()
+                                                        .name("endpoint")
+                                                        .build())
+                                                .docs(Documentation.of("metric docs"))
+                                                .build())
+                                .build())
+                .build();
+        String markdown = MarkdownRenderer.render(
+                "com.palantir:test", ImmutableMap.of("com.palantir:test:1.0.0", ImmutableList.of(schema)));
+        assertThat(markdown)
+                .isEqualTo("# Metrics\n"
+                        + "\n"
+                        + "## Test\n"
+                        + "\n"
+                        + "`com.palantir:test`\n"
+                        + "\n"
+                        + "### namespace\n"
+                        + "namespace docs\n"
+                        + "- `namespace.metric` (meter): metric docs\n"
+                        + "  - `result` values (`failure`,`success`)\n"
+                        + "  - `endpoint`");
     }
 
     @Test

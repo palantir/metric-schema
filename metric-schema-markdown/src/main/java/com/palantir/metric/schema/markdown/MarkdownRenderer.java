@@ -24,6 +24,7 @@ import com.palantir.metric.schema.MetricDefinition;
 import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
 import com.palantir.metric.schema.TagDefinition;
+import com.palantir.metric.schema.TagValue;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -75,25 +76,40 @@ public final class MarkdownRenderer {
 
     private static void renderLine(String namespace, String metricName, MetricDefinition metric, StringBuilder output) {
         output.append("- `").append(namespace).append('.').append(metricName).append('`');
+        boolean hasComplexTags = metric.getTagDefinitions().stream()
+                .anyMatch(definition -> !definition.getValues().isEmpty());
         if (!metric.getTags().isEmpty()) {
             output.append(" tagged ")
                     .append(metric.getTags().stream()
                             .sorted()
                             .map(value -> '`' + value + '`')
                             .collect(Collectors.joining(", ")));
-        } else if (!metric.getTagDefinitions().isEmpty()) {
-            // TODO(forozco): improve markdown to render tag values and docs
+        } else if (!metric.getTagDefinitions().isEmpty() && !hasComplexTags) {
             output.append(" tagged ")
                     .append(metric.getTagDefinitions().stream()
                             .sorted(Comparator.comparing(TagDefinition::getName))
                             .map(value -> '`' + value.getName() + '`')
                             .collect(Collectors.joining(", ")));
         }
+
         output.append(" (")
                 .append(metric.getType().toString().toLowerCase(Locale.ENGLISH))
                 .append("): ")
                 .append(metric.getDocs().get())
                 .append('\n');
+        if (hasComplexTags) {
+            metric.getTagDefinitions().forEach(tagDefinition -> {
+                output.append("  - `").append(tagDefinition.getName()).append("`");
+                if (!tagDefinition.getValues().isEmpty()) {
+                    output.append(" values ")
+                            .append(tagDefinition.getValues().stream()
+                                    .map(TagValue::getValue)
+                                    .sorted()
+                                    .collect(Collectors.joining("`,`", "(`", "`)")));
+                }
+                output.append("\n");
+            });
+        }
     }
 
     private static ImmutableList<Section> namespaces(String localCoordinate, Map<String, List<MetricSchema>> schemas) {
