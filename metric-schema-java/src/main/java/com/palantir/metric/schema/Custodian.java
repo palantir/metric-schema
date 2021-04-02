@@ -19,6 +19,7 @@ package com.palantir.metric.schema;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Splitter;
 import com.palantir.logsafe.Preconditions;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 /** Utility functionality to escape metric values for generated java code. */
@@ -42,9 +43,11 @@ final class Custodian {
 
     static String anyToUpperUnderscore(String input) {
         Preconditions.checkNotNull(input, "Input string is required");
-        return String.join(
-                "",
-                CaseFormat.LOWER_CAMEL.converterTo(CaseFormat.UPPER_UNDERSCORE).convertAll(splitter.split(input)));
+        return escapeIfNecessary(splitter.splitToStream(input)
+                .map(segment -> CaseFormats.estimate(segment)
+                        .orElse(CaseFormat.LOWER_CAMEL)
+                        .to(CaseFormat.UPPER_UNDERSCORE, segment))
+                .collect(Collectors.joining("_")));
     }
 
     private static String escapeIfNecessary(String input) {

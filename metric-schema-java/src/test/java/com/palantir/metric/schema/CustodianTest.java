@@ -61,4 +61,34 @@ class CustodianTest {
     void testSanitize_leadingNumeric() {
         assertThat(Custodian.sanitizeName("4xx")).isEqualTo("_4xx");
     }
+
+    @Test
+    void testAnyToUpperUnderscore_lowerHyphen() {
+        assertThat(Custodian.anyToUpperUnderscore("foo-bar")).isEqualTo("FOO_BAR");
+    }
+
+    @Test
+    void testAnyToUpperUnderscore_lowerCamel() {
+        assertThat(Custodian.anyToUpperUnderscore("fooBar")).isEqualTo("FOO_BAR");
+    }
+
+    @Test
+    void testAnyToUpperUnderscore_upperCamel() {
+        assertThat(Custodian.anyToUpperUnderscore("FooBar")).isEqualTo("FOO_BAR");
+    }
+
+    @Test
+    void testAnyToUpperUnderscore_upperUnderscore() {
+        assertThat(Custodian.anyToUpperUnderscore("FOO_BAR")).isEqualTo("FOO_BAR");
+    }
+
+    @Test
+    void testAnyToUpperUnderscore_lowerUnderscore() {
+        assertThat(Custodian.anyToUpperUnderscore("foo_bar")).isEqualTo("FOO_BAR");
+    }
+
+    @Test
+    void testAnyToUpperUnderscore_5xx() {
+        assertThat(Custodian.anyToUpperUnderscore("5xx")).isEqualTo("_5XX");
+    }
 }
