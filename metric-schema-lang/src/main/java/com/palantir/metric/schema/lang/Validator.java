@@ -35,8 +35,10 @@ final class Validator {
     private static final String NAME_SEGMENT_PATTERN = "[a-z0-9][a-zA-Z0-9\\-]*";
     private static final String LAST_NAME_SEGMENT_PATTERN = "[a-zA-Z0-9][a-zA-Z0-9\\-]*";
     private static final String NAME_PATTERN = "(" + NAME_SEGMENT_PATTERN + "\\.)*" + LAST_NAME_SEGMENT_PATTERN;
+    private static final String TAG_VALUE_PATTERN = "[a-zA-Z0-9:.\\-]*";
     private static final Pattern NAME_PREDICATE = Pattern.compile(NAME_PATTERN);
     private static final Pattern SHORT_NAME_PREDICATE = Pattern.compile(SHORT_NAME_PATTERN);
+    private static final Pattern TAG_VALUE_PREDICATE = Pattern.compile(TAG_VALUE_PATTERN);
 
     static void validate(MetricSchema schema) {
         Preconditions.checkNotNull(schema, "MetricSchema is required");
@@ -89,11 +91,11 @@ final class Validator {
                         SafeArg.of("pattern", NAME_PATTERN));
                 tag.getValues().forEach(tagValue -> {
                     Preconditions.checkArgument(
-                            NAME_PREDICATE.matcher(tagValue.getValue()).matches(),
+                            TAG_VALUE_PREDICATE.matcher(tagValue.getValue()).matches(),
                             "tag values must match pattern",
                             SafeArg.of("tag", tag.getName()),
                             SafeArg.of("tagValue", tagValue),
-                            SafeArg.of("pattern", NAME_PATTERN));
+                            SafeArg.of("pattern", TAG_VALUE_PATTERN));
                 });
                 Set<String> uniqueValues =
                         tag.getValues().stream().map(TagValue::getValue).collect(Collectors.toSet());
