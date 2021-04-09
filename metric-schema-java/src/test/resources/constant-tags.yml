@@ -10,3 +10,5 @@ namespaces:
             docs: The result of processing
             values: [success, failure]
           - type
+          - name: locator
+            values: [ package:identifier ]

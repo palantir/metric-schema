@@ -52,6 +52,20 @@ public final class MonitorsMetrics {
         }
     }
 
+    public enum Processing_Locator {
+        PACKAGE_IDENTIFIER("package:identifier");
+
+        private final String value;
+
+        Processing_Locator(String value) {
+            this.value = value;
+        }
+
+        private String getValue() {
+            return value;
+        }
+    }
+
     public interface ProcessingBuildStage {
         @CheckReturnValue
         Meter build();
@@ -65,16 +79,24 @@ public final class MonitorsMetrics {
 
     public interface ProcessingBuilderTypeStage {
         @CheckReturnValue
-        ProcessingBuildStage type(String type);
+        ProcessingBuilderLocatorStage type(String type);
+    }
+
+    public interface ProcessingBuilderLocatorStage {
+        @CheckReturnValue
+        ProcessingBuildStage locator(Processing_Locator locator);
     }
 
     private final class ProcessingBuilder
             implements ProcessingBuilderResultStage,
                     ProcessingBuilderTypeStage,
+                    ProcessingBuilderLocatorStage,
                     ProcessingBuildStage {
         private Processing_Result result;
 
         private String type;
+
+        private Processing_Locator locator;
 
         @Override
         public Meter build() {
@@ -83,6 +105,7 @@ public final class MonitorsMetrics {
                             .safeName("monitors.processing")
                             .putSafeTags("result", result.getValue())
                             .putSafeTags("type", type)
+                            .putSafeTags("locator", locator.getValue())
                             .putSafeTags("libraryName", LIBRARY_NAME)
                             .putSafeTags("libraryVersion", LIBRARY_VERSION)
                             .build());
@@ -99,6 +122,13 @@ public final class MonitorsMetrics {
         public ProcessingBuilder type(String type) {
             Preconditions.checkState(this.type == null, "type is already set");
             this.type = Preconditions.checkNotNull(type, "type is required");
+            return this;
+        }
+
+        @Override
+        public ProcessingBuilder locator(Processing_Locator locator) {
+            Preconditions.checkState(this.locator == null, "locator is already set");
+            this.locator = Preconditions.checkNotNull(locator, "locator is required");
             return this;
         }
     }
