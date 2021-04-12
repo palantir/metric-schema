@@ -12,3 +12,5 @@ namespaces:
           - type
           - name: locator
             values: [ package:identifier ]
+          - name: otherLocator
+            values: [ package:identifier, package:identifier2 ]

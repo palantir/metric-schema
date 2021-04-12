@@ -52,12 +52,14 @@ public final class MonitorsMetrics {
         }
     }
 
-    public enum Processing_Locator {
-        PACKAGE_IDENTIFIER("package:identifier");
+    public enum Processing_OtherLocator {
+        PACKAGE_IDENTIFIER("package:identifier"),
+
+        PACKAGE_IDENTIFIER2("package:identifier2");
 
         private final String value;
 
-        Processing_Locator(String value) {
+        Processing_OtherLocator(String value) {
             this.value = value;
         }
 
@@ -79,24 +81,24 @@ public final class MonitorsMetrics {
 
     public interface ProcessingBuilderTypeStage {
         @CheckReturnValue
-        ProcessingBuilderLocatorStage type(String type);
+        ProcessingBuilderOtherLocatorStage type(String type);
     }
 
-    public interface ProcessingBuilderLocatorStage {
+    public interface ProcessingBuilderOtherLocatorStage {
         @CheckReturnValue
-        ProcessingBuildStage locator(Processing_Locator locator);
+        ProcessingBuildStage otherLocator(Processing_OtherLocator otherLocator);
     }
 
     private final class ProcessingBuilder
             implements ProcessingBuilderResultStage,
                     ProcessingBuilderTypeStage,
-                    ProcessingBuilderLocatorStage,
+                    ProcessingBuilderOtherLocatorStage,
                     ProcessingBuildStage {
         private Processing_Result result;
 
         private String type;
 
-        private Processing_Locator locator;
+        private Processing_OtherLocator otherLocator;
 
         @Override
         public Meter build() {
@@ -105,7 +107,8 @@ public final class MonitorsMetrics {
                             .safeName("monitors.processing")
                             .putSafeTags("result", result.getValue())
                             .putSafeTags("type", type)
-                            .putSafeTags("locator", locator.getValue())
+                            .putSafeTags("locator", "package:identifier")
+                            .putSafeTags("otherLocator", otherLocator.getValue())
                             .putSafeTags("libraryName", LIBRARY_NAME)
                             .putSafeTags("libraryVersion", LIBRARY_VERSION)
                             .build());
@@ -126,9 +129,10 @@ public final class MonitorsMetrics {
         }
 
         @Override
-        public ProcessingBuilder locator(Processing_Locator locator) {
-            Preconditions.checkState(this.locator == null, "locator is already set");
-            this.locator = Preconditions.checkNotNull(locator, "locator is required");
+        public ProcessingBuilder otherLocator(Processing_OtherLocator otherLocator) {
+            Preconditions.checkState(this.otherLocator == null, "otherLocator is already set");
+            this.otherLocator =
+                    Preconditions.checkNotNull(otherLocator, "otherLocator is required");
             return this;
         }
     }
