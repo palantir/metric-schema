@@ -18,6 +18,7 @@ package com.palantir.metric.schema;
 
 import com.codahale.metrics.Gauge;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.MetricName;
@@ -106,7 +107,7 @@ final class UtilityGenerator {
             MetricDefinition definition,
             ImplementationVisibility visibility) {
         definition.getTagDefinitions().forEach(tagDef -> {
-            if (tagDef.getValues().isEmpty()) {
+            if (tagDef.getValues().size() <= 1) {
                 return;
             }
 
@@ -145,6 +146,11 @@ final class UtilityGenerator {
         definition.getTagDefinitions().forEach(tagDef -> {
             if (tagDef.getValues().isEmpty()) {
                 builder.add(".putSafeTags($S, $L)", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
+            } else if (tagDef.getValues().size() == 1) {
+                builder.add(
+                        ".putSafeTags($S, $S)",
+                        tagDef.getName(),
+                        Iterables.getOnlyElement(tagDef.getValues()).getValue());
             } else {
                 builder.add(
                         ".putSafeTags($S, $L.getValue())", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
@@ -250,8 +256,9 @@ final class UtilityGenerator {
                 .addModifiers(visibility.apply())
                 .addMethods(abstractBuildMethods)
                 .build());
-        ImmutableList<TagDefinition> tagList =
-                definition.getTagDefinitions().stream().collect(ImmutableList.toImmutableList());
+        ImmutableList<TagDefinition> tagList = definition.getTagDefinitions().stream()
+                .filter(tagDefinition -> tagDefinition.getValues().size() != 1)
+                .collect(ImmutableList.toImmutableList());
         for (int i = 0; i < tagList.size(); i++) {
             boolean lastTag = i == tagList.size() - 1;
             TagDefinition tag = tagList.get(i);
@@ -355,7 +362,9 @@ final class UtilityGenerator {
     }
 
     private static int numArgs(MetricDefinition definition) {
-        return definition.getTagDefinitions().size()
+        return (int) definition.getTagDefinitions().stream()
+                        .filter(tagDefinition -> tagDefinition.getValues().size() != 1)
+                        .count()
                 // Gauges require a gauge argument.
                 + (MetricType.GAUGE.equals(definition.getType()) ? 1 : 0);
     }
