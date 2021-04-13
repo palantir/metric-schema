@@ -14,3 +14,10 @@ namespaces:
             values: [ package:identifier ]
           - name: otherLocator
             values: [ package:identifier, package:identifier2 ]
+      more:
+        docs: Measures more
+        type: meter
+        tags:
+          - type
+          - name: locator
+            values: [ package:identifier ]
