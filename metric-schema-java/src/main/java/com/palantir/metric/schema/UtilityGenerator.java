@@ -187,6 +187,7 @@ final class UtilityGenerator {
                 .addModifiers(visibility.apply())
                 .returns(MetricTypes.type(definition.getType()))
                 .addParameters(definition.getTagDefinitions().stream()
+                        .filter(tag -> tag.getValues().size() != 1)
                         .map(tag -> ParameterSpec.builder(
                                         getTagClassName(metricName, tag), Custodian.sanitizeName(tag.getName()))
                                 .build())

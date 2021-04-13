@@ -31,6 +31,19 @@ public final class MonitorsMetrics {
         return new ProcessingBuilder();
     }
 
+    /** Measures more */
+    @CheckReturnValue
+    public Meter more(String type) {
+        return registry.meter(
+                MetricName.builder()
+                        .safeName("monitors.more")
+                        .putSafeTags("type", type)
+                        .putSafeTags("locator", "package:identifier")
+                        .putSafeTags("libraryName", LIBRARY_NAME)
+                        .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                        .build());
+    }
+
     @Override
     public String toString() {
         return "MonitorsMetrics{registry=" + registry + '}';
