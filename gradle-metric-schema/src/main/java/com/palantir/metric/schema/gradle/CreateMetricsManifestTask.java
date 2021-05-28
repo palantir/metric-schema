@@ -157,8 +157,11 @@ public class CreateMetricsManifestTask extends DefaultTask {
 
             if (id instanceof ProjectComponentIdentifier) {
                 Project dependencyProject = getProject().project(((ProjectComponentIdentifier) id).getProjectPath());
-                inferProjectDependencyMetrics(dependencyProject)
-                        .ifPresent(metrics -> discoveredMetrics.put(getProjectCoordinates(dependencyProject), metrics));
+                if (!dependencyProject.equals(getProject())) {
+                    inferProjectDependencyMetrics(dependencyProject)
+                            .ifPresent(metrics ->
+                                    discoveredMetrics.put(getProjectCoordinates(dependencyProject), metrics));
+                }
             } else {
                 getExternalMetrics(id, artifact).ifPresent(metrics -> discoveredMetrics.put(id.toString(), metrics));
             }

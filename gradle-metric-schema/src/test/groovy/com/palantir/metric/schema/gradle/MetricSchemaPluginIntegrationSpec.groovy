@@ -303,4 +303,26 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         manifest['a:a:1.0'] != null
     }
 
+    def 'createManifest ignores local metrics from discovered metrics'() {
+        setup:
+        addSubproject("foo-lib", """
+            dependencies {
+                implementation project(':foo-server')
+            }
+        """)
+
+        addSubproject("foo-server", """
+            dependencies {
+                runtimeOnly project(':foo-lib')
+            }
+        """.stripIndent())
+        def serverMetrics = file('foo-server/src/main/metrics/metric.yml')
+        serverMetrics << METRICS
+
+        when:
+        def result1 = runTasksSuccessfully(':foo-server:createMetricsManifest')
+
+        then:
+        fileExists('foo-server/build/metricSchema/manifest.json')
+    }
 }
