@@ -53,9 +53,7 @@ class GenerateMetricMarkdownIntegrationSpec extends IntegrationSpec {
 
         repositories {
             jcenter()
-            maven {
-                url 'https://dl.bintray.com/palantir/releases/'
-            }
+            mavenCentral()
         }
 
         configurations.all {
