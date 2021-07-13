@@ -9,14 +9,15 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Optional;
 
-/** Tests that reserved words are escaped. */
+/**
+ * Tests that reserved words are escaped.
+ */
 public final class ReservedConflictMetrics {
     private static final String LIBRARY_NAME = "witchcraft";
 
-    private static final String LIBRARY_VERSION =
-            Optional.ofNullable(
-                            ReservedConflictMetrics.class.getPackage().getImplementationVersion())
-                    .orElse("unknown");
+    private static final String LIBRARY_VERSION = Optional.ofNullable(
+                    ReservedConflictMetrics.class.getPackage().getImplementationVersion())
+            .orElse("unknown");
 
     private final TaggedMetricRegistry registry;
 
@@ -25,29 +26,33 @@ public final class ReservedConflictMetrics {
     }
 
     public static ReservedConflictMetrics of(TaggedMetricRegistry registry) {
-        return new ReservedConflictMetrics(
-                Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
+        return new ReservedConflictMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
     }
 
-    /** Uh-oh! */
+    /**
+     * Uh-oh!
+     */
     @CheckReturnValue
     public IntBuilderIntStage int_() {
         return new IntBuilder();
     }
 
-    /** Meter with a single tag. */
+    /**
+     * Meter with a single tag.
+     */
     @CheckReturnValue
     public Meter long_(String int_) {
-        return registry.meter(
-                MetricName.builder()
-                        .safeName("reserved.conflict.long")
-                        .putSafeTags("int", int_)
-                        .putSafeTags("libraryName", LIBRARY_NAME)
-                        .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                        .build());
+        return registry.meter(MetricName.builder()
+                .safeName("reserved.conflict.long")
+                .putSafeTags("int", int_)
+                .putSafeTags("libraryName", LIBRARY_NAME)
+                .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .build());
     }
 
-    /** Gauge metric with a single no tags. */
+    /**
+     * Gauge metric with a single no tags.
+     */
     public void float_(Gauge<?> gauge) {
         registry.registerWithReplacement(floatMetricName(), gauge);
     }
@@ -60,7 +65,9 @@ public final class ReservedConflictMetrics {
                 .build();
     }
 
-    /** Gauge metric with a single tag. */
+    /**
+     * Gauge metric with a single tag.
+     */
     @CheckReturnValue
     public DoubleBuilderIntStage double_() {
         return new DoubleBuilder();
@@ -92,10 +99,7 @@ public final class ReservedConflictMetrics {
     }
 
     private final class IntBuilder
-            implements IntBuilderIntStage,
-                    IntBuilderRegistryStage,
-                    IntBuilderLongStage,
-                    IntBuildStage {
+            implements IntBuilderIntStage, IntBuilderRegistryStage, IntBuilderLongStage, IntBuildStage {
         private String int_;
 
         private String registry_;
@@ -104,15 +108,14 @@ public final class ReservedConflictMetrics {
 
         @Override
         public Histogram build() {
-            return registry.histogram(
-                    MetricName.builder()
-                            .safeName("reserved.conflict.int")
-                            .putSafeTags("int", int_)
-                            .putSafeTags("registry", registry_)
-                            .putSafeTags("long", long_)
-                            .putSafeTags("libraryName", LIBRARY_NAME)
-                            .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                            .build());
+            return registry.histogram(MetricName.builder()
+                    .safeName("reserved.conflict.int")
+                    .putSafeTags("int", int_)
+                    .putSafeTags("registry", registry_)
+                    .putSafeTags("long", long_)
+                    .putSafeTags("libraryName", LIBRARY_NAME)
+                    .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .build());
         }
 
         @Override
