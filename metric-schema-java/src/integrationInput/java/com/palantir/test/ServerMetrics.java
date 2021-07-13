@@ -8,13 +8,15 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Optional;
 
-/** General web server metrics. */
+/**
+ * General web server metrics.
+ */
 public final class ServerMetrics {
     private static final String LIBRARY_NAME = "witchcraft";
 
-    private static final String LIBRARY_VERSION =
-            Optional.ofNullable(ServerMetrics.class.getPackage().getImplementationVersion())
-                    .orElse("unknown");
+    private static final String LIBRARY_VERSION = Optional.ofNullable(
+                    ServerMetrics.class.getPackage().getImplementationVersion())
+            .orElse("unknown");
 
     private final TaggedMetricRegistry registry;
 
@@ -26,13 +28,17 @@ public final class ServerMetrics {
         return new ServerMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
     }
 
-    /** A histogram of the number of bytes written into the response. */
+    /**
+     * A histogram of the number of bytes written into the response.
+     */
     @CheckReturnValue
     public ResponseSizeBuilderServiceNameStage responseSize() {
         return new ResponseSizeBuilder();
     }
 
-    /** A gauge of the ratio of active workers to the number of workers. */
+    /**
+     * A gauge of the ratio of active workers to the number of workers.
+     */
     public void workerUtilization(Gauge<?> gauge) {
         registry.registerWithReplacement(workerUtilizationMetricName(), gauge);
     }
@@ -66,23 +72,20 @@ public final class ServerMetrics {
     }
 
     private final class ResponseSizeBuilder
-            implements ResponseSizeBuilderServiceNameStage,
-                    ResponseSizeBuilderEndpointStage,
-                    ResponseSizeBuildStage {
+            implements ResponseSizeBuilderServiceNameStage, ResponseSizeBuilderEndpointStage, ResponseSizeBuildStage {
         private String serviceName;
 
         private String endpoint;
 
         @Override
         public Histogram build() {
-            return registry.histogram(
-                    MetricName.builder()
-                            .safeName("server.response.size")
-                            .putSafeTags("service-name", serviceName)
-                            .putSafeTags("endpoint", endpoint)
-                            .putSafeTags("libraryName", LIBRARY_NAME)
-                            .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                            .build());
+            return registry.histogram(MetricName.builder()
+                    .safeName("server.response.size")
+                    .putSafeTags("service-name", serviceName)
+                    .putSafeTags("endpoint", endpoint)
+                    .putSafeTags("libraryName", LIBRARY_NAME)
+                    .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .build());
         }
 
         @Override

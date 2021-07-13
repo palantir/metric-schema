@@ -18,16 +18,21 @@ package com.palantir.metric.schema;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.palantir.goethe.Goethe;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
 public final class JavaGenerator {
     // TODO(forozco): consider splitting this out into an API package
-    /** Specifies under which package Java classes should be generated. */
+    /**
+     * Specifies under which package Java classes should be generated.
+     */
     private static final String JAVA_PACKAGE = "javaPackage";
 
-    /** Specifies visibility of generated Utility class. Defaults to public */
+    /**
+     * Specifies visibility of generated Utility class. Defaults to public
+     */
     private static final String JAVA_VISIBILITY = "javaVisibility";
 
     @CanIgnoreReturnValue

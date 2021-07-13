@@ -7,13 +7,15 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Optional;
 
-/** General web server metrics. */
+/**
+ * General web server metrics.
+ */
 public final class MonitorsMetrics {
     private static final String LIBRARY_NAME = "witchcraft";
 
-    private static final String LIBRARY_VERSION =
-            Optional.ofNullable(MonitorsMetrics.class.getPackage().getImplementationVersion())
-                    .orElse("unknown");
+    private static final String LIBRARY_VERSION = Optional.ofNullable(
+                    MonitorsMetrics.class.getPackage().getImplementationVersion())
+            .orElse("unknown");
 
     private final TaggedMetricRegistry registry;
 
@@ -25,23 +27,26 @@ public final class MonitorsMetrics {
         return new MonitorsMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
     }
 
-    /** Measures number of installations that were processed */
+    /**
+     * Measures number of installations that were processed
+     */
     @CheckReturnValue
     public ProcessingBuilderResultStage processing() {
         return new ProcessingBuilder();
     }
 
-    /** Measures more */
+    /**
+     * Measures more
+     */
     @CheckReturnValue
     public Meter more(String type) {
-        return registry.meter(
-                MetricName.builder()
-                        .safeName("monitors.more")
-                        .putSafeTags("type", type)
-                        .putSafeTags("locator", "package:identifier")
-                        .putSafeTags("libraryName", LIBRARY_NAME)
-                        .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                        .build());
+        return registry.meter(MetricName.builder()
+                .safeName("monitors.more")
+                .putSafeTags("type", type)
+                .putSafeTags("locator", "package:identifier")
+                .putSafeTags("libraryName", LIBRARY_NAME)
+                .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .build());
     }
 
     @Override
@@ -87,7 +92,9 @@ public final class MonitorsMetrics {
     }
 
     public interface ProcessingBuilderResultStage {
-        /** The result of processing */
+        /**
+         * The result of processing
+         */
         @CheckReturnValue
         ProcessingBuilderTypeStage result(Processing_Result result);
     }
@@ -115,16 +122,15 @@ public final class MonitorsMetrics {
 
         @Override
         public Meter build() {
-            return registry.meter(
-                    MetricName.builder()
-                            .safeName("monitors.processing")
-                            .putSafeTags("result", result.getValue())
-                            .putSafeTags("type", type)
-                            .putSafeTags("locator", "package:identifier")
-                            .putSafeTags("otherLocator", otherLocator.getValue())
-                            .putSafeTags("libraryName", LIBRARY_NAME)
-                            .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                            .build());
+            return registry.meter(MetricName.builder()
+                    .safeName("monitors.processing")
+                    .putSafeTags("result", result.getValue())
+                    .putSafeTags("type", type)
+                    .putSafeTags("locator", "package:identifier")
+                    .putSafeTags("otherLocator", otherLocator.getValue())
+                    .putSafeTags("libraryName", LIBRARY_NAME)
+                    .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .build());
         }
 
         @Override
@@ -144,8 +150,7 @@ public final class MonitorsMetrics {
         @Override
         public ProcessingBuilder otherLocator(Processing_OtherLocator otherLocator) {
             Preconditions.checkState(this.otherLocator == null, "otherLocator is already set");
-            this.otherLocator =
-                    Preconditions.checkNotNull(otherLocator, "otherLocator is required");
+            this.otherLocator = Preconditions.checkNotNull(otherLocator, "otherLocator is required");
             return this;
         }
     }
