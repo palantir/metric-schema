@@ -36,7 +36,7 @@ joda-time:joda-time:2.10.8 (1 constraints: 2e16acf1)
 org.apache.commons:commons-lang3:3.12.0 (1 constraints: 38053b3b)
 org.checkerframework:checker-qual:3.8.0 (1 constraints: 1d0a02b5)
 org.immutables:value:2.8.8 (1 constraints: 14051536)
-org.slf4j:slf4j-api:1.7.31 (4 constraints: 58337a47)
+org.slf4j:slf4j-api:1.7.32 (4 constraints: 5933ff47)
 org.yaml:snakeyaml:1.27 (1 constraints: 7217fa27)
 
 [Test dependencies]
