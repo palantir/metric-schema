@@ -113,7 +113,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         SourceDirectorySet sourceSet =
                 project.getObjects().sourceDirectorySet("metricSchema", "Metric Schema source set");
         sourceSet.srcDir("src/main/metrics");
-        sourceSet.include("*.yml");
+        sourceSet.include("**/*.yml");
         return sourceSet;
     }
 
