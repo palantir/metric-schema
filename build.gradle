@@ -43,7 +43,7 @@ subprojects {
     }
 
     tasks.check.dependsOn(javadoc)
-    sourceCompatibility = 1.8
+    sourceCompatibility = 11
 
     dependencies {
         testImplementation 'org.junit.jupiter:junit-jupiter'

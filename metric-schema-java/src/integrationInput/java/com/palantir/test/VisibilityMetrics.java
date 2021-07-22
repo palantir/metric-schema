@@ -8,13 +8,15 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Optional;
 
-/** Tests we respect javaVisibility */
+/**
+ * Tests we respect javaVisibility
+ */
 final class VisibilityMetrics {
     private static final String LIBRARY_NAME = "witchcraft";
 
-    private static final String LIBRARY_VERSION =
-            Optional.ofNullable(VisibilityMetrics.class.getPackage().getImplementationVersion())
-                    .orElse("unknown");
+    private static final String LIBRARY_VERSION = Optional.ofNullable(
+                    VisibilityMetrics.class.getPackage().getImplementationVersion())
+            .orElse("unknown");
 
     private final TaggedMetricRegistry registry;
 
@@ -26,18 +28,21 @@ final class VisibilityMetrics {
         return new VisibilityMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
     }
 
-    /** just a metric */
+    /**
+     * just a metric
+     */
     @CheckReturnValue
     Counter test() {
-        return registry.counter(
-                MetricName.builder()
-                        .safeName("visibility.test")
-                        .putSafeTags("libraryName", LIBRARY_NAME)
-                        .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                        .build());
+        return registry.counter(MetricName.builder()
+                .safeName("visibility.test")
+                .putSafeTags("libraryName", LIBRARY_NAME)
+                .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .build());
     }
 
-    /** Tagged gauge metric. */
+    /**
+     * Tagged gauge metric.
+     */
     @CheckReturnValue
     ComplexBuilderFooStage complex() {
         return new ComplexBuilder();
@@ -64,8 +69,7 @@ final class VisibilityMetrics {
         ComplexBuildStage bar(String bar);
     }
 
-    private final class ComplexBuilder
-            implements ComplexBuilderFooStage, ComplexBuilderBarStage, ComplexBuildStage {
+    private final class ComplexBuilder implements ComplexBuilderFooStage, ComplexBuilderBarStage, ComplexBuildStage {
         private String foo;
 
         private String bar;
