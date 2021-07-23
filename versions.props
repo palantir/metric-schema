@@ -20,4 +20,4 @@ com.palantir.goethe:* = 0.2.0
 
 # conflict resolution
 com.google.code.findbugs:jsr305 = 3.0.2
-com.google.errorprone:error_prone_annotations = 2.7.1
+com.google.errorprone:error_prone_annotations = 2.8.0
