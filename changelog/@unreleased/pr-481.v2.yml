@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Apply automatic fixes for error-prone `ImmutablesStyle`
+  links:
+  - https://github.com/palantir/metric-schema/pull/481
