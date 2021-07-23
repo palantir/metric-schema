@@ -18,14 +18,15 @@ package com.palantir.metric.schema.markdown;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
 import org.immutables.value.Value;
 
+@SectionStyle
 @Value.Immutable
-@Value.Style(
-        overshadowImplementation = true,
-        jdkOnly = true,
-        get = {"get*", "is*"})
 @JsonDeserialize(as = ImmutableSection.class)
 @JsonSerialize(as = ImmutableSection.class)
 interface Section {
@@ -40,3 +41,12 @@ interface Section {
         return new Builder();
     }
 }
+
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.SOURCE)
+@SuppressWarnings({"checkstyle:OuterTypeFilename", "checkstyle:OneTopLevelClass"})
+@Value.Style(
+        overshadowImplementation = true,
+        jdkOnly = true,
+        get = {"get*", "is*"})
+@interface SectionStyle {}

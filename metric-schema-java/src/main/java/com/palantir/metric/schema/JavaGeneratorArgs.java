@@ -18,18 +18,18 @@ package com.palantir.metric.schema;
 
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import org.immutables.value.Value;
 
+@JavaGeneratorArgsStyle
 @Value.Immutable
-@Value.Style(
-        visibility = Value.Style.ImplementationVisibility.PACKAGE,
-        overshadowImplementation = true,
-        jdkOnly = true,
-        get = {"get*", "is*"})
 public abstract class JavaGeneratorArgs {
 
     private static final Predicate<String> LIBRARY_NAME =
@@ -67,3 +67,13 @@ public abstract class JavaGeneratorArgs {
         return new Builder();
     }
 }
+
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.SOURCE)
+@SuppressWarnings({"checkstyle:OuterTypeFilename", "checkstyle:OneTopLevelClass"})
+@Value.Style(
+        visibility = Value.Style.ImplementationVisibility.PACKAGE,
+        overshadowImplementation = true,
+        jdkOnly = true,
+        get = {"get*", "is*"})
+@interface JavaGeneratorArgsStyle {}

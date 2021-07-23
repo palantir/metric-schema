@@ -19,13 +19,14 @@ package com.palantir.metric.schema.markdown;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.metric.schema.MetricNamespace;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import org.immutables.value.Value;
 
+@NamespaceStyle
 @Value.Immutable
-@Value.Style(
-        overshadowImplementation = true,
-        jdkOnly = true,
-        get = {"get*", "is*"})
 @JsonDeserialize(as = ImmutableNamespace.class)
 @JsonSerialize(as = ImmutableNamespace.class)
 interface Namespace {
@@ -40,3 +41,12 @@ interface Namespace {
         return new Builder();
     }
 }
+
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.SOURCE)
+@SuppressWarnings({"checkstyle:OuterTypeFilename", "checkstyle:OneTopLevelClass"})
+@Value.Style(
+        overshadowImplementation = true,
+        jdkOnly = true,
+        get = {"get*", "is*"})
+@interface NamespaceStyle {}
