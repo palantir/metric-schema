@@ -21,6 +21,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.metric.schema.MetricNamespace;
 import org.immutables.value.Value;
 
+// Automatically suppressed to unblock enforcement in new code
+@SuppressWarnings("ImmutablesStyle")
 @Value.Immutable
 @Value.Style(
         overshadowImplementation = true,

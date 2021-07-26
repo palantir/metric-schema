@@ -185,14 +185,13 @@ public class CreateMetricsManifestTask extends DefaultTask {
         return Optional.of(ObjectMappers.loadMetricSchema(file));
     }
 
-    private static java.util.Optional<List<MetricSchema>> getExternalMetrics(
-            ComponentIdentifier id, ResolvedArtifact artifact) {
+    private static Optional<List<MetricSchema>> getExternalMetrics(ComponentIdentifier id, ResolvedArtifact artifact) {
         if (!artifact.getFile().exists()) {
             log.debug("Artifact did not exist: {}", artifact.getFile());
-            return java.util.Optional.empty();
+            return Optional.empty();
         } else if (!Files.getFileExtension(artifact.getFile().getName()).equals("jar")) {
             log.debug("Artifact is not jar: {}", artifact.getFile());
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
 
         try {
@@ -200,12 +199,11 @@ public class CreateMetricsManifestTask extends DefaultTask {
             ZipEntry manifestEntry = zipFile.getEntry(MetricSchemaPlugin.METRIC_SCHEMA_RESOURCE);
             if (manifestEntry == null) {
                 log.debug("Manifest file does not exist in JAR: {}", id);
-                return java.util.Optional.empty();
+                return Optional.empty();
             }
 
             try (InputStream is = zipFile.getInputStream(manifestEntry)) {
-                return java.util.Optional.of(
-                        ObjectMappers.mapper.readValue(is, new TypeReference<List<MetricSchema>>() {}));
+                return Optional.of(ObjectMappers.mapper.readValue(is, new TypeReference<List<MetricSchema>>() {}));
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to load external monitors");
