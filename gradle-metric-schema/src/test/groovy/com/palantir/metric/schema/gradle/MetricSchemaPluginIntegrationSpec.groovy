@@ -210,7 +210,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
         addSubproject("foo-server", """
             dependencies {
-                compile project(':foo-lib')
+                implementation project(':foo-lib')
             }
         """.stripIndent())
 
@@ -236,7 +236,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
         addSubproject("foo-server", """
             dependencies {
-                compile project(':foo-lib')
+                implementation project(':foo-lib')
             }
         """.stripIndent())
 
