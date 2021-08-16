@@ -24,7 +24,6 @@ import nebula.test.dependencies.DependencyGraph
 import nebula.test.dependencies.GradleDependencyGenerator
 import nebula.test.functional.ExecutionResult
 import org.apache.commons.io.FileUtils
-import org.gradle.util.GFileUtils
 
 class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
     public static final String METRICS = """
@@ -63,7 +62,6 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
             group 'com.palantir.test'
 
             repositories {
-                jcenter()
                 mavenCentral()
             }
 
@@ -120,8 +118,8 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
                 originalProjectDir.getName() + "-relocated").toFile()
         FileUtils.copyDirectory(originalProjectDir, newProjectDir)
         setProjectDir(newProjectDir)
-        GFileUtils.deleteDirectory(originalProjectDir)
-        GFileUtils.deleteDirectory(file("build/metricSchema/generated_src/"))
+        FileUtils.deleteDirectory(originalProjectDir)
+        FileUtils.deleteDirectory(file("build/metricSchema/generated_src/"))
 
         then:
         ExecutionResult result = runTasksSuccessfully('generateMetrics')
@@ -212,7 +210,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
         addSubproject("foo-server", """
             dependencies {
-                compile project(':foo-lib')
+                implementation project(':foo-lib')
             }
         """.stripIndent())
 
@@ -238,7 +236,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
         addSubproject("foo-server", """
             dependencies {
-                compile project(':foo-lib')
+                implementation project(':foo-lib')
             }
         """.stripIndent())
 

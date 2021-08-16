@@ -14,7 +14,8 @@ dependencies {
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
 
     testImplementation gradleTestKit()
-    testCompile 'com.netflix.nebula:nebula-test'
+    testImplementation 'com.netflix.nebula:nebula-test'
+    testImplementation 'commons-io:commons-io'
 
     compileOnly 'org.immutables:value::annotations'
 }

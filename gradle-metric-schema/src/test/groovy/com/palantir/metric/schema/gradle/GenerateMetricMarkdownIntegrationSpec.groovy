@@ -52,7 +52,6 @@ class GenerateMetricMarkdownIntegrationSpec extends IntegrationSpec {
         ${applyPlugin(MetricSchemaMarkdownPlugin.class)}
 
         repositories {
-            jcenter()
             mavenCentral()
         }
 
