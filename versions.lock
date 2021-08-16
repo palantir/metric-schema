@@ -42,6 +42,7 @@ org.yaml:snakeyaml:1.27 (1 constraints: 7217fa27)
 [Test dependencies]
 cglib:cglib-nodep:3.3.0 (2 constraints: 7a1acf3c)
 com.netflix.nebula:nebula-test:10.0.0 (1 constraints: 3305273b)
+commons-io:commons-io:2.5 (1 constraints: ab04222c)
 junit:junit:4.13.2 (4 constraints: fd31106f)
 net.bytebuddy:byte-buddy:1.11.3 (2 constraints: d41828da)
 net.bytebuddy:byte-buddy-agent:1.11.3 (1 constraints: 400b38de)

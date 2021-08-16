@@ -15,6 +15,7 @@ dependencies {
 
     testImplementation gradleTestKit()
     testImplementation 'com.netflix.nebula:nebula-test'
+    testImplementation 'commons-io:commons-io'
 
     compileOnly 'org.immutables:value::annotations'
 }
