@@ -62,7 +62,6 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
             group 'com.palantir.test'
 
             repositories {
-                jcenter()
                 mavenCentral()
             }
 
