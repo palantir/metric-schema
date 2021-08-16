@@ -35,7 +35,7 @@ public interface TagDefinition {
 
     List<String> values();
 
-    class TagDefinitionDeserializer extends JsonDeserializer<TagDefinition> {
+    final class TagDefinitionDeserializer extends JsonDeserializer<TagDefinition> {
         @Override
         public TagDefinition deserialize(JsonParser parser, DeserializationContext _ctxt) throws IOException {
             if (parser.currentToken() == JsonToken.VALUE_STRING) {
