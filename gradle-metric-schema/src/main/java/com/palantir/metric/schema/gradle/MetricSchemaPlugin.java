@@ -16,8 +16,6 @@
 
 package com.palantir.metric.schema.gradle;
 
-import com.google.common.collect.ImmutableSet;
-import java.io.File;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -137,14 +135,8 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
             project.getTasks().getByName("ideaModule", task -> task.dependsOn(generateMetrics));
             project.getExtensions().configure(IdeaModel.class, idea -> {
                 IdeaModule module = idea.getModule();
-                module.setSourceDirs(ImmutableSet.<File>builder()
-                        .addAll(module.getSourceDirs())
-                        .add(outputDir.get().getAsFile())
-                        .build());
-                module.setGeneratedSourceDirs(ImmutableSet.<File>builder()
-                        .addAll(module.getGeneratedSourceDirs())
-                        .add(outputDir.get().getAsFile())
-                        .build());
+                module.getSourceDirs().add(outputDir.get().getAsFile());
+                module.getGeneratedSourceDirs().add(outputDir.get().getAsFile());
             });
         });
     }
