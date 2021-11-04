@@ -8,7 +8,7 @@ org.mockito:mockito-core = 4.0.0
 org.slf4j:* = 1.7.32
 com.palantir.tritium:tritium-registry = 0.30.0
 com.palantir.conjure.java:* = 6.8.0
-com.palantir.conjure.java.runtime:* = 7.16.0
+com.palantir.conjure.java.runtime:* = 7.17.0
 com.palantir.conjure:conjure = 4.16.1
 com.fasterxml.jackson.*:jackson-* = 2.10.3
 com.squareup:javapoet = 1.13.0
@@ -21,4 +21,4 @@ commons-io:commons-io = 2.11.0
 
 # conflict resolution
 com.google.code.findbugs:jsr305 = 3.0.2
-com.google.errorprone:error_prone_annotations = 2.9.0
+com.google.errorprone:error_prone_annotations = 2.10.0
