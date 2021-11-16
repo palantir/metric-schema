@@ -25,6 +25,7 @@ import com.palantir.metric.schema.MetricDefinition;
 import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
 import com.palantir.metric.schema.MetricType;
+import com.palantir.metric.schema.Safety;
 import com.palantir.metric.schema.TagDefinition;
 import com.palantir.metric.schema.TagValue;
 import org.junit.jupiter.api.Test;
@@ -200,11 +201,13 @@ class MarkdownRendererTest {
                                                 .type(MetricType.METER)
                                                 .tagDefinitions(TagDefinition.builder()
                                                         .name("result")
+                                                        .safety(Safety.SAFE)
                                                         .values(TagValue.of("success"))
                                                         .values(TagValue.of("failure"))
                                                         .build())
                                                 .tagDefinitions(TagDefinition.builder()
                                                         .name("endpoint")
+                                                        .safety(Safety.SAFE)
                                                         .docs(Documentation.of("Some docs"))
                                                         .build())
                                                 .docs(Documentation.of("metric docs"))

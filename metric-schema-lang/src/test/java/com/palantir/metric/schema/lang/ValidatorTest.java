@@ -25,6 +25,7 @@ import com.palantir.metric.schema.MetricDefinition;
 import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
 import com.palantir.metric.schema.MetricType;
+import com.palantir.metric.schema.Safety;
 import com.palantir.metric.schema.TagDefinition;
 import org.junit.jupiter.api.Test;
 
@@ -121,6 +122,7 @@ class ValidatorTest {
                                                         .type(MetricType.COUNTER)
                                                         .tagDefinitions(TagDefinition.builder()
                                                                 .name("")
+                                                                .safety(Safety.SAFE)
                                                                 .build())
                                                         .build())
                                         .build())

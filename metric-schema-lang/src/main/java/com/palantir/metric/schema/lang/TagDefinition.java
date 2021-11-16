@@ -24,12 +24,18 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
 @JsonDeserialize(using = TagDefinition.TagDefinitionDeserializer.class)
 public interface TagDefinition {
     String name();
+
+    @Default
+    default LangSafety safety() {
+        return LangSafety.SAFE;
+    }
 
     Optional<String> docs();
 

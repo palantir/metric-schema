@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2021 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.palantir.metric.schema.gradle
+package com.palantir.metric.schema.lang;
 
-class Versions {
-    public static final String TRITIUM = "0.16.3"
-    public static final String SAFE_LOGGING = "1.11.0"
-    public static final String GUAVA = "31.0-jre"
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    private Versions() { }
+public enum LangSafety {
+    @JsonProperty("safe")
+    SAFE,
+    @JsonProperty("unsafe")
+    UNSAFE;
 }

@@ -59,6 +59,7 @@ class GenerateMetricMarkdownIntegrationSpec extends IntegrationSpec {
             resolutionStrategy {
                 force 'com.palantir.tritium:tritium-registry:${Versions.TRITIUM}'
                 force 'com.palantir.safe-logging:preconditions:${Versions.SAFE_LOGGING}'
+                force 'com.google.guava:guava:${Versions.GUAVA}'
             }
         }
         """.stripIndent()

@@ -41,6 +41,7 @@ dependencies {
     // Make sure generated code compiles
     integrationInputImplementation 'com.palantir.tritium:tritium-registry'
     integrationInputImplementation 'com.palantir.safe-logging:preconditions'
+    integrationInputImplementation 'com.google.guava:guava'
     // work around warning about unknown enum constant ImplementationVisibility.PACKAGE
     integrationInputCompileOnly 'org.immutables:value::annotations'
 }

@@ -35,9 +35,14 @@ types:
       Documentation:
         docs: Documentation describing an associated component. Markdown syntax may be used.
         alias: string
+      Safety:
+        values:
+          - SAFE
+          - UNSAFE
       TagDefinition:
         fields:
           name: string
+          safety: Safety
           docs: optional<Documentation>
           values: set<TagValue>
       TagValue:

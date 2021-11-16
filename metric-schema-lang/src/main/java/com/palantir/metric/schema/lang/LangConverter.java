@@ -22,6 +22,7 @@ import com.palantir.metric.schema.Documentation;
 import com.palantir.metric.schema.MetricDefinition;
 import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
+import com.palantir.metric.schema.Safety;
 import com.palantir.metric.schema.TagDefinition;
 import com.palantir.metric.schema.TagValue;
 
@@ -47,6 +48,7 @@ final class LangConverter {
                 .tagDefinitions(definition.tags().stream()
                         .map(tag -> TagDefinition.builder()
                                 .name(tag.name())
+                                .safety(convert(tag.safety()))
                                 .docs(tag.docs().map(Documentation::of))
                                 .values(tag.values().stream()
                                         .map(TagValue::of)
@@ -55,6 +57,14 @@ final class LangConverter {
                         .collect(ImmutableList.toImmutableList()))
                 .docs(Documentation.of(definition.docs()))
                 .build();
+    }
+
+    private static Safety convert(LangSafety safety) {
+        if (safety.equals(LangSafety.SAFE)) {
+            return Safety.SAFE;
+        } else {
+            return Safety.UNSAFE;
+        }
     }
 
     private LangConverter() {}

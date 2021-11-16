@@ -19,6 +19,7 @@ package com.palantir.metric.schema;
 import com.codahale.metrics.Gauge;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.hash.Hashing;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.MetricName;
@@ -32,6 +33,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
@@ -145,7 +147,16 @@ final class UtilityGenerator {
         CodeBlock.Builder builder = CodeBlock.builder().add("$T.builder().safeName($S)", MetricName.class, safeName);
         definition.getTagDefinitions().forEach(tagDef -> {
             if (tagDef.getValues().isEmpty()) {
-                builder.add(".putSafeTags($S, $L)", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
+                if (tagDef.getSafety().equals(Safety.SAFE)) {
+                    builder.add(".putSafeTags($S, $L)", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
+                } else {
+                    builder.add(
+                            ".putSafeTags($S, $T.murmur3_32_fixed().hashString($L, $T.UTF_8).toString())",
+                            tagDef.getName(),
+                            Hashing.class,
+                            Custodian.sanitizeName(tagDef.getName()),
+                            StandardCharsets.class);
+                }
             } else if (tagDef.getValues().size() == 1) {
                 builder.add(
                         ".putSafeTags($S, $S)",

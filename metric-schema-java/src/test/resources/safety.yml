@@ -1,0 +1,24 @@
+namespaces:
+  safety:
+    docs: Test for tag safety
+    metrics:
+      test:
+        type: counter
+        docs: A metric with safe and unsafe tags
+        tags:
+          - name: safe
+            safety: safe
+          - name: unsafe
+            safety: unsafe
+          - name: safe-single
+            safety: safe
+            values: [ value ]
+          - name: unsafe-single
+            safety: unsafe
+            values: [ value ]
+          - name: safe-multiple
+            safety: safe
+            values: [ value1, value2 ]
+          - name: unsafe-multiple
+            safety: unsafe
+            values: [ value1, value2 ]
