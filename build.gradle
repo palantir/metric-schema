@@ -20,6 +20,7 @@ apply plugin: 'com.palantir.external-publish'
 apply plugin: 'com.palantir.baseline'
 apply plugin: 'com.palantir.git-version'
 apply plugin: 'com.palantir.consistent-versions'
+apply plugin: 'com.palantir.baseline-java-versions'
 
 version System.env.CIRCLE_TAG ?: gitVersion()
 
@@ -43,7 +44,6 @@ subprojects {
     }
 
     tasks.check.dependsOn(javadoc)
-    sourceCompatibility = 11
 
     dependencies {
         testImplementation 'org.junit.jupiter:junit-jupiter'
@@ -51,4 +51,8 @@ subprojects {
             because 'allows JUnit 3 and JUnit 4 tests to run'
         }
     }
+}
+
+javaVersions {
+    libraryTarget = 11
 }
