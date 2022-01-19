@@ -35,7 +35,7 @@ jakarta.ws.rs:jakarta.ws.rs-api:2.1.6 (3 constraints: a948e7ce)
 joda-time:joda-time:2.10.13 (4 constraints: f05f74fc)
 org.apache.commons:commons-lang3:3.12.0 (2 constraints: 5515f9d9)
 org.checkerframework:checker-qual:3.19.0 (5 constraints: 815f1422)
-org.immutables:value:2.8.8 (4 constraints: d74d8304)
+org.immutables:value:2.9.0 (4 constraints: d04df7fe)
 org.slf4j:slf4j-api:1.7.33 (7 constraints: a77c8dbf)
 org.yaml:snakeyaml:1.27 (2 constraints: 35279cd0)
 
