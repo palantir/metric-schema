@@ -13,7 +13,7 @@ com.fasterxml.jackson.datatype:jackson-datatype-joda:2.12.5 (4 constraints: f557
 com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.5 (5 constraints: bf672157)
 com.fasterxml.jackson.module:jackson-module-afterburner:2.12.5 (5 constraints: bf672157)
 com.google.code.findbugs:jsr305:3.0.2 (14 constraints: 2de09337)
-com.google.errorprone:error_prone_annotations:2.10.0 (14 constraints: 40e1d47d)
+com.google.errorprone:error_prone_annotations:2.11.0 (14 constraints: 41e14c80)
 com.google.guava:failureaccess:1.0.1 (7 constraints: cc7b7196)
 com.google.guava:guava:31.0.1-jre (9 constraints: 8caa425f)
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (7 constraints: 6bdb2b61)
