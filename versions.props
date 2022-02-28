@@ -1,6 +1,6 @@
 org.junit.jupiter:* = 5.8.2
 org.junit.vintage:* = 5.8.2
-com.google.guava:guava = 31.0.1-jre
+com.google.guava:guava = 31.1-jre
 junit:junit = 4.13.2
 org.assertj:assertj-core = 3.22.0
 org.immutables:* = 2.8.8
