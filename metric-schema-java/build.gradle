@@ -3,15 +3,11 @@ apply plugin: 'com.palantir.external-publish-jar'
 
 sourceSets {
     integrationInput
-    test {
-        compileClasspath += integrationInput.output
-        runtimeClasspath += integrationInput.output
-    }
 }
 
 idea {
     module {
-        testSourceDirs += sourceSets.integrationInput.java.srcDirs
+        sourceDirs += sourceSets.integrationInput.java.srcDirs
     }
 }
 
@@ -19,6 +15,7 @@ tasks.checkstyleIntegrationInput.enabled = false
 
 dependencies {
     implementation project(':metric-schema-api:metric-schema-api-objects')
+    implementation project(':metric-schema-lang')
     implementation 'com.palantir.tritium:tritium-registry'
     implementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     implementation 'com.squareup:javapoet'
@@ -34,7 +31,7 @@ dependencies {
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'
 
-    implementation project(':metric-schema-lang')
+    testImplementation sourceSets.integrationInput.output
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.mockito:mockito-core'
 
