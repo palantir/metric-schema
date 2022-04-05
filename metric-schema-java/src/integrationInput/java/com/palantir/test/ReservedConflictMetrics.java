@@ -5,9 +5,10 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
-import java.util.Optional;
+import java.util.Objects;
 
 /**
  * Tests that reserved words are escaped.
@@ -15,9 +16,8 @@ import java.util.Optional;
 public final class ReservedConflictMetrics {
     private static final String LIBRARY_NAME = "witchcraft";
 
-    private static final String LIBRARY_VERSION = Optional.ofNullable(
-                    ReservedConflictMetrics.class.getPackage().getImplementationVersion())
-            .orElse("unknown");
+    private static final String LIBRARY_VERSION = Objects.requireNonNullElse(
+            ReservedConflictMetrics.class.getPackage().getImplementationVersion(), "unknown");
 
     private final TaggedMetricRegistry registry;
 
@@ -41,7 +41,7 @@ public final class ReservedConflictMetrics {
      * Meter with a single tag.
      */
     @CheckReturnValue
-    public Meter long_(String int_) {
+    public Meter long_(@Safe String int_) {
         return registry.meter(MetricName.builder()
                 .safeName("reserved.conflict.long")
                 .putSafeTags("int", int_)
@@ -85,17 +85,17 @@ public final class ReservedConflictMetrics {
 
     public interface IntBuilderIntStage {
         @CheckReturnValue
-        IntBuilderRegistryStage int_(String int_);
+        IntBuilderRegistryStage int_(@Safe String int_);
     }
 
     public interface IntBuilderRegistryStage {
         @CheckReturnValue
-        IntBuilderLongStage registry_(String registry_);
+        IntBuilderLongStage registry_(@Safe String registry_);
     }
 
     public interface IntBuilderLongStage {
         @CheckReturnValue
-        IntBuildStage long_(String long_);
+        IntBuildStage long_(@Safe String long_);
     }
 
     private final class IntBuilder
@@ -119,21 +119,21 @@ public final class ReservedConflictMetrics {
         }
 
         @Override
-        public IntBuilder int_(String int_) {
+        public IntBuilder int_(@Safe String int_) {
             Preconditions.checkState(this.int_ == null, "int is already set");
             this.int_ = Preconditions.checkNotNull(int_, "int is required");
             return this;
         }
 
         @Override
-        public IntBuilder registry_(String registry_) {
+        public IntBuilder registry_(@Safe String registry_) {
             Preconditions.checkState(this.registry_ == null, "registry is already set");
             this.registry_ = Preconditions.checkNotNull(registry_, "registry is required");
             return this;
         }
 
         @Override
-        public IntBuilder long_(String long_) {
+        public IntBuilder long_(@Safe String long_) {
             Preconditions.checkState(this.long_ == null, "long is already set");
             this.long_ = Preconditions.checkNotNull(long_, "long is required");
             return this;
@@ -148,7 +148,7 @@ public final class ReservedConflictMetrics {
 
     public interface DoubleBuilderIntStage {
         @CheckReturnValue
-        DoubleBuildStage int_(String int_);
+        DoubleBuildStage int_(@Safe String int_);
     }
 
     private final class DoubleBuilder implements DoubleBuilderIntStage, DoubleBuildStage {
@@ -170,7 +170,7 @@ public final class ReservedConflictMetrics {
         }
 
         @Override
-        public DoubleBuilder int_(String int_) {
+        public DoubleBuilder int_(@Safe String int_) {
             Preconditions.checkState(this.int_ == null, "int is already set");
             this.int_ = Preconditions.checkNotNull(int_, "int is required");
             return this;

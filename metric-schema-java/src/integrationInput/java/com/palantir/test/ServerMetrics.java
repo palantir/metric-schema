@@ -4,9 +4,10 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
-import java.util.Optional;
+import java.util.Objects;
 
 /**
  * General web server metrics.
@@ -14,9 +15,8 @@ import java.util.Optional;
 public final class ServerMetrics {
     private static final String LIBRARY_NAME = "witchcraft";
 
-    private static final String LIBRARY_VERSION = Optional.ofNullable(
-                    ServerMetrics.class.getPackage().getImplementationVersion())
-            .orElse("unknown");
+    private static final String LIBRARY_VERSION =
+            Objects.requireNonNullElse(ServerMetrics.class.getPackage().getImplementationVersion(), "unknown");
 
     private final TaggedMetricRegistry registry;
 
@@ -63,12 +63,12 @@ public final class ServerMetrics {
 
     public interface ResponseSizeBuilderServiceNameStage {
         @CheckReturnValue
-        ResponseSizeBuilderEndpointStage serviceName(String serviceName);
+        ResponseSizeBuilderEndpointStage serviceName(@Safe String serviceName);
     }
 
     public interface ResponseSizeBuilderEndpointStage {
         @CheckReturnValue
-        ResponseSizeBuildStage endpoint(String endpoint);
+        ResponseSizeBuildStage endpoint(@Safe String endpoint);
     }
 
     private final class ResponseSizeBuilder
@@ -89,14 +89,14 @@ public final class ServerMetrics {
         }
 
         @Override
-        public ResponseSizeBuilder serviceName(String serviceName) {
+        public ResponseSizeBuilder serviceName(@Safe String serviceName) {
             Preconditions.checkState(this.serviceName == null, "service-name is already set");
             this.serviceName = Preconditions.checkNotNull(serviceName, "service-name is required");
             return this;
         }
 
         @Override
-        public ResponseSizeBuilder endpoint(String endpoint) {
+        public ResponseSizeBuilder endpoint(@Safe String endpoint) {
             Preconditions.checkState(this.endpoint == null, "endpoint is already set");
             this.endpoint = Preconditions.checkNotNull(endpoint, "endpoint is required");
             return this;
