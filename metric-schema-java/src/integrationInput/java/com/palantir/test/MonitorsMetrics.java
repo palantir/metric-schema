@@ -3,9 +3,10 @@ package com.palantir.test;
 import com.codahale.metrics.Meter;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
-import java.util.Optional;
+import java.util.Objects;
 
 /**
  * General web server metrics.
@@ -13,9 +14,8 @@ import java.util.Optional;
 public final class MonitorsMetrics {
     private static final String LIBRARY_NAME = "witchcraft";
 
-    private static final String LIBRARY_VERSION = Optional.ofNullable(
-                    MonitorsMetrics.class.getPackage().getImplementationVersion())
-            .orElse("unknown");
+    private static final String LIBRARY_VERSION =
+            Objects.requireNonNullElse(MonitorsMetrics.class.getPackage().getImplementationVersion(), "unknown");
 
     private final TaggedMetricRegistry registry;
 
@@ -39,7 +39,7 @@ public final class MonitorsMetrics {
      * Measures more
      */
     @CheckReturnValue
-    public Meter more(String type) {
+    public Meter more(@Safe String type) {
         return registry.meter(MetricName.builder()
                 .safeName("monitors.more")
                 .putSafeTags("type", type)
@@ -96,17 +96,17 @@ public final class MonitorsMetrics {
          * The result of processing
          */
         @CheckReturnValue
-        ProcessingBuilderTypeStage result(Processing_Result result);
+        ProcessingBuilderTypeStage result(@Safe Processing_Result result);
     }
 
     public interface ProcessingBuilderTypeStage {
         @CheckReturnValue
-        ProcessingBuilderOtherLocatorStage type(String type);
+        ProcessingBuilderOtherLocatorStage type(@Safe String type);
     }
 
     public interface ProcessingBuilderOtherLocatorStage {
         @CheckReturnValue
-        ProcessingBuildStage otherLocator(Processing_OtherLocator otherLocator);
+        ProcessingBuildStage otherLocator(@Safe Processing_OtherLocator otherLocator);
     }
 
     private final class ProcessingBuilder
@@ -134,21 +134,21 @@ public final class MonitorsMetrics {
         }
 
         @Override
-        public ProcessingBuilder result(Processing_Result result) {
+        public ProcessingBuilder result(@Safe Processing_Result result) {
             Preconditions.checkState(this.result == null, "result is already set");
             this.result = Preconditions.checkNotNull(result, "result is required");
             return this;
         }
 
         @Override
-        public ProcessingBuilder type(String type) {
+        public ProcessingBuilder type(@Safe String type) {
             Preconditions.checkState(this.type == null, "type is already set");
             this.type = Preconditions.checkNotNull(type, "type is required");
             return this;
         }
 
         @Override
-        public ProcessingBuilder otherLocator(Processing_OtherLocator otherLocator) {
+        public ProcessingBuilder otherLocator(@Safe Processing_OtherLocator otherLocator) {
             Preconditions.checkState(this.otherLocator == null, "otherLocator is already set");
             this.otherLocator = Preconditions.checkNotNull(otherLocator, "otherLocator is required");
             return this;

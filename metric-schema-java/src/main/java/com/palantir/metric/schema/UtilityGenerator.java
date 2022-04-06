@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import com.squareup.javapoet.ClassName;
@@ -33,6 +34,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
 
@@ -50,7 +52,7 @@ final class UtilityGenerator {
                 .addModifiers(visibility.apply(Modifier.FINAL))
                 .addJavadoc(Javadoc.render(metrics.getDocs()))
                 .addMethod(MethodSpec.methodBuilder(ReservedNames.FACTORY_METHOD)
-                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                        .addModifiers(visibility.apply(Modifier.STATIC))
                         .addParameter(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME)
                         .addStatement(
                                 "return new $T($T.checkNotNull(registry, \"TaggedMetricRegistry\"))",
@@ -71,8 +73,8 @@ final class UtilityGenerator {
                             Modifier.STATIC,
                             Modifier.FINAL)
                     .initializer(
-                            "$T.ofNullable($T.class.getPackage().getImplementationVersion()).orElse(\"unknown\")",
-                            Optional.class,
+                            "$T.requireNonNullElse($T.class.getPackage().getImplementationVersion(), \"unknown\")",
+                            Objects.class,
                             className)
                     .build());
         }
@@ -190,6 +192,7 @@ final class UtilityGenerator {
                         .filter(tag -> tag.getValues().size() != 1)
                         .map(tag -> ParameterSpec.builder(
                                         getTagClassName(metricName, tag), Custodian.sanitizeName(tag.getName()))
+                                .addAnnotation(Safe.class)
                                 .build())
                         .collect(ImmutableList.toImmutableList()))
                 .addJavadoc(Javadoc.render(definition.getDocs()));
@@ -269,7 +272,10 @@ final class UtilityGenerator {
             outerBuilder.addType(TypeSpec.interfaceBuilder(stageName(metricName, tagName))
                     .addModifiers(visibility.apply())
                     .addMethod(methodBuilder
-                            .addParameter(getTagClassName(metricName, tag), Custodian.sanitizeName(tagName))
+                            .addParameter(ParameterSpec.builder(
+                                            getTagClassName(metricName, tag), Custodian.sanitizeName(tagName))
+                                    .addAnnotation(Safe.class)
+                                    .build())
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                             .addAnnotation(CheckReturnValue.class)
                             .returns(ClassName.bestGuess(
@@ -336,7 +342,10 @@ final class UtilityGenerator {
                                 .addModifiers(Modifier.PUBLIC)
                                 .addAnnotation(Override.class)
                                 .returns(ClassName.bestGuess(Custodian.anyToUpperCamel(metricName) + "Builder"))
-                                .addParameter(getTagClassName(metricName, tag), Custodian.sanitizeName(tag.getName()))
+                                .addParameter(ParameterSpec.builder(
+                                                getTagClassName(metricName, tag), Custodian.sanitizeName(tag.getName()))
+                                        .addAnnotation(Safe.class)
+                                        .build())
                                 .addStatement(
                                         "$1T.checkState(this.$2L == null, $3S)",
                                         Preconditions.class,

@@ -4,9 +4,10 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
-import java.util.Optional;
+import java.util.Objects;
 
 /**
  * Tests we respect javaVisibility
@@ -14,9 +15,8 @@ import java.util.Optional;
 final class VisibilityMetrics {
     private static final String LIBRARY_NAME = "witchcraft";
 
-    private static final String LIBRARY_VERSION = Optional.ofNullable(
-                    VisibilityMetrics.class.getPackage().getImplementationVersion())
-            .orElse("unknown");
+    private static final String LIBRARY_VERSION =
+            Objects.requireNonNullElse(VisibilityMetrics.class.getPackage().getImplementationVersion(), "unknown");
 
     private final TaggedMetricRegistry registry;
 
@@ -24,7 +24,7 @@ final class VisibilityMetrics {
         this.registry = registry;
     }
 
-    public static VisibilityMetrics of(TaggedMetricRegistry registry) {
+    static VisibilityMetrics of(TaggedMetricRegistry registry) {
         return new VisibilityMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
     }
 
@@ -61,12 +61,12 @@ final class VisibilityMetrics {
 
     interface ComplexBuilderFooStage {
         @CheckReturnValue
-        ComplexBuilderBarStage foo(String foo);
+        ComplexBuilderBarStage foo(@Safe String foo);
     }
 
     interface ComplexBuilderBarStage {
         @CheckReturnValue
-        ComplexBuildStage bar(String bar);
+        ComplexBuildStage bar(@Safe String bar);
     }
 
     private final class ComplexBuilder implements ComplexBuilderFooStage, ComplexBuilderBarStage, ComplexBuildStage {
@@ -91,14 +91,14 @@ final class VisibilityMetrics {
         }
 
         @Override
-        public ComplexBuilder foo(String foo) {
+        public ComplexBuilder foo(@Safe String foo) {
             Preconditions.checkState(this.foo == null, "foo is already set");
             this.foo = Preconditions.checkNotNull(foo, "foo is required");
             return this;
         }
 
         @Override
-        public ComplexBuilder bar(String bar) {
+        public ComplexBuilder bar(@Safe String bar) {
             Preconditions.checkState(this.bar == null, "bar is already set");
             this.bar = Preconditions.checkNotNull(bar, "bar is required");
             return this;
