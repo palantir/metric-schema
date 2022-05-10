@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.serialization.ObjectMappers;
@@ -40,6 +41,8 @@ public class JavaGeneratorTest {
 
     private static final String REFERENCE_FILES_FOLDER = "src/integrationInput/java";
 
+    private static final String DAGGER_REFERENCE_FILES_FOLDER = "src/integrationInputWithDagger/java";
+
     @TempDir
     public Path outputDir;
 
@@ -47,10 +50,10 @@ public class JavaGeneratorTest {
     public Path inputDir;
 
     @Test
-    void generates_code() {
+    void generates_code_without_dagger() {
         JavaGenerator.generate(JavaGeneratorArgs.builder()
                         .output(outputDir)
-                        .input(compileAndEmit(listFiles(Paths.get("src/test/resources"))))
+                        .input(compileAndEmit(listFiles(Paths.get("src/test/resources"), _path -> true)))
                         .defaultPackageName("com.palantir.test")
                         .libraryName("witchcraft")
                         .build())
@@ -59,6 +62,23 @@ public class JavaGeneratorTest {
                 .map(Path::toString)
                 .forEach(relativePath ->
                         assertThatFilesAreTheSame(outputDir.resolve(relativePath), REFERENCE_FILES_FOLDER));
+    }
+
+    @Test
+    void generates_code_with_dagger() {
+        JavaGenerator.generate(JavaGeneratorArgs.builder()
+                        .output(outputDir)
+                        .input(compileAndEmit(listFiles(Paths.get("src/test/resources"), path -> path.getFileName()
+                                .startsWith("server.yml"))))
+                        .defaultPackageName("com.palantir.test")
+                        .libraryName("witchcraft")
+                        .generateDaggerAnnotations(true)
+                        .build())
+                .stream()
+                .map(outputDir::relativize)
+                .map(Path::toString)
+                .forEach(relativePath ->
+                        assertThatFilesAreTheSame(outputDir.resolve(relativePath), DAGGER_REFERENCE_FILES_FOLDER));
     }
 
     private void assertThatFilesAreTheSame(Path outputFile, String referenceFilesFolder) {
@@ -76,10 +96,10 @@ public class JavaGeneratorTest {
         assertThat(outputFile).hasSameTextualContentAs(expectedFile);
     }
 
-    private List<Path> listFiles(Path path) {
+    private List<Path> listFiles(Path path, Predicate<Path> filter) {
         Preconditions.checkArgument(Files.isDirectory(path), "Expected a directory", SafeArg.of("path", path));
         try (Stream<Path> stream = Files.list(path)) {
-            return stream.collect(ImmutableList.toImmutableList());
+            return stream.filter(filter).collect(ImmutableList.toImmutableList());
         } catch (IOException e) {
             throw new SafeRuntimeException("Failed to list directory", e, SafeArg.of("path", path));
         }

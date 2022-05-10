@@ -20,6 +20,9 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ResolvedArtifact;
+import org.gradle.api.artifacts.component.ComponentArtifactIdentifier;
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.SourceDirectorySet;
@@ -56,6 +59,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                     task.setDescription("Generates bindings for producing well defined metrics");
                     task.getInputFile().set(compileSchemaTask.flatMap(CompileMetricSchemaTask::getOutputFile));
                     task.getOutputDir().set(generatedJavaOutputDir);
+                    task.getGenerateDaggerAnnotations().set(project.provider(() -> hasDaggerOnClasspath(project)));
                 });
         project.getTasks().named("compileJava", compileJava -> compileJava.dependsOn(generateMetricsTask));
 
@@ -68,6 +72,17 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         project.getPluginManager()
                 .withPlugin("com.palantir.sls-java-service-distribution", _plugin -> project.getPluginManager()
                         .apply(MetricSchemaMarkdownPlugin.class));
+    }
+
+    private static boolean hasDaggerOnClasspath(Project project) {
+        Configuration compileClasspath = project.getConfigurations().getByName("compileClasspath");
+        return compileClasspath.getResolvedConfiguration().getResolvedArtifacts().stream()
+                .map(ResolvedArtifact::getId)
+                .map(ComponentArtifactIdentifier::getComponentIdentifier)
+                .filter(ModuleComponentIdentifier.class::isInstance)
+                .map(ModuleComponentIdentifier.class::cast)
+                .anyMatch(id -> id.getGroup().equals("com.google.dagger")
+                        && id.getModule().equals("dagger"));
     }
 
     private static void createManifestTask(

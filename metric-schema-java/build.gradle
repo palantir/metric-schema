@@ -3,6 +3,7 @@ apply plugin: 'com.palantir.external-publish-jar'
 
 sourceSets {
     integrationInput
+    integrationInputWithDagger
 }
 
 idea {
@@ -12,6 +13,13 @@ idea {
 }
 
 tasks.checkstyleIntegrationInput.enabled = false
+
+// Setup integrationInputWithDagger to inherit integrationInput's dependencies
+["Implementation", "CompileOnly"].forEach { subCfg ->
+    configurations.named("integrationInputWithDagger" + subCfg).configure {
+        extendsFrom configurations.getByName("integrationInput" + subCfg)
+    }
+}
 
 dependencies {
     implementation project(':metric-schema-api:metric-schema-api-objects')
@@ -40,10 +48,12 @@ dependencies {
     integrationInputImplementation 'com.palantir.safe-logging:preconditions'
     // work around warning about unknown enum constant ImplementationVisibility.PACKAGE
     integrationInputCompileOnly 'org.immutables:value::annotations'
+
+    integrationInputWithDaggerImplementation 'com.google.dagger:dagger'
 }
 
 // Ignore generated code when formatting since we currently use g-j-f in code and p-j-f in gradle
 spotless.java {
-    targetExclude = sourceSets.integrationInput.java
+    targetExclude = sourceSets.integrationInput.java + sourceSets.integrationInputWithDagger.java
     target target
 }

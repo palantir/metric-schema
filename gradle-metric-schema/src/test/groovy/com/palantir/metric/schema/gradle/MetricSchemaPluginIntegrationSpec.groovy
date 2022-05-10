@@ -55,6 +55,8 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
                 docs: A histogram of the number of bytes written into the response.
         """.stripIndent()
 
+    private static final String OUTPUT_JAVA_FILE = "build/metricSchema/generated_src/com/palantir/test/ServerMetrics.java"
+
     void setup() {
         buildFile << """
         allprojects {
@@ -94,14 +96,37 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         def result = runTasksSuccessfully('compileMetricSchema')
     }
 
-    def 'generates java'() {
+    private boolean fileContainsLine(String path, String text) {
+        new File(projectDir, path).readLines().any { line -> (line == text) }
+    }
+
+    def 'generates java without dagger support'() {
         when:
         file('src/main/metrics/metrics.yml') << METRICS
 
         then:
         def result = runTasksSuccessfully('classes')
         result.wasExecuted(':generateMetrics')
-        fileExists("build/metricSchema/generated_src/com/palantir/test/ServerMetrics.java")
+        !fileContainsLine(OUTPUT_JAVA_FILE, "import dagger.Reusable;")
+        !fileContainsLine(OUTPUT_JAVA_FILE, "import javax.inject.Inject;")
+    }
+
+    def 'generates java with dagger support'() {
+        when:
+        file('src/main/metrics/metrics.yml') << METRICS
+        buildFile.append("""
+        allprojects {
+            dependencies {
+                api 'com.google.dagger:dagger:2.41'
+            }
+        }
+        """.stripIndent())
+
+        then:
+        def result = runTasksSuccessfully('classes')
+        result.wasExecuted(':generateMetrics')
+        fileContainsLine(OUTPUT_JAVA_FILE, "import dagger.Reusable;")
+        fileContainsLine(OUTPUT_JAVA_FILE, "import javax.inject.Inject;")
     }
 
     def 'build cache works'() {
@@ -110,7 +135,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         file('src/main/metrics/metrics.yml') << METRICS
 
         runTasksSuccessfully('generateMetrics')
-        fileExists("build/metricSchema/generated_src/com/palantir/test/ServerMetrics.java")
+        fileExists(OUTPUT_JAVA_FILE)
 
         // we want cache hits no matter where the project is checked out on disk
         File originalProjectDir = getProjectDir()

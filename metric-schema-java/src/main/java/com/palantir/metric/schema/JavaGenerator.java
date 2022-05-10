@@ -44,7 +44,8 @@ public final class JavaGenerator {
                             entry.getValue(),
                             args.libraryName(),
                             getPackage(args, schema),
-                            getVisibility(schema));
+                            getVisibility(schema),
+                            args.getGenerateDaggerAnnotations());
                 }))
                 .map(javaFile -> Goethe.formatAndEmit(javaFile, args.output()))
                 .collect(ImmutableList.toImmutableList());

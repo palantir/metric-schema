@@ -20,6 +20,9 @@ com.palantir.safe-logging:preconditions = 1.11.0
 com.palantir.goethe:* = 0.7.0
 commons-io:commons-io = 2.11.0
 
+# just for verifying generated dagger annotations compile
+com.google.dagger:* = 2.41
+
 # conflict resolution
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.errorprone:error_prone_annotations = 2.11.0

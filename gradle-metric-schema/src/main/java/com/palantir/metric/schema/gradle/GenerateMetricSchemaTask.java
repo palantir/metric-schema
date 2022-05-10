@@ -37,6 +37,8 @@ import org.gradle.util.GFileUtils;
 public abstract class GenerateMetricSchemaTask extends DefaultTask {
     private final Property<String> libraryName =
             getProject().getObjects().property(String.class).value(defaultLibraryName());
+    private final Property<Boolean> generateDaggerAnnotations =
+            getProject().getObjects().property(Boolean.class).value(false);
 
     @InputFile
     @PathSensitive(PathSensitivity.RELATIVE)
@@ -45,6 +47,11 @@ public abstract class GenerateMetricSchemaTask extends DefaultTask {
     @Input
     public final Property<String> getLibraryName() {
         return libraryName;
+    }
+
+    @Input
+    public final Property<Boolean> getGenerateDaggerAnnotations() {
+        return generateDaggerAnnotations;
     }
 
     @OutputDirectory
@@ -60,6 +67,7 @@ public abstract class GenerateMetricSchemaTask extends DefaultTask {
                 .input(getInputFile().getAsFile().get().toPath())
                 .output(output.toPath())
                 .libraryName(Optional.ofNullable(libraryName.getOrNull()))
+                .generateDaggerAnnotations(getGenerateDaggerAnnotations().get())
                 // TODO(forozco): probably want something better
                 .defaultPackageName(getProject().getGroup().toString())
                 .build());
