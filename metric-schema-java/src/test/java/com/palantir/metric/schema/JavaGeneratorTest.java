@@ -41,7 +41,7 @@ public class JavaGeneratorTest {
 
     private static final String REFERENCE_FILES_FOLDER = "src/integrationInput/java";
 
-    private static final String DAGGER_REFERENCE_FILES_FOLDER = "src/integrationInputWithDagger/java";
+    private static final String INJECT_REFERENCE_FILES_FOLDER = "src/integrationInputWithInject/java";
 
     @TempDir
     public Path outputDir;
@@ -50,7 +50,7 @@ public class JavaGeneratorTest {
     public Path inputDir;
 
     @Test
-    void generates_code_without_dagger() {
+    void generates_code_without_inject() {
         JavaGenerator.generate(JavaGeneratorArgs.builder()
                         .output(outputDir)
                         .input(compileAndEmit(listFiles(Paths.get("src/test/resources"), _path -> true)))
@@ -65,20 +65,20 @@ public class JavaGeneratorTest {
     }
 
     @Test
-    void generates_code_with_dagger() {
+    void generates_code_with_inject() {
         JavaGenerator.generate(JavaGeneratorArgs.builder()
                         .output(outputDir)
                         .input(compileAndEmit(listFiles(Paths.get("src/test/resources"), path -> path.getFileName()
                                 .startsWith("server.yml"))))
                         .defaultPackageName("com.palantir.test")
                         .libraryName("witchcraft")
-                        .generateDaggerAnnotations(true)
+                        .generateInjectAnnotation(true)
                         .build())
                 .stream()
                 .map(outputDir::relativize)
                 .map(Path::toString)
                 .forEach(relativePath ->
-                        assertThatFilesAreTheSame(outputDir.resolve(relativePath), DAGGER_REFERENCE_FILES_FOLDER));
+                        assertThatFilesAreTheSame(outputDir.resolve(relativePath), INJECT_REFERENCE_FILES_FOLDER));
     }
 
     private void assertThatFilesAreTheSame(Path outputFile, String referenceFilesFolder) {

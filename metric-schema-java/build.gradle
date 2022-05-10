@@ -3,7 +3,7 @@ apply plugin: 'com.palantir.external-publish-jar'
 
 sourceSets {
     integrationInput
-    integrationInputWithDagger
+    integrationInputWithInject
 }
 
 idea {
@@ -13,11 +13,11 @@ idea {
 }
 
 tasks.checkstyleIntegrationInput.enabled = false
-tasks.checkstyleIntegrationInputWithDagger.enabled = false
+tasks.checkstyleIntegrationInputWithInject.enabled = false
 
-// Setup integrationInputWithDagger to inherit integrationInput's dependencies
+// Setup integrationInputWithInject to inherit integrationInput's dependencies
 ["Implementation", "CompileOnly"].forEach { subCfg ->
-    configurations.named("integrationInputWithDagger" + subCfg).configure {
+    configurations.named("integrationInputWithInject" + subCfg).configure {
         extendsFrom configurations.getByName("integrationInput" + subCfg)
     }
 }
@@ -50,11 +50,11 @@ dependencies {
     // work around warning about unknown enum constant ImplementationVisibility.PACKAGE
     integrationInputCompileOnly 'org.immutables:value::annotations'
 
-    integrationInputWithDaggerImplementation 'com.google.dagger:dagger'
+    integrationInputWithInjectImplementation 'jakarta.inject:jakarta.inject-api'
 }
 
 // Ignore generated code when formatting since we currently use g-j-f in code and p-j-f in gradle
 spotless.java {
-    targetExclude = sourceSets.integrationInput.java + sourceSets.integrationInputWithDagger.java
+    targetExclude = sourceSets.integrationInput.java + sourceSets.integrationInputWithInject.java
     target target
 }

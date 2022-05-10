@@ -51,9 +51,9 @@ public abstract class JavaGeneratorArgs {
     /** The default Java package name for generated classes. */
     abstract String defaultPackageName();
 
-    /** Should Dagger's @Inject and @Reusable annotations be added to generated types. */
+    /** Should the JSR-330 @Inject annotation be added to generated types. */
     @Value.Default
-    boolean getGenerateDaggerAnnotations() {
+    boolean getGenerateInjectAnnotation() {
         return false;
     }
 

@@ -100,24 +100,23 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         new File(projectDir, path).readLines().any { line -> (line == text) }
     }
 
-    def 'generates java without dagger support'() {
+    def 'generates java without Inject support'() {
         when:
         file('src/main/metrics/metrics.yml') << METRICS
 
         then:
         def result = runTasksSuccessfully('classes')
         result.wasExecuted(':generateMetrics')
-        !fileContainsLine(OUTPUT_JAVA_FILE, "import dagger.Reusable;")
         !fileContainsLine(OUTPUT_JAVA_FILE, "import javax.inject.Inject;")
     }
 
-    def 'generates java with dagger support'() {
+    def 'generates java with Inject support'() {
         when:
         file('src/main/metrics/metrics.yml') << METRICS
         buildFile.append("""
         allprojects {
             dependencies {
-                api 'com.google.dagger:dagger:2.41'
+                api 'jakarta.inject:jakarta.inject-api:1.0'
             }
         }
         """.stripIndent())
@@ -125,7 +124,6 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         then:
         def result = runTasksSuccessfully('classes')
         result.wasExecuted(':generateMetrics')
-        fileContainsLine(OUTPUT_JAVA_FILE, "import dagger.Reusable;")
         fileContainsLine(OUTPUT_JAVA_FILE, "import javax.inject.Inject;")
     }
 

@@ -7,14 +7,12 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
-import dagger.Reusable;
 import java.util.Objects;
 import javax.inject.Inject;
 
 /**
  * General web server metrics.
  */
-@Reusable
 public final class ServerMetrics {
     private static final String LIBRARY_NAME = "witchcraft";
 

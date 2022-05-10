@@ -1,6 +1,5 @@
 type: improvement
 improvement:
-  description: Add dagger's Inject and Reusable annotations when available on the
-    classpath
+  description: Add JSR-330's Inject annotation when jakarta.inject is on the classpath
   links:
   - https://github.com/palantir/metric-schema/pull/778

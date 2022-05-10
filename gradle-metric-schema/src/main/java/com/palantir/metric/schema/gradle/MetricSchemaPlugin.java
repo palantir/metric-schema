@@ -59,7 +59,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                     task.setDescription("Generates bindings for producing well defined metrics");
                     task.getInputFile().set(compileSchemaTask.flatMap(CompileMetricSchemaTask::getOutputFile));
                     task.getOutputDir().set(generatedJavaOutputDir);
-                    task.getGenerateDaggerAnnotations().set(project.provider(() -> hasDaggerOnClasspath(project)));
+                    task.getGenerateInjectAnnotation().set(project.provider(() -> hasInjectionFramework(project)));
                 });
         project.getTasks().named("compileJava", compileJava -> compileJava.dependsOn(generateMetricsTask));
 
@@ -74,15 +74,15 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                         .apply(MetricSchemaMarkdownPlugin.class));
     }
 
-    private static boolean hasDaggerOnClasspath(Project project) {
+    private static boolean hasInjectionFramework(Project project) {
         Configuration compileClasspath = project.getConfigurations().getByName("compileClasspath");
         return compileClasspath.getResolvedConfiguration().getResolvedArtifacts().stream()
                 .map(ResolvedArtifact::getId)
                 .map(ComponentArtifactIdentifier::getComponentIdentifier)
                 .filter(ModuleComponentIdentifier.class::isInstance)
                 .map(ModuleComponentIdentifier.class::cast)
-                .anyMatch(id -> id.getGroup().equals("com.google.dagger")
-                        && id.getModule().equals("dagger"));
+                .anyMatch(id ->
+                        id.getGroup().equals("jakarta.inject") && id.getModule().equals("jakarta.inject-api"));
     }
 
     private static void createManifestTask(

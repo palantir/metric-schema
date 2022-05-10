@@ -46,7 +46,7 @@ final class UtilityGenerator {
             Optional<String> libraryName,
             String packageName,
             ImplementationVisibility visibility,
-            boolean generateDaggerAnnotations) {
+            boolean generateInjectAnnotation) {
         ClassName className =
                 ClassName.get(packageName, className(metrics.getShortName().orElse(namespace)));
         TypeSpec.Builder builder = TypeSpec.classBuilder(className.simpleName())
@@ -84,9 +84,8 @@ final class UtilityGenerator {
                 .addParameter(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME)
                 .addStatement("this.$1L = $1L", ReservedNames.REGISTRY_NAME);
 
-        if (generateDaggerAnnotations) {
+        if (generateInjectAnnotation) {
             ctorBuilder.addModifiers(Modifier.PUBLIC).addAnnotation(ClassName.get("javax.inject", "Inject"));
-            builder.addAnnotation(ClassName.get("dagger", "Reusable"));
         } else {
             ctorBuilder.addModifiers(Modifier.PRIVATE);
         }

@@ -50,7 +50,7 @@ public abstract class GenerateMetricSchemaTask extends DefaultTask {
     }
 
     @Input
-    public final Property<Boolean> getGenerateDaggerAnnotations() {
+    public final Property<Boolean> getGenerateInjectAnnotation() {
         return generateDaggerAnnotations;
     }
 
@@ -67,7 +67,7 @@ public abstract class GenerateMetricSchemaTask extends DefaultTask {
                 .input(getInputFile().getAsFile().get().toPath())
                 .output(output.toPath())
                 .libraryName(Optional.ofNullable(libraryName.getOrNull()))
-                .generateDaggerAnnotations(getGenerateDaggerAnnotations().get())
+                .generateInjectAnnotation(getGenerateInjectAnnotation().get())
                 // TODO(forozco): probably want something better
                 .defaultPackageName(getProject().getGroup().toString())
                 .build());
