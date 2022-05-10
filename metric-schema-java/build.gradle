@@ -13,6 +13,7 @@ idea {
 }
 
 tasks.checkstyleIntegrationInput.enabled = false
+tasks.checkstyleIntegrationInputWithDagger.enabled = false
 
 // Setup integrationInputWithDagger to inherit integrationInput's dependencies
 ["Implementation", "CompileOnly"].forEach { subCfg ->
