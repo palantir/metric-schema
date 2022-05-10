@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Add dagger's Inject and Reusable annotations when available on the
+    classpath
+  links:
+  - https://github.com/palantir/metric-schema/pull/778
