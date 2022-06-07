@@ -78,7 +78,7 @@ public class CheckMetricMarkdownTask extends DefaultTask {
 
         Map<String, List<MetricSchema>> schemas =
                 ObjectMappers.mapper.readValue(manifest, new TypeReference<Map<String, List<MetricSchema>>>() {});
-        if (schemas.isEmpty()) {
+        if (isEmpty(schemas)) {
             return;
         }
 
@@ -98,5 +98,9 @@ public class CheckMetricMarkdownTask extends DefaultTask {
                     markdown.getName(),
                     MetricSchemaPlugin.GENERATE_METRICS_MARKDOWN);
         }
+    }
+
+    private static boolean isEmpty(Map<String, List<MetricSchema>> schemas) {
+        return schemas.isEmpty() || schemas.values().stream().allMatch(List::isEmpty);
     }
 }
