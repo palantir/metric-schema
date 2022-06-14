@@ -50,7 +50,7 @@ public final class MetricSchemaMarkdownPlugin implements Plugin<Project> {
                     task.mustRunAfter(checkMetricsMarkdown);
                 });
 
-        project.getTasks().named("check", check -> check.dependsOn(checkMetricsMarkdown));
+        project.getTasks().named("check").configure(check -> check.dependsOn(checkMetricsMarkdown));
 
         // Wire up dependencies so running `./gradlew --write-locks` will update the markdown
         StartParameter startParam = project.getGradle().getStartParameter();
