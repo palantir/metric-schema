@@ -12,6 +12,8 @@ import java.util.Objects;
  * General web server metrics.
  */
 public final class MonitorsMetrics {
+    private static final String JAVA_VERSION = System.getProperty("java.version", "unknown");
+
     private static final String LIBRARY_NAME = "witchcraft";
 
     private static final String LIBRARY_VERSION =
@@ -46,6 +48,7 @@ public final class MonitorsMetrics {
                 .putSafeTags("locator", "package:identifier")
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .putSafeTags("javaVersion", JAVA_VERSION)
                 .build());
     }
 
@@ -130,6 +133,7 @@ public final class MonitorsMetrics {
                     .putSafeTags("otherLocator", otherLocator.getValue())
                     .putSafeTags("libraryName", LIBRARY_NAME)
                     .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .putSafeTags("javaVersion", JAVA_VERSION)
                     .build());
         }
 

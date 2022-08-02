@@ -13,6 +13,8 @@ import java.util.Objects;
  * Tests we respect javaVisibility
  */
 final class VisibilityMetrics {
+    private static final String JAVA_VERSION = System.getProperty("java.version", "unknown");
+
     private static final String LIBRARY_NAME = "witchcraft";
 
     private static final String LIBRARY_VERSION =
@@ -37,6 +39,7 @@ final class VisibilityMetrics {
                 .safeName("visibility.test")
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .putSafeTags("javaVersion", JAVA_VERSION)
                 .build());
     }
 
@@ -87,6 +90,7 @@ final class VisibilityMetrics {
                     .putSafeTags("bar", bar)
                     .putSafeTags("libraryName", LIBRARY_NAME)
                     .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .putSafeTags("javaVersion", JAVA_VERSION)
                     .build();
         }
 

@@ -14,6 +14,8 @@ import java.util.Objects;
  * Tests that reserved words are escaped.
  */
 public final class ReservedConflictMetrics {
+    private static final String JAVA_VERSION = System.getProperty("java.version", "unknown");
+
     private static final String LIBRARY_NAME = "witchcraft";
 
     private static final String LIBRARY_VERSION = Objects.requireNonNullElse(
@@ -47,6 +49,7 @@ public final class ReservedConflictMetrics {
                 .putSafeTags("int", int_)
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .putSafeTags("javaVersion", JAVA_VERSION)
                 .build());
     }
 
@@ -62,6 +65,7 @@ public final class ReservedConflictMetrics {
                 .safeName("reserved.conflict.float")
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .putSafeTags("javaVersion", JAVA_VERSION)
                 .build();
     }
 
@@ -115,6 +119,7 @@ public final class ReservedConflictMetrics {
                     .putSafeTags("long", long_)
                     .putSafeTags("libraryName", LIBRARY_NAME)
                     .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .putSafeTags("javaVersion", JAVA_VERSION)
                     .build());
         }
 
@@ -166,6 +171,7 @@ public final class ReservedConflictMetrics {
                     .putSafeTags("int", int_)
                     .putSafeTags("libraryName", LIBRARY_NAME)
                     .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .putSafeTags("javaVersion", JAVA_VERSION)
                     .build();
         }
 

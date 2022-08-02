@@ -13,6 +13,8 @@ import java.util.Objects;
  * General web server metrics.
  */
 public final class ServerMetrics {
+    private static final String JAVA_VERSION = System.getProperty("java.version", "unknown");
+
     private static final String LIBRARY_NAME = "witchcraft";
 
     private static final String LIBRARY_VERSION =
@@ -48,6 +50,7 @@ public final class ServerMetrics {
                 .safeName("server.worker.utilization")
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .putSafeTags("javaVersion", JAVA_VERSION)
                 .build();
     }
 
@@ -85,6 +88,7 @@ public final class ServerMetrics {
                     .putSafeTags("endpoint", endpoint)
                     .putSafeTags("libraryName", LIBRARY_NAME)
                     .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .putSafeTags("javaVersion", JAVA_VERSION)
                     .build());
         }
 
