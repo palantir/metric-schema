@@ -23,14 +23,18 @@ import javax.lang.model.SourceVersion;
 /** Field and parameter names used by this generator. */
 final class ReservedNames {
 
-    static final String LIBRARY_NAME = "LIBRARY_NAME";
-    static final String LIBRARY_VERSION = "LIBRARY_VERSION";
+    static final String LIBRARY_NAME_FIELD = "LIBRARY_NAME";
+    static final String LIBRARY_NAME_TAG = "libraryName";
+    static final String LIBRARY_VERSION_FIELD = "LIBRARY_VERSION";
+    static final String LIBRARY_VERSION_TAG = "libraryVersion";
+    static final String JAVA_VERSION_FIELD = "JAVA_VERSION";
+    static final String JAVA_VERSION_TAG = "javaVersion";
     static final String FACTORY_METHOD = "of";
     static final String GAUGE_NAME = "gauge";
     static final String REGISTRY_NAME = "registry";
 
-    private static final ImmutableSet<String> RESERVED_NAMES =
-            ImmutableSet.of(FACTORY_METHOD, GAUGE_NAME, REGISTRY_NAME, LIBRARY_NAME, LIBRARY_VERSION);
+    private static final ImmutableSet<String> RESERVED_NAMES = ImmutableSet.of(
+            FACTORY_METHOD, GAUGE_NAME, JAVA_VERSION_FIELD, LIBRARY_NAME_FIELD, LIBRARY_VERSION_FIELD, REGISTRY_NAME);
 
     /** Returns true if the input string cannot be used. */
     static boolean isValid(String input) {

@@ -22,10 +22,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import com.palantir.metric.schema.lang.MetricSchemaCompiler;
+import com.palantir.test.MonitorsMetrics;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.MetricName;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -59,6 +63,14 @@ public class JavaGeneratorTest {
                 .map(Path::toString)
                 .forEach(relativePath ->
                         assertThatFilesAreTheSame(outputDir.resolve(relativePath), REFERENCE_FILES_FOLDER));
+    }
+
+    @Test
+    public void testJavaVersionTag() {
+        DefaultTaggedMetricRegistry registry = new DefaultTaggedMetricRegistry();
+        MonitorsMetrics.of(registry).more("value").mark();
+        MetricName key = Iterables.getOnlyElement(registry.getMetrics().keySet());
+        assertThat(key.safeTags().get("javaVersion")).matches("\\d+\\.\\d+\\.\\d+");
     }
 
     private void assertThatFilesAreTheSame(Path outputFile, String referenceFilesFolder) {

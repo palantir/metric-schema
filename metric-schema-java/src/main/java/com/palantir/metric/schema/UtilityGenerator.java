@@ -18,6 +18,7 @@ package com.palantir.metric.schema;
 
 import com.codahale.metrics.Gauge;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
@@ -60,15 +61,27 @@ final class UtilityGenerator {
                                 Preconditions.class)
                         .returns(className)
                         .build())
-                .addField(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME, Modifier.PRIVATE, Modifier.FINAL);
+                .addField(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME, Modifier.PRIVATE, Modifier.FINAL)
+                .addField(FieldSpec.builder(
+                                String.class,
+                                ReservedNames.JAVA_VERSION_FIELD,
+                                Modifier.PRIVATE,
+                                Modifier.STATIC,
+                                Modifier.FINAL)
+                        .initializer("$T.getProperty($S, $S)", System.class, "java.version", "unknown")
+                        .build());
         if (libraryName.isPresent()) {
             builder.addField(FieldSpec.builder(
-                            String.class, ReservedNames.LIBRARY_NAME, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                            String.class,
+                            ReservedNames.LIBRARY_NAME_FIELD,
+                            Modifier.PRIVATE,
+                            Modifier.STATIC,
+                            Modifier.FINAL)
                     .initializer("$S", libraryName.get())
                     .build());
             builder.addField(FieldSpec.builder(
                             String.class,
-                            ReservedNames.LIBRARY_VERSION,
+                            ReservedNames.LIBRARY_VERSION_FIELD,
                             Modifier.PRIVATE,
                             Modifier.STATIC,
                             Modifier.FINAL)
@@ -158,11 +171,26 @@ final class UtilityGenerator {
                         ".putSafeTags($S, $L.getValue())", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
             }
         });
+        ImmutableSortedSet<String> insensitiveTags = insensitiveTags(definition);
         if (libraryName.isPresent()) {
-            builder.add(".putSafeTags(\"libraryName\", $L)", ReservedNames.LIBRARY_NAME);
-            builder.add(".putSafeTags(\"libraryVersion\", $L)", ReservedNames.LIBRARY_VERSION);
+            if (!insensitiveTags.contains(ReservedNames.LIBRARY_NAME_TAG)) {
+                builder.add(".putSafeTags($S, $L)", ReservedNames.LIBRARY_NAME_TAG, ReservedNames.LIBRARY_NAME_FIELD);
+            }
+            if (!insensitiveTags.contains(ReservedNames.LIBRARY_VERSION_TAG)) {
+                builder.add(
+                        ".putSafeTags($S, $L)", ReservedNames.LIBRARY_VERSION_TAG, ReservedNames.LIBRARY_VERSION_FIELD);
+            }
+        }
+        if (!insensitiveTags.contains(ReservedNames.JAVA_VERSION_TAG)) {
+            builder.add(".putSafeTags($S, $L)", ReservedNames.JAVA_VERSION_TAG, ReservedNames.JAVA_VERSION_FIELD);
         }
         return builder.add(".build()").build();
+    }
+
+    private static ImmutableSortedSet<String> insensitiveTags(MetricDefinition definition) {
+        return definition.getTagDefinitions().stream()
+                .map(TagDefinition::getName)
+                .collect(ImmutableSortedSet.toImmutableSortedSet(String.CASE_INSENSITIVE_ORDER));
     }
 
     private static MethodSpec generateToString(ClassName className) {

@@ -14,6 +14,8 @@ import java.util.Objects;
  * Tests that reserved words are escaped.
  */
 public final class ReservedConflictMetrics {
+    private static final String JAVA_VERSION = System.getProperty("java.version", "unknown");
+
     private static final String LIBRARY_NAME = "witchcraft";
 
     private static final String LIBRARY_VERSION = Objects.requireNonNullElse(
@@ -47,6 +49,7 @@ public final class ReservedConflictMetrics {
                 .putSafeTags("int", int_)
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .putSafeTags("javaVersion", JAVA_VERSION)
                 .build());
     }
 
@@ -62,6 +65,7 @@ public final class ReservedConflictMetrics {
                 .safeName("reserved.conflict.float")
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .putSafeTags("javaVersion", JAVA_VERSION)
                 .build();
     }
 
@@ -71,6 +75,22 @@ public final class ReservedConflictMetrics {
     @CheckReturnValue
     public DoubleBuilderIntStage double_() {
         return new DoubleBuilder();
+    }
+
+    /**
+     * docs.
+     */
+    @CheckReturnValue
+    public IncludesDefaultTagsBuilderJavaVersionStage includesDefaultTags() {
+        return new IncludesDefaultTagsBuilder();
+    }
+
+    /**
+     * docs.
+     */
+    @CheckReturnValue
+    public IncludesDefaultTagsDifferentCaseBuilderJavaversionStage includesDefaultTagsDifferentCase() {
+        return new IncludesDefaultTagsDifferentCaseBuilder();
     }
 
     @Override
@@ -115,6 +135,7 @@ public final class ReservedConflictMetrics {
                     .putSafeTags("long", long_)
                     .putSafeTags("libraryName", LIBRARY_NAME)
                     .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .putSafeTags("javaVersion", JAVA_VERSION)
                     .build());
         }
 
@@ -166,6 +187,7 @@ public final class ReservedConflictMetrics {
                     .putSafeTags("int", int_)
                     .putSafeTags("libraryName", LIBRARY_NAME)
                     .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .putSafeTags("javaVersion", JAVA_VERSION)
                     .build();
         }
 
@@ -173,6 +195,132 @@ public final class ReservedConflictMetrics {
         public DoubleBuilder int_(@Safe String int_) {
             Preconditions.checkState(this.int_ == null, "int is already set");
             this.int_ = Preconditions.checkNotNull(int_, "int is required");
+            return this;
+        }
+    }
+
+    public interface IncludesDefaultTagsBuildStage {
+        @CheckReturnValue
+        Meter build();
+    }
+
+    public interface IncludesDefaultTagsBuilderJavaVersionStage {
+        @CheckReturnValue
+        IncludesDefaultTagsBuilderLibraryNameStage javaVersion(@Safe String javaVersion);
+    }
+
+    public interface IncludesDefaultTagsBuilderLibraryNameStage {
+        @CheckReturnValue
+        IncludesDefaultTagsBuilderLibraryVersionStage libraryName(@Safe String libraryName);
+    }
+
+    public interface IncludesDefaultTagsBuilderLibraryVersionStage {
+        @CheckReturnValue
+        IncludesDefaultTagsBuildStage libraryVersion(@Safe String libraryVersion);
+    }
+
+    private final class IncludesDefaultTagsBuilder
+            implements IncludesDefaultTagsBuilderJavaVersionStage,
+                    IncludesDefaultTagsBuilderLibraryNameStage,
+                    IncludesDefaultTagsBuilderLibraryVersionStage,
+                    IncludesDefaultTagsBuildStage {
+        private String javaVersion;
+
+        private String libraryName;
+
+        private String libraryVersion;
+
+        @Override
+        public Meter build() {
+            return registry.meter(MetricName.builder()
+                    .safeName("reserved.conflict.includes.default.tags")
+                    .putSafeTags("javaVersion", javaVersion)
+                    .putSafeTags("libraryName", libraryName)
+                    .putSafeTags("libraryVersion", libraryVersion)
+                    .build());
+        }
+
+        @Override
+        public IncludesDefaultTagsBuilder javaVersion(@Safe String javaVersion) {
+            Preconditions.checkState(this.javaVersion == null, "javaVersion is already set");
+            this.javaVersion = Preconditions.checkNotNull(javaVersion, "javaVersion is required");
+            return this;
+        }
+
+        @Override
+        public IncludesDefaultTagsBuilder libraryName(@Safe String libraryName) {
+            Preconditions.checkState(this.libraryName == null, "libraryName is already set");
+            this.libraryName = Preconditions.checkNotNull(libraryName, "libraryName is required");
+            return this;
+        }
+
+        @Override
+        public IncludesDefaultTagsBuilder libraryVersion(@Safe String libraryVersion) {
+            Preconditions.checkState(this.libraryVersion == null, "libraryVersion is already set");
+            this.libraryVersion = Preconditions.checkNotNull(libraryVersion, "libraryVersion is required");
+            return this;
+        }
+    }
+
+    public interface IncludesDefaultTagsDifferentCaseBuildStage {
+        @CheckReturnValue
+        Meter build();
+    }
+
+    public interface IncludesDefaultTagsDifferentCaseBuilderJavaversionStage {
+        @CheckReturnValue
+        IncludesDefaultTagsDifferentCaseBuilderLibrarynameStage javaversion(@Safe String javaversion);
+    }
+
+    public interface IncludesDefaultTagsDifferentCaseBuilderLibrarynameStage {
+        @CheckReturnValue
+        IncludesDefaultTagsDifferentCaseBuilderLibraryversionStage libraryname(@Safe String libraryname);
+    }
+
+    public interface IncludesDefaultTagsDifferentCaseBuilderLibraryversionStage {
+        @CheckReturnValue
+        IncludesDefaultTagsDifferentCaseBuildStage libraryversion(@Safe String libraryversion);
+    }
+
+    private final class IncludesDefaultTagsDifferentCaseBuilder
+            implements IncludesDefaultTagsDifferentCaseBuilderJavaversionStage,
+                    IncludesDefaultTagsDifferentCaseBuilderLibrarynameStage,
+                    IncludesDefaultTagsDifferentCaseBuilderLibraryversionStage,
+                    IncludesDefaultTagsDifferentCaseBuildStage {
+        private String javaversion;
+
+        private String libraryname;
+
+        private String libraryversion;
+
+        @Override
+        public Meter build() {
+            return registry.meter(MetricName.builder()
+                    .safeName("reserved.conflict.includes.default.tags.different.case")
+                    .putSafeTags("javaversion", javaversion)
+                    .putSafeTags("libraryname", libraryname)
+                    .putSafeTags("libraryversion", libraryversion)
+                    .build());
+        }
+
+        @Override
+        public IncludesDefaultTagsDifferentCaseBuilder javaversion(@Safe String javaversion) {
+            Preconditions.checkState(this.javaversion == null, "javaversion is already set");
+            this.javaversion = Preconditions.checkNotNull(javaversion, "javaversion is required");
+            return this;
+        }
+
+        @Override
+        public IncludesDefaultTagsDifferentCaseBuilder libraryname(@Safe String libraryname) {
+            Preconditions.checkState(this.libraryname == null, "libraryname is already set");
+            this.libraryname = Preconditions.checkNotNull(libraryname, "libraryname is required");
+            return this;
+        }
+
+        @Override
+        public IncludesDefaultTagsDifferentCaseBuilder libraryversion(@Safe String libraryversion) {
+            Preconditions.checkState(this.libraryversion == null, "libraryversion is already set");
+            this.libraryversion = Preconditions.checkNotNull(libraryversion, "libraryversion is required");
             return this;
         }
     }
