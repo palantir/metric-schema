@@ -22,3 +22,11 @@ namespaces:
         tags:
           - int
         docs: Gauge metric with a single tag.
+      includes.default.tags:
+        type: meter
+        tags: [ javaVersion, libraryName, libraryVersion ]
+        docs: docs.
+      includes.default.tags.different.case:
+        type: meter
+        tags: [ javaversion, libraryname, libraryversion ]
+        docs: docs.
