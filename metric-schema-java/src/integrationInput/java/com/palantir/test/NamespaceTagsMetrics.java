@@ -35,7 +35,6 @@ public final class NamespaceTagsMetrics {
             String noValueTag,
             NamespaceTags_LocatorWithMultipleValues locatorWithMultipleValues) {
         Map<String, String> tags = new HashMap<>();
-        tags.put("locator", "package:identifier");
         tags.put("noValueTag", noValueTag);
         tags.put("locatorWithMultipleValues", locatorWithMultipleValues.getValue());
         return new NamespaceTagsMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"), tags);
@@ -57,6 +56,7 @@ public final class NamespaceTagsMetrics {
         return registry.meter(MetricName.builder()
                 .safeName("namespace-tags.more")
                 .putAllSafeTags(tags)
+                .putSafeTags("locator", "package:identifier")
                 .putSafeTags("otherLocator2", "package:identifier")
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
@@ -156,6 +156,7 @@ public final class NamespaceTagsMetrics {
             return registry.meter(MetricName.builder()
                     .safeName("namespace-tags.processing")
                     .putAllSafeTags(tags)
+                    .putSafeTags("locator", "package:identifier")
                     .putSafeTags("result", result.getValue())
                     .putSafeTags("type", type)
                     .putSafeTags("otherLocator", otherLocator.getValue())

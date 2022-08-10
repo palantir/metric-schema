@@ -153,10 +153,11 @@ final class UtilityGenerator {
                     builder.addStatement(
                             "tags.put($S, $L)", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
                 } else if (tagDef.getValues().size() == 1) {
-                    builder.addStatement(
-                            "tags.put($S, $S)",
-                            tagDef.getName(),
-                            Iterables.getOnlyElement(tagDef.getValues()).getValue());
+                    // Ignore: each metricName build should add this manually.
+                    //                    builder.addStatement(
+                    //                            "tags.put($S, $S)",
+                    //                            tagDef.getName(),
+                    //                            Iterables.getOnlyElement(tagDef.getValues()).getValue());
                 } else {
                     builder.addStatement(
                             "tags.put($S, $L.getValue())", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
@@ -243,6 +244,15 @@ final class UtilityGenerator {
         if (!metricNamespace.getTags().isEmpty()) {
             builder.add(".putAllSafeTags($L)", ReservedNames.TAGS);
         }
+        metricNamespace.getTags().forEach(tagDef -> {
+            if (tagDef.getValues().size() == 1) {
+                builder.add(
+                        ".putSafeTags($S, $S)",
+                        tagDef.getName(),
+                        Iterables.getOnlyElement(tagDef.getValues()).getValue());
+            }
+        });
+
         definition.getTagDefinitions().forEach(tagDef -> {
             if (tagDef.getValues().isEmpty()) {
                 builder.add(".putSafeTags($S, $L)", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
