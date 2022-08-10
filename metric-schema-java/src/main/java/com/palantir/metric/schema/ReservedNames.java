@@ -33,7 +33,6 @@ final class ReservedNames {
     static final String BUILDER_METHOD = "builder";
     static final String GAUGE_NAME = "gauge";
     static final String REGISTRY_NAME = "registry";
-    static final String TAGS = "tags";
 
     private static final ImmutableSet<String> RESERVED_NAMES = ImmutableSet.of(
             FACTORY_METHOD, GAUGE_NAME, JAVA_VERSION_FIELD, LIBRARY_NAME_FIELD, LIBRARY_VERSION_FIELD, REGISTRY_NAME);

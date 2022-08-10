@@ -6,8 +6,6 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -23,21 +21,27 @@ public final class NamespaceTagsMetrics {
 
     private final TaggedMetricRegistry registry;
 
-    private final Map<String, String> tags;
+    private final String noValueTag;
 
-    private NamespaceTagsMetrics(TaggedMetricRegistry registry, Map<String, String> tags) {
+    private final NamespaceTags_LocatorWithMultipleValues locatorWithMultipleValues;
+
+    private NamespaceTagsMetrics(
+            TaggedMetricRegistry registry,
+            String noValueTag,
+            NamespaceTags_LocatorWithMultipleValues locatorWithMultipleValues) {
         this.registry = registry;
-        this.tags = tags;
+        this.noValueTag = noValueTag;
+        this.locatorWithMultipleValues = locatorWithMultipleValues;
     }
 
     public static NamespaceTagsMetrics of(
             TaggedMetricRegistry registry,
             String noValueTag,
             NamespaceTags_LocatorWithMultipleValues locatorWithMultipleValues) {
-        Map<String, String> tags = new HashMap<>();
-        tags.put("noValueTag", noValueTag);
-        tags.put("locatorWithMultipleValues", locatorWithMultipleValues.getValue());
-        return new NamespaceTagsMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"), tags);
+        return new NamespaceTagsMetrics(
+                Preconditions.checkNotNull(registry, "TaggedMetricRegistry"),
+                Preconditions.checkNotNull(noValueTag, "noValueTag"),
+                Preconditions.checkNotNull(locatorWithMultipleValues, "locatorWithMultipleValues"));
     }
 
     /**
@@ -55,8 +59,9 @@ public final class NamespaceTagsMetrics {
     public Meter more() {
         return registry.meter(MetricName.builder()
                 .safeName("namespace-tags.more")
-                .putAllSafeTags(tags)
                 .putSafeTags("locator", "package:identifier")
+                .putSafeTags("noValueTag", noValueTag)
+                .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValues.getValue())
                 .putSafeTags("otherLocator2", "package:identifier")
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
@@ -155,8 +160,9 @@ public final class NamespaceTagsMetrics {
         public Meter build() {
             return registry.meter(MetricName.builder()
                     .safeName("namespace-tags.processing")
-                    .putAllSafeTags(tags)
                     .putSafeTags("locator", "package:identifier")
+                    .putSafeTags("noValueTag", noValueTag)
+                    .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValues.getValue())
                     .putSafeTags("result", result.getValue())
                     .putSafeTags("type", type)
                     .putSafeTags("otherLocator", otherLocator.getValue())

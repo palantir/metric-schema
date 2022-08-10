@@ -34,9 +34,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
@@ -51,7 +49,6 @@ final class UtilityGenerator {
             ImplementationVisibility visibility) {
         String actualName = metrics.getShortName().orElse(namespace);
         ClassName className = ClassName.get(packageName, className(actualName));
-        ParameterizedTypeName mapOfTagsType = ParameterizedTypeName.get(Map.class, String.class, String.class);
         TypeSpec.Builder builder = TypeSpec.classBuilder(className.simpleName())
                 .addModifiers(visibility.apply(Modifier.FINAL))
                 .addJavadoc(Javadoc.render(metrics.getDocs()))
@@ -65,9 +62,15 @@ final class UtilityGenerator {
                         .initializer("$T.getProperty($S, $S)", System.class, "java.version", "unknown")
                         .build());
         if (!metrics.getTags().isEmpty()) {
-            builder.addField(mapOfTagsType, ReservedNames.TAGS, Modifier.PRIVATE, Modifier.FINAL);
-
             metrics.getTags().forEach(tagDef -> {
+                if (tagDefinitionRequiresParam(tagDef)) {
+                    builder.addField(
+                            getTagClassName(actualName, tagDef),
+                            Custodian.sanitizeName(tagDef.getName()),
+                            Modifier.PRIVATE,
+                            Modifier.FINAL);
+                }
+
                 if (tagDef.getValues().size() <= 1) {
                     return;
                 }
@@ -77,16 +80,6 @@ final class UtilityGenerator {
         }
 
         builder.addMethod(generateFactoryOrBuilder(visibility, className, actualName, metrics));
-
-        //        builder.addMethod(MethodSpec.methodBuilder(ReservedNames.BUILDER_METHOD)
-        //                .addModifiers(visibility.apply(Modifier.STATIC))
-        //                .addParameter(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME)
-        //                .addStatement(
-        //                        "return new $T($T.checkNotNull(registry, \"TaggedMetricRegistry\"))",
-        //                        className,
-        //                        Preconditions.class)
-        //                .returns(className)
-        //                .build());
 
         if (libraryName.isPresent()) {
             builder.addField(FieldSpec.builder(
@@ -110,7 +103,7 @@ final class UtilityGenerator {
                     .build());
         }
 
-        builder.addMethod(generateConstructor(metrics));
+        builder.addMethod(generateConstructor(actualName, metrics));
 
         metrics.getMetrics().forEach((metricName, definition) -> {
             generateConstants(builder, metricName, definition, visibility);
@@ -142,50 +135,48 @@ final class UtilityGenerator {
                 .addParameter(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME)
                 .returns(className);
         if (!metricNamespace.getTags().isEmpty()) {
-            metricNamespace.getTags().forEach(tagDefinition -> {
-                if (tagDefinitionRequiresParam(tagDefinition)) {
-                    builder.addParameter(getTagClassName(actualName, tagDefinition), tagDefinition.getName());
-                }
-            });
-            builder.addStatement("$1T<$2T, $2T> tags = new $3T<>()", Map.class, String.class, HashMap.class);
             metricNamespace.getTags().forEach(tagDef -> {
-                if (tagDef.getValues().isEmpty()) {
-                    builder.addStatement(
-                            "tags.put($S, $L)", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
-                } else if (tagDef.getValues().size() == 1) {
-                    // Ignore: each metricName build should add this manually.
-                    //                    builder.addStatement(
-                    //                            "tags.put($S, $S)",
-                    //                            tagDef.getName(),
-                    //                            Iterables.getOnlyElement(tagDef.getValues()).getValue());
-                } else {
-                    builder.addStatement(
-                            "tags.put($S, $L.getValue())", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
+                if (tagDefinitionRequiresParam(tagDef)) {
+                    builder.addParameter(getTagClassName(actualName, tagDef), Custodian.sanitizeName(tagDef.getName()));
                 }
             });
-            builder.addStatement(
-                    "return new $T($T.checkNotNull(registry, \"TaggedMetricRegistry\"), tags)",
-                    className,
-                    Preconditions.class);
-        } else {
-            builder.addStatement(
-                    "return new $T($T.checkNotNull(registry, \"TaggedMetricRegistry\"))",
-                    className,
-                    Preconditions.class);
         }
 
-        return builder.build();
+        CodeBlock.Builder returnBuilder = CodeBlock.builder()
+                .add(
+                        "return new $T($T.checkNotNull(registry, \"TaggedMetricRegistry\")",
+                        className,
+                        Preconditions.class);
+
+        if (!metricNamespace.getTags().isEmpty()) {
+            metricNamespace.getTags().forEach(tagDef -> {
+                if (tagDefinitionRequiresParam(tagDef)) {
+                    returnBuilder.add(
+                            ",$2T.checkNotNull($1L, $1S)",
+                            Custodian.sanitizeName(tagDef.getName()),
+                            Preconditions.class);
+                }
+            });
+        }
+
+        returnBuilder.add(")");
+
+        return builder.addStatement(returnBuilder.build()).build();
     }
 
-    private static MethodSpec generateConstructor(MetricNamespace metrics) {
+    private static MethodSpec generateConstructor(String actualName, MetricNamespace metrics) {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME)
                 .addStatement("this.$1L = $1L", ReservedNames.REGISTRY_NAME);
 
         if (!metrics.getTags().isEmpty()) {
-            builder.addParameter(ParameterizedTypeName.get(Map.class, String.class, String.class), ReservedNames.TAGS)
-                    .addStatement("this.$1L = $1L", ReservedNames.TAGS);
+            metrics.getTags().forEach(tagDef -> {
+                if (tagDefinitionRequiresParam(tagDef)) {
+                    builder.addParameter(getTagClassName(actualName, tagDef), Custodian.sanitizeName(tagDef.getName()))
+                            .addStatement("this.$1L = $1L", Custodian.sanitizeName(tagDef.getName()));
+                }
+            });
         }
 
         return builder.build();
@@ -241,15 +232,20 @@ final class UtilityGenerator {
             MetricNamespace metricNamespace) {
         String safeName = namespace + '.' + metricName;
         CodeBlock.Builder builder = CodeBlock.builder().add("$T.builder().safeName($S)", MetricName.class, safeName);
-        if (!metricNamespace.getTags().isEmpty()) {
-            builder.add(".putAllSafeTags($L)", ReservedNames.TAGS);
-        }
+        //        if (!metricNamespace.getTags().isEmpty()) {
+        //            builder.add(".putAllSafeTags($L)", ReservedNames.TAGS);
+        //        }
         metricNamespace.getTags().forEach(tagDef -> {
-            if (tagDef.getValues().size() == 1) {
+            if (tagDef.getValues().isEmpty()) {
+                builder.add(".putSafeTags($S, $L)", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
+            } else if (tagDef.getValues().size() == 1) {
                 builder.add(
                         ".putSafeTags($S, $S)",
                         tagDef.getName(),
                         Iterables.getOnlyElement(tagDef.getValues()).getValue());
+            } else {
+                builder.add(
+                        ".putSafeTags($S, $L.getValue())", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
             }
         });
 
