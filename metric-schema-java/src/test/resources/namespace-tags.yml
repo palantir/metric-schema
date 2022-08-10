@@ -4,6 +4,9 @@ namespaces:
     tags:
       - name: locator
         values: [ package:identifier ]
+      - noValueTag
+      - name: locatorWithMultipleValues
+        values: [ package:identifier, package:identifier2 ]
     metrics:
       processing:
         docs: Measures number of installations that were processed
@@ -18,3 +21,6 @@ namespaces:
       more:
         docs: Measures more
         type: meter
+        tags:
+          - name: otherLocator2
+            values: [ package:identifier ]

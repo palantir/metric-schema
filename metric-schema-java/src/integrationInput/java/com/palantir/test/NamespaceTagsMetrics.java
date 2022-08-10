@@ -30,9 +30,14 @@ public final class NamespaceTagsMetrics {
         this.tags = tags;
     }
 
-    public static NamespaceTagsMetrics of(TaggedMetricRegistry registry, String locator) {
+    public static NamespaceTagsMetrics of(
+            TaggedMetricRegistry registry,
+            String noValueTag,
+            NamespaceTags_LocatorWithMultipleValues locatorWithMultipleValues) {
         Map<String, String> tags = new HashMap<>();
-        tags.put("locator", locator);
+        tags.put("locator", "package:identifier");
+        tags.put("noValueTag", noValueTag);
+        tags.put("locatorWithMultipleValues", locatorWithMultipleValues.getValue());
         return new NamespaceTagsMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"), tags);
     }
 
@@ -51,6 +56,8 @@ public final class NamespaceTagsMetrics {
     public Meter more() {
         return registry.meter(MetricName.builder()
                 .safeName("namespace-tags.more")
+                .putAllSafeTags(tags)
+                .putSafeTags("otherLocator2", "package:identifier")
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
                 .putSafeTags("javaVersion", JAVA_VERSION)
@@ -60,6 +67,22 @@ public final class NamespaceTagsMetrics {
     @Override
     public String toString() {
         return "NamespaceTagsMetrics{registry=" + registry + '}';
+    }
+
+    public enum NamespaceTags_LocatorWithMultipleValues {
+        PACKAGE_IDENTIFIER("package:identifier"),
+
+        PACKAGE_IDENTIFIER2("package:identifier2");
+
+        private final String value;
+
+        NamespaceTags_LocatorWithMultipleValues(String value) {
+            this.value = value;
+        }
+
+        private String getValue() {
+            return value;
+        }
     }
 
     public enum Processing_Result {
@@ -132,6 +155,7 @@ public final class NamespaceTagsMetrics {
         public Meter build() {
             return registry.meter(MetricName.builder()
                     .safeName("namespace-tags.processing")
+                    .putAllSafeTags(tags)
                     .putSafeTags("result", result.getValue())
                     .putSafeTags("type", type)
                     .putSafeTags("otherLocator", otherLocator.getValue())
