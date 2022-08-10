@@ -33,7 +33,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.TypeSpec.Builder;
 import com.squareup.javapoet.WildcardTypeName;
 import java.util.HashMap;
 import java.util.List;
@@ -206,8 +205,8 @@ final class UtilityGenerator {
     }
 
     private static void generateTagEnum(
-            Builder builder, String metricName, ImplementationVisibility visibility, TagDefinition tagDef) {
-        Builder enumBuilder = TypeSpec.enumBuilder(getTagClassName(metricName, tagDef));
+            TypeSpec.Builder builder, String metricName, ImplementationVisibility visibility, TagDefinition tagDef) {
+        TypeSpec.Builder enumBuilder = TypeSpec.enumBuilder(getTagClassName(metricName, tagDef));
         tagDef.getValues()
                 .forEach(value -> enumBuilder.addEnumConstant(
                         Custodian.anyToUpperUnderscore(value.getValue()),
