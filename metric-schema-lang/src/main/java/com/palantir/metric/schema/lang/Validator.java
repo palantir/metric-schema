@@ -80,6 +80,7 @@ final class Validator {
             Preconditions.checkArgument(
                     uniqueNames.size() == definition.getTagDefinitions().size(), "Encountered duplicate tag names");
             definition.getTagDefinitions().forEach(tag -> {
+                // TODO(jakubk): Check that tag names here are not clashing with the namespace tags.
                 Preconditions.checkArgument(
                         !tag.getName().isEmpty(),
                         "MetricDefinition tags must not be empty",
