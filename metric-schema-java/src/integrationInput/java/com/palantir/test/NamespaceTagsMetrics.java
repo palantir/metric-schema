@@ -6,6 +6,8 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -21,12 +23,17 @@ public final class NamespaceTagsMetrics {
 
     private final TaggedMetricRegistry registry;
 
-    private NamespaceTagsMetrics(TaggedMetricRegistry registry) {
+    private final Map<String, String> tags;
+
+    private NamespaceTagsMetrics(TaggedMetricRegistry registry, Map<String, String> tags) {
         this.registry = registry;
+        this.tags = tags;
     }
 
-    public static NamespaceTagsMetrics of(TaggedMetricRegistry registry) {
-        return new NamespaceTagsMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
+    public static NamespaceTagsMetrics of(TaggedMetricRegistry registry, String locator) {
+        Map<String, String> tags = new HashMap<>();
+        tags.put("locator", locator);
+        return new NamespaceTagsMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"), tags);
     }
 
     /**

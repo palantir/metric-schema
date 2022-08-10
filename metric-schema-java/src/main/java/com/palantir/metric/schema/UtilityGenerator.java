@@ -34,7 +34,9 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
@@ -49,18 +51,10 @@ final class UtilityGenerator {
             ImplementationVisibility visibility) {
         ClassName className =
                 ClassName.get(packageName, className(metrics.getShortName().orElse(namespace)));
+        ParameterizedTypeName mapOfTagsType = ParameterizedTypeName.get(Map.class, String.class, String.class);
         TypeSpec.Builder builder = TypeSpec.classBuilder(className.simpleName())
                 .addModifiers(visibility.apply(Modifier.FINAL))
                 .addJavadoc(Javadoc.render(metrics.getDocs()))
-                .addMethod(MethodSpec.methodBuilder(ReservedNames.FACTORY_METHOD)
-                        .addModifiers(visibility.apply(Modifier.STATIC))
-                        .addParameter(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME)
-                        .addStatement(
-                                "return new $T($T.checkNotNull(registry, \"TaggedMetricRegistry\"))",
-                                className,
-                                Preconditions.class)
-                        .returns(className)
-                        .build())
                 .addField(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME, Modifier.PRIVATE, Modifier.FINAL)
                 .addField(FieldSpec.builder(
                                 String.class,
@@ -70,6 +64,22 @@ final class UtilityGenerator {
                                 Modifier.FINAL)
                         .initializer("$T.getProperty($S, $S)", System.class, "java.version", "unknown")
                         .build());
+        if (!metrics.getTags().isEmpty()) {
+            builder.addField(mapOfTagsType, ReservedNames.TAGS, Modifier.PRIVATE, Modifier.FINAL);
+        }
+
+        builder.addMethod(generateFactoryOrBuilder(visibility, className, metrics));
+
+        //        builder.addMethod(MethodSpec.methodBuilder(ReservedNames.BUILDER_METHOD)
+        //                .addModifiers(visibility.apply(Modifier.STATIC))
+        //                .addParameter(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME)
+        //                .addStatement(
+        //                        "return new $T($T.checkNotNull(registry, \"TaggedMetricRegistry\"))",
+        //                        className,
+        //                        Preconditions.class)
+        //                .returns(className)
+        //                .build());
+
         if (libraryName.isPresent()) {
             builder.addField(FieldSpec.builder(
                             String.class,
@@ -92,11 +102,7 @@ final class UtilityGenerator {
                     .build());
         }
 
-        builder.addMethod(MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PRIVATE)
-                .addParameter(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME)
-                .addStatement("this.$1L = $1L", ReservedNames.REGISTRY_NAME)
-                .build());
+        builder.addMethod(generateConstructor(metrics));
 
         metrics.getMetrics().forEach((metricName, definition) -> {
             generateConstants(builder, metricName, definition, visibility);
@@ -114,6 +120,49 @@ final class UtilityGenerator {
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
+    }
+
+    private static MethodSpec generateFactoryOrBuilder(
+            ImplementationVisibility visibility, ClassName className, MetricNamespace metricNamespace) {
+        // TODO(jakubk): Generate a builder
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(ReservedNames.FACTORY_METHOD)
+                .addModifiers(visibility.apply(Modifier.STATIC))
+                .addParameter(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME)
+                .returns(className);
+        if (!metricNamespace.getTags().isEmpty()) {
+            metricNamespace.getTags().forEach(tagDefinition -> {
+                builder.addParameter(String.class, tagDefinition.getName());
+            });
+            builder.addStatement("$1T<$2T, $2T> tags = new $3T<>()", Map.class, String.class, HashMap.class);
+            metricNamespace.getTags().forEach(tagDefinition -> {
+                builder.addStatement("tags.put($S, $L)", tagDefinition.getName(), tagDefinition.getName());
+            });
+            builder.addStatement(
+                    "return new $T($T.checkNotNull(registry, \"TaggedMetricRegistry\"), tags)",
+                    className,
+                    Preconditions.class);
+        } else {
+            builder.addStatement(
+                    "return new $T($T.checkNotNull(registry, \"TaggedMetricRegistry\"))",
+                    className,
+                    Preconditions.class);
+        }
+
+        return builder.build();
+    }
+
+    private static MethodSpec generateConstructor(MetricNamespace metrics) {
+        MethodSpec.Builder builder = MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PRIVATE)
+                .addParameter(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME)
+                .addStatement("this.$1L = $1L", ReservedNames.REGISTRY_NAME);
+
+        if (!metrics.getTags().isEmpty()) {
+            builder.addParameter(ParameterizedTypeName.get(Map.class, String.class, String.class), ReservedNames.TAGS)
+                    .addStatement("this.$1L = $1L", ReservedNames.TAGS);
+        }
+
+        return builder.build();
     }
 
     private static void generateConstants(
@@ -194,6 +243,7 @@ final class UtilityGenerator {
     }
 
     private static MethodSpec generateToString(ClassName className) {
+        // TODO(jakubk): Log the common tag values.
         return MethodSpec.methodBuilder("toString")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
