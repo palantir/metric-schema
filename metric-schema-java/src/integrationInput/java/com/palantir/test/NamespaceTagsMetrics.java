@@ -34,14 +34,9 @@ public final class NamespaceTagsMetrics {
         this.locatorWithMultipleValues = locatorWithMultipleValues.getValue();
     }
 
-    public static NamespaceTagsMetrics of(
-            TaggedMetricRegistry registry,
-            String noValueTag,
-            NamespaceTags_LocatorWithMultipleValues locatorWithMultipleValues) {
-        return new NamespaceTagsMetrics(
-                Preconditions.checkNotNull(registry, "TaggedMetricRegistry"),
-                Preconditions.checkNotNull(noValueTag, "noValueTag"),
-                Preconditions.checkNotNull(locatorWithMultipleValues, "locatorWithMultipleValues"));
+    @CheckReturnValue
+    public NamespaceTagsBuilderRegistryStage builder() {
+        return new NamespaceTagsBuilder();
     }
 
     /**
@@ -88,6 +83,68 @@ public final class NamespaceTagsMetrics {
 
         private String getValue() {
             return value;
+        }
+    }
+
+    public interface NamespaceTagsBuildStage {
+        @CheckReturnValue
+        NamespaceTagsMetrics build();
+    }
+
+    public interface NamespaceTagsBuilderRegistryStage {
+        @CheckReturnValue
+        NamespaceTagsBuilderNoValueTagStage registry(@Safe TaggedMetricRegistry registry);
+    }
+
+    public interface NamespaceTagsBuilderNoValueTagStage {
+        @CheckReturnValue
+        NamespaceTagsBuilderLocatorWithMultipleValuesStage noValueTag(@Safe String noValueTag);
+    }
+
+    public interface NamespaceTagsBuilderLocatorWithMultipleValuesStage {
+        @CheckReturnValue
+        NamespaceTagsBuildStage locatorWithMultipleValues(
+                @Safe NamespaceTags_LocatorWithMultipleValues locatorWithMultipleValues);
+    }
+
+    private final class NamespaceTagsBuilder
+            implements NamespaceTagsBuilderRegistryStage,
+                    NamespaceTagsBuilderNoValueTagStage,
+                    NamespaceTagsBuilderLocatorWithMultipleValuesStage,
+                    NamespaceTagsBuildStage {
+        private TaggedMetricRegistry registry;
+
+        private String noValueTag;
+
+        private NamespaceTags_LocatorWithMultipleValues locatorWithMultipleValues;
+
+        @Override
+        public NamespaceTagsMetrics build() {
+            return new NamespaceTagsMetrics(registry, noValueTag, locatorWithMultipleValues);
+        }
+
+        @Override
+        public NamespaceTagsBuilder registry(@Safe TaggedMetricRegistry registry) {
+            Preconditions.checkState(this.registry == null, "registry is already set");
+            this.registry = Preconditions.checkNotNull(registry, "registry is required");
+            return this;
+        }
+
+        @Override
+        public NamespaceTagsBuilder noValueTag(@Safe String noValueTag) {
+            Preconditions.checkState(this.noValueTag == null, "noValueTag is already set");
+            this.noValueTag = Preconditions.checkNotNull(noValueTag, "noValueTag is required");
+            return this;
+        }
+
+        @Override
+        public NamespaceTagsBuilder locatorWithMultipleValues(
+                @Safe NamespaceTags_LocatorWithMultipleValues locatorWithMultipleValues) {
+            Preconditions.checkState(
+                    this.locatorWithMultipleValues == null, "locatorWithMultipleValues is already set");
+            this.locatorWithMultipleValues =
+                    Preconditions.checkNotNull(locatorWithMultipleValues, "locatorWithMultipleValues is required");
+            return this;
         }
     }
 

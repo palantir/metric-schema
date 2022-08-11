@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 /** Utility functionality to escape metric values for generated java code. */
-final class Custodian {
+public final class Custodian {
 
     private static final Splitter splitter =
             Splitter.onPattern("[^a-zA-Z0-9]").trimResults().omitEmptyStrings();
@@ -35,7 +35,7 @@ final class Custodian {
         return escapeIfNecessary(sanitized);
     }
 
-    static String anyToUpperCamel(String input) {
+    public static String anyToUpperCamel(String input) {
         Preconditions.checkNotNull(input, "Input string is required");
         return String.join(
                 "", CaseFormat.LOWER_CAMEL.converterTo(CaseFormat.UPPER_CAMEL).convertAll(splitter.split(input)));

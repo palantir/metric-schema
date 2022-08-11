@@ -19,6 +19,7 @@ package com.palantir.metric.schema;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.goethe.Goethe;
+import com.palantir.metric.schema.model.ImplementationVisibility;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
