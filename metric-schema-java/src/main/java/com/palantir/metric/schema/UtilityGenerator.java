@@ -52,8 +52,8 @@ final class UtilityGenerator {
             Optional<String> libraryName,
             String packageName,
             ImplementationVisibility visibility) {
-        String actualName = metrics.getShortName().orElse(namespace);
-        ClassName className = ClassName.get(packageName, className(actualName));
+        String name = metrics.getShortName().orElse(namespace);
+        ClassName className = ClassName.get(packageName, className(name));
         TypeSpec.Builder builder = TypeSpec.classBuilder(className.simpleName())
                 .addModifiers(visibility.apply(Modifier.FINAL))
                 .addJavadoc(Javadoc.render(metrics.getDocs()))
@@ -77,14 +77,14 @@ final class UtilityGenerator {
                     return;
                 }
 
-                generateTagEnum(builder, actualName, visibility, tagDef);
+                generateTagEnum(builder, name, visibility, tagDef);
             });
         }
 
         if (metrics.getTags().isEmpty()) {
             builder.addMethod(generateSimpleFactory(visibility, className));
         } else {
-            generateFactoryBuilder(actualName, className, metrics, builder, visibility);
+            generateFactoryBuilder(name, className, metrics, builder, visibility);
         }
 
         if (libraryName.isPresent()) {
@@ -109,7 +109,7 @@ final class UtilityGenerator {
                     .build());
         }
 
-        builder.addMethod(generateConstructor(actualName, metrics));
+        builder.addMethod(generateConstructor(name, metrics));
 
         metrics.getMetrics().forEach((metricName, definition) -> {
             generateConstants(builder, metricName, definition, visibility);
@@ -145,9 +145,9 @@ final class UtilityGenerator {
 
     /** Produce a private staged builder, which implements public interfaces. */
     private static void generateFactoryBuilder(
-            String actualName1,
-            ClassName className1,
-            MetricNamespace metricNamespace1,
+            String name,
+            ClassName className,
+            MetricNamespace metricNamespace,
             TypeSpec.Builder outerBuilder,
             ImplementationVisibility visibility1) {
         BuilderStage metricRegistryStage = BuilderStage.builder()
@@ -155,31 +155,33 @@ final class UtilityGenerator {
                 .sanitizedName(ReservedNames.REGISTRY_NAME)
                 .className(ClassName.get(TaggedMetricRegistry.class))
                 .build();
-        List<BuilderStage> tagStages = metricNamespace1.getTags().stream()
+        List<BuilderStage> tagStages = metricNamespace.getTags().stream()
                 .filter(UtilityGenerator::tagDefinitionRequiresParam)
                 .map(tagDef -> BuilderStage.builder()
                         .name(tagDef.getName())
                         .sanitizedName(Custodian.sanitizeName(tagDef.getName()))
-                        .className(getTagClassName(actualName1, tagDef))
+                        .className(getTagClassName(name, tagDef))
                         .build())
                 .collect(Collectors.toList());
-        List<BuilderStage> builderStages = new ArrayList<>();
-        builderStages.add(metricRegistryStage);
-        builderStages.addAll(tagStages);
-
         CodeBlock.Builder buildBlock = CodeBlock.builder();
-        buildBlock.add("new $T($L", className1, metricRegistryStage.sanitizedName());
+        buildBlock.add("new $T($L", className, metricRegistryStage.sanitizedName());
         tagStages.forEach(stage -> buildBlock.add(", $L", stage.sanitizedName()));
         buildBlock.add(");");
         StagedBuilderSpec stagedBuilderSpec = StagedBuilderSpec.builder()
-                .name(actualName1)
-                .className(className1)
+                .name(name)
+                .className(className)
                 .constructor(buildBlock.build())
                 .visibility(visibility1)
                 .isStatic(true)
-                .addAllStages(builderStages)
+                .addAllStages(ImmutableList.<BuilderStage>builder()
+                        .add(metricRegistryStage)
+                        .addAll(tagStages)
+                        .build())
                 .build();
+        generateStagedBuilder(stagedBuilderSpec, outerBuilder);
+    }
 
+    private static void generateStagedBuilder(StagedBuilderSpec stagedBuilderSpec, TypeSpec.Builder outerBuilder) {
         MethodSpec.Builder abstractBuildMethodBuilder = MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .returns(stagedBuilderSpec.className());
