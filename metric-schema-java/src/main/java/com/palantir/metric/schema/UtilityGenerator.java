@@ -264,7 +264,7 @@ final class UtilityGenerator {
                                 .build())
                         .collect(ImmutableList.toImmutableList()))
                 .build());
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("builder")
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(ReservedNames.BUILDER_METHOD)
                 .addModifiers(stagedBuilderSpec.visibility().apply())
                 .returns(ClassName.bestGuess(stageName(
                         stagedBuilderSpec.name(),
