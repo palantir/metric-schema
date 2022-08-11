@@ -107,7 +107,7 @@ final class Validator {
                 .filter(namespaceTagNames::contains)
                 .collect(Collectors.toSet());
         checkArgumentWithErrorContext(
-                duplicateNames.isEmpty(),
+                duplicateNamespaceTagNames.isEmpty(),
                 "Encountered metric tag names that duplicate namespace tag names",
                 errorContext,
                 SafeArg.of("duplicateTagNames", duplicateNames),
