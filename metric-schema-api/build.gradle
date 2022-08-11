@@ -20,6 +20,12 @@ apply plugin: 'com.palantir.external-publish-conjure'
 conjure {
     java {
         strictObjects = true
+        // Avoid breaking strict consumers when new
+        // optional components are provided. Strict
+        // consumers will fail to deserialize once
+        // new features are used.
+        excludeEmptyOptionals = true
+        excludeEmptyCollections = true
     }
 }
 
