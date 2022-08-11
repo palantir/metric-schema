@@ -27,6 +27,7 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.CodeBlock.Builder;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -65,10 +66,7 @@ final class UtilityGenerator {
             metrics.getTags().forEach(tagDef -> {
                 if (tagDefinitionRequiresParam(tagDef)) {
                     builder.addField(
-                            getTagClassName(actualName, tagDef),
-                            Custodian.sanitizeName(tagDef.getName()),
-                            Modifier.PRIVATE,
-                            Modifier.FINAL);
+                            String.class, Custodian.sanitizeName(tagDef.getName()), Modifier.PRIVATE, Modifier.FINAL);
                 }
 
                 if (tagDef.getValues().size() <= 1) {
@@ -116,7 +114,7 @@ final class UtilityGenerator {
             }
         });
 
-        builder.addMethod(generateToString(className));
+        builder.addMethod(generateToString(metrics, className));
 
         return JavaFile.builder(className.packageName(), builder.build())
                 .skipJavaLangImports(true)
@@ -173,8 +171,12 @@ final class UtilityGenerator {
         if (!metrics.getTags().isEmpty()) {
             metrics.getTags().forEach(tagDef -> {
                 if (tagDefinitionRequiresParam(tagDef)) {
-                    builder.addParameter(getTagClassName(actualName, tagDef), Custodian.sanitizeName(tagDef.getName()))
-                            .addStatement("this.$1L = $1L", Custodian.sanitizeName(tagDef.getName()));
+                    builder.addParameter(getTagClassName(actualName, tagDef), Custodian.sanitizeName(tagDef.getName()));
+                    if (tagDef.getValues().isEmpty()) {
+                        builder.addStatement("this.$1L = $1L", Custodian.sanitizeName(tagDef.getName()));
+                    } else {
+                        builder.addStatement("this.$1L = $1L.getValue()", Custodian.sanitizeName(tagDef.getName()));
+                    }
                 }
             });
         }
@@ -232,36 +234,18 @@ final class UtilityGenerator {
             MetricNamespace metricNamespace) {
         String safeName = namespace + '.' + metricName;
         CodeBlock.Builder builder = CodeBlock.builder().add("$T.builder().safeName($S)", MetricName.class, safeName);
-        //        if (!metricNamespace.getTags().isEmpty()) {
-        //            builder.add(".putAllSafeTags($L)", ReservedNames.TAGS);
-        //        }
         metricNamespace.getTags().forEach(tagDef -> {
-            if (tagDef.getValues().isEmpty()) {
+            if (tagDef.getValues().size() != 1) {
                 builder.add(".putSafeTags($S, $L)", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
-            } else if (tagDef.getValues().size() == 1) {
+            } else {
                 builder.add(
                         ".putSafeTags($S, $S)",
                         tagDef.getName(),
                         Iterables.getOnlyElement(tagDef.getValues()).getValue());
-            } else {
-                builder.add(
-                        ".putSafeTags($S, $L.getValue())", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
             }
         });
 
-        definition.getTagDefinitions().forEach(tagDef -> {
-            if (tagDef.getValues().isEmpty()) {
-                builder.add(".putSafeTags($S, $L)", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
-            } else if (tagDef.getValues().size() == 1) {
-                builder.add(
-                        ".putSafeTags($S, $S)",
-                        tagDef.getName(),
-                        Iterables.getOnlyElement(tagDef.getValues()).getValue());
-            } else {
-                builder.add(
-                        ".putSafeTags($S, $L.getValue())", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
-            }
-        });
+        definition.getTagDefinitions().forEach(tagDef -> putSafeTags(tagDef, builder));
         ImmutableSortedSet<String> insensitiveTags = insensitiveTags(definition);
         if (libraryName.isPresent()) {
             if (!insensitiveTags.contains(ReservedNames.LIBRARY_NAME_TAG)) {
@@ -278,21 +262,51 @@ final class UtilityGenerator {
         return builder.add(".build()").build();
     }
 
+    private static void putSafeTags(TagDefinition tagDef, Builder builder) {
+        if (tagDef.getValues().isEmpty()) {
+            builder.add(".putSafeTags($S, $L)", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
+        } else if (tagDef.getValues().size() == 1) {
+            builder.add(
+                    ".putSafeTags($S, $S)",
+                    tagDef.getName(),
+                    Iterables.getOnlyElement(tagDef.getValues()).getValue());
+        } else {
+            builder.add(".putSafeTags($S, $L.getValue())", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
+        }
+    }
+
     private static ImmutableSortedSet<String> insensitiveTags(MetricDefinition definition) {
         return definition.getTagDefinitions().stream()
                 .map(TagDefinition::getName)
                 .collect(ImmutableSortedSet.toImmutableSortedSet(String.CASE_INSENSITIVE_ORDER));
     }
 
-    private static MethodSpec generateToString(ClassName className) {
-        // TODO(jakubk): Log the common tag values.
+    private static MethodSpec generateToString(MetricNamespace metricNamespace, ClassName className) {
+        CodeBlock.Builder returnBuilder = CodeBlock.builder();
+        returnBuilder.add(
+                "return $S + $L",
+                String.format("%s{%s=", className.simpleName(), ReservedNames.REGISTRY_NAME),
+                ReservedNames.REGISTRY_NAME);
+        metricNamespace.getTags().forEach(tagDef -> {
+            if (tagDef.getValues().size() != 1) {
+                returnBuilder.add(
+                        "+ $S + $L",
+                        String.format(", %s=", tagDef.getName()),
+                        Custodian.sanitizeName(tagDef.getName()));
+            } else {
+                returnBuilder.add(
+                        "+ $S",
+                        String.format(
+                                ", %s=%s",
+                                tagDef.getName(),
+                                Iterables.getOnlyElement(tagDef.getValues()).getValue()));
+            }
+        });
+        returnBuilder.add("+ '}'");
         return MethodSpec.methodBuilder("toString")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
-                .addStatement(
-                        "return $S + $L + '}'",
-                        String.format("%s{%s=", className.simpleName(), ReservedNames.REGISTRY_NAME),
-                        ReservedNames.REGISTRY_NAME)
+                .addStatement(returnBuilder.build())
                 .returns(String.class)
                 .build();
     }
