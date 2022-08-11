@@ -27,7 +27,6 @@ import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
 import com.palantir.metric.schema.MetricType;
 import com.palantir.metric.schema.TagDefinition;
-import com.palantir.metric.schema.TagValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -127,13 +126,6 @@ final class Validator {
                             SafeArg.of("tag", tag.getName()),
                             SafeArg.of("tagValue", tagValue),
                             SafeArg.of("pattern", TAG_VALUE_PATTERN)));
-            Set<String> duplicates = getDuplicates(
-                    tag.getValues().stream().map(TagValue::getValue).collect(Collectors.toList()));
-            checkArgumentWithErrorContext(
-                    !duplicates.isEmpty(),
-                    "Encountered duplicate tag values",
-                    errorContext,
-                    SafeArg.of("duplicateTagValues", duplicates));
         });
     }
 
