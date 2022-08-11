@@ -35,7 +35,7 @@ public final class NamespaceTagsMetrics {
     }
 
     @CheckReturnValue
-    public NamespaceTagsBuilderRegistryStage builder() {
+    public static NamespaceTagsBuilderRegistryStage builder() {
         return new NamespaceTagsBuilder();
     }
 
