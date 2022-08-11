@@ -30,7 +30,6 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.CodeBlock.Builder;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -377,7 +376,7 @@ final class UtilityGenerator {
         return builder.add(".build()").build();
     }
 
-    private static void putSafeTags(TagDefinition tagDef, Builder builder) {
+    private static void putSafeTags(TagDefinition tagDef, CodeBlock.Builder builder) {
         if (tagDef.getValues().isEmpty()) {
             builder.add(".putSafeTags($S, $L)", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
         } else if (tagDef.getValues().size() == 1) {
