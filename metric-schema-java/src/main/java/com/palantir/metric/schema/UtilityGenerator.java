@@ -150,33 +150,33 @@ final class UtilityGenerator {
             MetricNamespace metricNamespace,
             TypeSpec.Builder outerBuilder,
             ImplementationVisibility visibility1) {
-        BuilderStage metricRegistryStage = BuilderStage.builder()
-                .name(ReservedNames.REGISTRY_NAME)
-                .sanitizedName(ReservedNames.REGISTRY_NAME)
-                .className(ClassName.get(TaggedMetricRegistry.class))
-                .build();
-        List<BuilderStage> tagStages = metricNamespace.getTags().stream()
-                .filter(UtilityGenerator::tagDefinitionRequiresParam)
-                .map(tagDef -> BuilderStage.builder()
-                        .name(tagDef.getName())
-                        .sanitizedName(Custodian.sanitizeName(tagDef.getName()))
-                        .className(getTagClassName(name, tagDef))
+        List<BuilderStage> builderStages = ImmutableList.<BuilderStage>builder()
+                .add(BuilderStage.builder()
+                        .name(ReservedNames.REGISTRY_NAME)
+                        .sanitizedName(ReservedNames.REGISTRY_NAME)
+                        .className(ClassName.get(TaggedMetricRegistry.class))
                         .build())
-                .collect(Collectors.toList());
-        CodeBlock.Builder buildBlock = CodeBlock.builder();
-        buildBlock.add("new $T($L", className, metricRegistryStage.sanitizedName());
-        tagStages.forEach(stage -> buildBlock.add(", $L", stage.sanitizedName()));
-        buildBlock.add(");");
+                .addAll(metricNamespace.getTags().stream()
+                        .filter(UtilityGenerator::tagDefinitionRequiresParam)
+                        .map(tagDef -> BuilderStage.builder()
+                                .name(tagDef.getName())
+                                .sanitizedName(Custodian.sanitizeName(tagDef.getName()))
+                                .className(getTagClassName(name, tagDef))
+                                .build())
+                        .collect(Collectors.toList()))
+                .build();
         StagedBuilderSpec stagedBuilderSpec = StagedBuilderSpec.builder()
                 .name(name)
                 .className(className)
-                .constructor(buildBlock.build())
+                .constructor(CodeBlock.of(
+                        "new $T($L);",
+                        className,
+                        builderStages.stream()
+                                .map(stage -> CodeBlock.of("$L", stage.sanitizedName()))
+                                .collect(CodeBlock.joining(","))))
                 .visibility(visibility1)
                 .isStatic(true)
-                .addAllStages(ImmutableList.<BuilderStage>builder()
-                        .add(metricRegistryStage)
-                        .addAll(tagStages)
-                        .build())
+                .addAllStages(builderStages)
                 .build();
         generateStagedBuilder(stagedBuilderSpec, outerBuilder);
     }
@@ -222,8 +222,7 @@ final class UtilityGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
                 .returns(stagedBuilderSpec.className())
-                .addCode("return ")
-                .addCode(stagedBuilderSpec.constructor());
+                .addCode("return $L", stagedBuilderSpec.constructor());
         MethodSpec buildMethod = buildMethodBuilder.build();
         List<Modifier> modifiers = new ArrayList<>();
         modifiers.addAll(List.of(Modifier.PRIVATE, Modifier.FINAL));
@@ -234,12 +233,12 @@ final class UtilityGenerator {
                 .addModifiers(modifiers.toArray(new Modifier[0]))
                 .addSuperinterfaces(stagedBuilderSpec.stages().stream()
                         .map(stage -> ClassName.bestGuess(stageName(stagedBuilderSpec.name(), stage.name())))
-                        .collect(ImmutableList.toImmutableList()))
+                        .collect(Collectors.toList()))
                 .addSuperinterface(ClassName.bestGuess(buildStage(stagedBuilderSpec.name())))
                 .addFields(stagedBuilderSpec.stages().stream()
                         .map(tag -> FieldSpec.builder(tag.className(), tag.sanitizedName(), Modifier.PRIVATE)
                                 .build())
-                        .collect(ImmutableList.toImmutableList()))
+                        .collect(Collectors.toList()))
                 .addMethod(buildMethod)
                 .addMethods(stagedBuilderSpec.stages().stream()
                         .map(tag -> MethodSpec.methodBuilder(tag.sanitizedName())
@@ -262,7 +261,7 @@ final class UtilityGenerator {
                                         tag.name() + " is required")
                                 .addStatement("return this")
                                 .build())
-                        .collect(ImmutableList.toImmutableList()))
+                        .collect(Collectors.toList()))
                 .build());
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(ReservedNames.BUILDER_METHOD)
                 .addModifiers(stagedBuilderSpec.visibility().apply(Modifier.STATIC))
@@ -397,31 +396,34 @@ final class UtilityGenerator {
     }
 
     private static MethodSpec generateToString(MetricNamespace metricNamespace, ClassName className) {
-        CodeBlock.Builder returnBuilder = CodeBlock.builder();
-        returnBuilder.add(
-                "return $S + $L",
+        CodeBlock tagsBlock = metricNamespace.getTags().stream()
+                .map(tagDef -> {
+                    if (tagDef.getValues().size() != 1) {
+                        return CodeBlock.of(
+                                "$S + $L",
+                                String.format(", %s=", tagDef.getName()),
+                                Custodian.sanitizeName(tagDef.getName()));
+                    } else {
+                        return CodeBlock.of(
+                                "$S",
+                                String.format(
+                                        ", %s=%s",
+                                        tagDef.getName(),
+                                        Iterables.getOnlyElement(tagDef.getValues())
+                                                .getValue()));
+                    }
+                })
+                .collect(CodeBlock.joining("+"));
+        CodeBlock concat = tagsBlock.isEmpty() ? tagsBlock : CodeBlock.of("+ $L", tagsBlock);
+        CodeBlock returnBlock = CodeBlock.of(
+                "return $S + $L $L + '}'",
                 String.format("%s{%s=", className.simpleName(), ReservedNames.REGISTRY_NAME),
-                ReservedNames.REGISTRY_NAME);
-        metricNamespace.getTags().forEach(tagDef -> {
-            if (tagDef.getValues().size() != 1) {
-                returnBuilder.add(
-                        "+ $S + $L",
-                        String.format(", %s=", tagDef.getName()),
-                        Custodian.sanitizeName(tagDef.getName()));
-            } else {
-                returnBuilder.add(
-                        "+ $S",
-                        String.format(
-                                ", %s=%s",
-                                tagDef.getName(),
-                                Iterables.getOnlyElement(tagDef.getValues()).getValue()));
-            }
-        });
-        returnBuilder.add("+ '}'");
+                ReservedNames.REGISTRY_NAME,
+                concat);
         return MethodSpec.methodBuilder("toString")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
-                .addStatement(returnBuilder.build())
+                .addStatement(returnBlock)
                 .returns(String.class)
                 .build();
     }
