@@ -192,7 +192,6 @@ final class UtilityGenerator {
                 .addModifiers(stagedBuilderSpec.visibility().apply())
                 .addMethods(abstractBuildMethods)
                 .build());
-
         for (int i = 0; i < stagedBuilderSpec.stages().size(); i++) {
             boolean lastTag = i == stagedBuilderSpec.stages().size() - 1;
             BuilderStage tag = stagedBuilderSpec.stages().get(i);

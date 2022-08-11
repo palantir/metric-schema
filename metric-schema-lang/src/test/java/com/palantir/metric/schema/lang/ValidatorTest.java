@@ -126,7 +126,7 @@ class ValidatorTest {
                                         .build())
                         .build()))
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessageContaining("MetricDefinition tags must not be empty");
+                .hasMessageContaining("tag name must not be empty");
     }
 
     @Test
