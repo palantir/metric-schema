@@ -107,7 +107,7 @@ public final class NamespaceTagsMetrics {
                 @Safe NamespaceTags_LocatorWithMultipleValues locatorWithMultipleValues);
     }
 
-    private final class NamespaceTagsBuilder
+    private static final class NamespaceTagsBuilder
             implements NamespaceTagsBuilderRegistryStage,
                     NamespaceTagsBuilderNoValueTagStage,
                     NamespaceTagsBuilderLocatorWithMultipleValuesStage,

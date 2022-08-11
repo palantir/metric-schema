@@ -39,6 +39,8 @@ public interface StagedBuilderSpec {
 
     Optional<Documentation> docs();
 
+    boolean isStatic();
+
     static ImmutableStagedBuilderSpec.NameBuildStage builder() {
         return ImmutableStagedBuilderSpec.builder();
     }

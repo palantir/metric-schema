@@ -177,6 +177,7 @@ final class UtilityGenerator {
                 .className(className1)
                 .constructor(buildBlock.build())
                 .visibility(visibility1)
+                .isStatic(true)
                 .addAllStages(builderStages)
                 .build();
 
@@ -224,8 +225,13 @@ final class UtilityGenerator {
                 .addCode("return ")
                 .addCode(stagedBuilderSpec.constructor());
         MethodSpec buildMethod = buildMethodBuilder.build();
+        List<Modifier> modifiers = new ArrayList<>();
+        modifiers.addAll(List.of(Modifier.PRIVATE, Modifier.FINAL));
+        if (stagedBuilderSpec.isStatic()) {
+            modifiers.add(Modifier.STATIC);
+        }
         outerBuilder.addType(TypeSpec.classBuilder(Custodian.anyToUpperCamel(stagedBuilderSpec.name()) + "Builder")
-                .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                .addModifiers(modifiers.toArray(new Modifier[0]))
                 .addSuperinterfaces(stagedBuilderSpec.stages().stream()
                         .map(stage -> ClassName.bestGuess(stageName(stagedBuilderSpec.name(), stage.name())))
                         .collect(ImmutableList.toImmutableList()))
