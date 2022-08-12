@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2022 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-apply plugin: 'com.palantir.conjure'
-apply plugin: 'com.palantir.external-publish-conjure'
+package com.palantir.metric.schema.model;
 
-conjure {
-    java {
-        strictObjects = true
-        // Avoid breaking strict consumers when new
-        // optional components are provided. Strict
-        // consumers will fail to deserialize once
-        // new features are used.
-        excludeEmptyOptionals = true
-        excludeEmptyCollections = true
+import com.palantir.metric.schema.Documentation;
+import com.squareup.javapoet.ClassName;
+import java.util.Optional;
+import org.immutables.value.Value;
+
+@Value.Immutable
+@ImmutablesStagedStyle
+public interface BuilderStage {
+
+    String name();
+
+    String sanitizedName();
+
+    ClassName className();
+
+    Optional<Documentation> docs();
+
+    static ImmutableBuilderStage.NameBuildStage builder() {
+        return ImmutableBuilderStage.builder();
     }
-}
-
-configure(subprojects) {
-    apply plugin: 'com.palantir.external-publish-jar'
 }

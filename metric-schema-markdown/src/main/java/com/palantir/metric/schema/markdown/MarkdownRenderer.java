@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.metric.schema.MetricDefinition;
 import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
+import com.palantir.metric.schema.TagDefinition;
 import com.palantir.metric.schema.TagValue;
 import java.util.Comparator;
 import java.util.List;
@@ -70,21 +71,31 @@ public final class MarkdownRenderer {
                 .append('\n')
                 .append(namespace.definition().getDocs().get())
                 .append('\n');
-        metrics.forEach((metricName, metric) -> renderLine(namespace.name(), metricName, metric, output));
+        metrics.forEach((metricName, metric) ->
+                renderLine(namespace.name(), metricName, namespace.definition(), metric, output));
     }
 
-    private static void renderLine(String namespace, String metricName, MetricDefinition metric, StringBuilder output) {
+    private static void renderLine(
+            String namespace,
+            String metricName,
+            MetricNamespace metricNamespace,
+            MetricDefinition metric,
+            StringBuilder output) {
+        List<TagDefinition> allTags = ImmutableList.<TagDefinition>builder()
+                .addAll(metricNamespace.getTags())
+                .addAll(metric.getTagDefinitions())
+                .build();
         output.append("- `").append(namespace).append('.').append(metricName).append('`');
-        boolean hasComplexTags = metric.getTagDefinitions().stream()
-                .anyMatch(definition -> !definition.getValues().isEmpty());
+        boolean hasComplexTags =
+                allTags.stream().anyMatch(definition -> !definition.getValues().isEmpty());
         if (!metric.getTags().isEmpty()) {
             output.append(" tagged ")
                     .append(metric.getTags().stream()
                             .map(value -> '`' + value + '`')
                             .collect(Collectors.joining(", ")));
-        } else if (!metric.getTagDefinitions().isEmpty() && !hasComplexTags) {
+        } else if (!allTags.isEmpty() && !hasComplexTags) {
             output.append(" tagged ")
-                    .append(metric.getTagDefinitions().stream()
+                    .append(allTags.stream()
                             .map(value -> '`' + value.getName() + '`')
                             .collect(Collectors.joining(", ")));
         }
@@ -95,7 +106,7 @@ public final class MarkdownRenderer {
                 .append(metric.getDocs().get())
                 .append('\n');
         if (hasComplexTags) {
-            metric.getTagDefinitions().forEach(tagDefinition -> {
+            allTags.forEach(tagDefinition -> {
                 output.append("  - `").append(tagDefinition.getName()).append("`");
                 if (!tagDefinition.getValues().isEmpty()) {
                     output.append(" values ")

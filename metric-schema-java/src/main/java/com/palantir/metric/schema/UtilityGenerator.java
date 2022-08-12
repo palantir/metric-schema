@@ -23,6 +23,9 @@ import com.google.common.collect.Iterables;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
+import com.palantir.metric.schema.model.BuilderStage;
+import com.palantir.metric.schema.model.ImplementationVisibility;
+import com.palantir.metric.schema.model.StagedBuilderSpec;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import com.squareup.javapoet.ClassName;
@@ -34,9 +37,11 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 final class UtilityGenerator {
@@ -47,20 +52,11 @@ final class UtilityGenerator {
             Optional<String> libraryName,
             String packageName,
             ImplementationVisibility visibility) {
-        ClassName className =
-                ClassName.get(packageName, className(metrics.getShortName().orElse(namespace)));
+        String name = metrics.getShortName().orElse(namespace);
+        ClassName className = ClassName.get(packageName, className(name));
         TypeSpec.Builder builder = TypeSpec.classBuilder(className.simpleName())
                 .addModifiers(visibility.apply(Modifier.FINAL))
                 .addJavadoc(Javadoc.render(metrics.getDocs()))
-                .addMethod(MethodSpec.methodBuilder(ReservedNames.FACTORY_METHOD)
-                        .addModifiers(visibility.apply(Modifier.STATIC))
-                        .addParameter(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME)
-                        .addStatement(
-                                "return new $T($T.checkNotNull(registry, \"TaggedMetricRegistry\"))",
-                                className,
-                                Preconditions.class)
-                        .returns(className)
-                        .build())
                 .addField(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME, Modifier.PRIVATE, Modifier.FINAL)
                 .addField(FieldSpec.builder(
                                 String.class,
@@ -70,6 +66,27 @@ final class UtilityGenerator {
                                 Modifier.FINAL)
                         .initializer("$T.getProperty($S, $S)", System.class, "java.version", "unknown")
                         .build());
+        if (!metrics.getTags().isEmpty()) {
+            metrics.getTags().forEach(tagDef -> {
+                if (tagDefinitionRequiresParam(tagDef)) {
+                    builder.addField(
+                            String.class, Custodian.sanitizeName(tagDef.getName()), Modifier.PRIVATE, Modifier.FINAL);
+                }
+
+                if (tagDef.getValues().size() <= 1) {
+                    return;
+                }
+
+                generateTagEnum(builder, name, visibility, tagDef);
+            });
+        }
+
+        if (metrics.getTags().isEmpty()) {
+            builder.addMethod(generateSimpleFactory(visibility, className));
+        } else {
+            generateFactoryBuilder(name, className, metrics, builder, visibility);
+        }
+
         if (libraryName.isPresent()) {
             builder.addField(FieldSpec.builder(
                             String.class,
@@ -92,28 +109,193 @@ final class UtilityGenerator {
                     .build());
         }
 
-        builder.addMethod(MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PRIVATE)
-                .addParameter(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME)
-                .addStatement("this.$1L = $1L", ReservedNames.REGISTRY_NAME)
-                .build());
+        builder.addMethod(generateConstructor(name, metrics));
 
         metrics.getMetrics().forEach((metricName, definition) -> {
             generateConstants(builder, metricName, definition, visibility);
             if (numArgs(definition) <= 1) {
-                builder.addMethods(
-                        generateSimpleMetricFactory(namespace, metricName, libraryName, definition, visibility));
+                builder.addMethods(generateSimpleMetricFactory(
+                        namespace, metricName, libraryName, metrics, definition, visibility));
             } else {
-                generateMetricFactoryBuilder(namespace, metricName, libraryName, definition, builder, visibility);
+                generateMetricFactoryBuilder(
+                        namespace, metricName, libraryName, definition, metrics, builder, visibility);
             }
         });
 
-        builder.addMethod(generateToString(className));
+        builder.addMethod(generateToString(metrics, className));
 
         return JavaFile.builder(className.packageName(), builder.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
+    }
+
+    private static MethodSpec generateSimpleFactory(ImplementationVisibility visibility, ClassName className) {
+        return MethodSpec.methodBuilder(ReservedNames.FACTORY_METHOD)
+                .addModifiers(visibility.apply(Modifier.STATIC))
+                .addParameter(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME)
+                .addStatement(
+                        "return new $T($T.checkNotNull(registry, $S))",
+                        className,
+                        Preconditions.class,
+                        TaggedMetricRegistry.class.getSimpleName())
+                .returns(className)
+                .build();
+    }
+
+    /** Produce a private staged builder, which implements public interfaces. */
+    private static void generateFactoryBuilder(
+            String name,
+            ClassName className,
+            MetricNamespace metricNamespace,
+            TypeSpec.Builder outerBuilder,
+            ImplementationVisibility visibility1) {
+        List<BuilderStage> builderStages = ImmutableList.<BuilderStage>builder()
+                .add(BuilderStage.builder()
+                        .name(ReservedNames.REGISTRY_NAME)
+                        .sanitizedName(ReservedNames.REGISTRY_NAME)
+                        .className(ClassName.get(TaggedMetricRegistry.class))
+                        .build())
+                .addAll(metricNamespace.getTags().stream()
+                        .filter(UtilityGenerator::tagDefinitionRequiresParam)
+                        .map(tagDef -> BuilderStage.builder()
+                                .name(tagDef.getName())
+                                .sanitizedName(Custodian.sanitizeName(tagDef.getName()))
+                                .className(getTagClassName(name, tagDef))
+                                .build())
+                        .collect(Collectors.toList()))
+                .build();
+        StagedBuilderSpec stagedBuilderSpec = StagedBuilderSpec.builder()
+                .name(name)
+                .className(className)
+                .constructor(CodeBlock.of(
+                        "new $T($L);",
+                        className,
+                        builderStages.stream()
+                                .map(stage -> CodeBlock.of("$L", stage.sanitizedName()))
+                                .collect(CodeBlock.joining(","))))
+                .visibility(visibility1)
+                .isStatic(true)
+                .addAllStages(builderStages)
+                .build();
+        generateStagedBuilder(stagedBuilderSpec, outerBuilder);
+    }
+
+    private static void generateStagedBuilder(StagedBuilderSpec stagedBuilderSpec, TypeSpec.Builder outerBuilder) {
+        MethodSpec.Builder abstractBuildMethodBuilder = MethodSpec.methodBuilder("build")
+                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                .returns(stagedBuilderSpec.className());
+        abstractBuildMethodBuilder.addAnnotation(CheckReturnValue.class);
+        MethodSpec abstractBuildMethod = abstractBuildMethodBuilder.build();
+        List<MethodSpec> abstractBuildMethods = ImmutableList.of(abstractBuildMethod);
+        outerBuilder.addType(TypeSpec.interfaceBuilder(buildStage(stagedBuilderSpec.name()))
+                .addModifiers(stagedBuilderSpec.visibility().apply())
+                .addMethods(abstractBuildMethods)
+                .build());
+        for (int i = 0; i < stagedBuilderSpec.stages().size(); i++) {
+            boolean lastTag = i == stagedBuilderSpec.stages().size() - 1;
+            BuilderStage tag = stagedBuilderSpec.stages().get(i);
+            String tagName = tag.name();
+            MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(tag.sanitizedName());
+            tag.docs().ifPresent(docs -> methodBuilder.addJavadoc(Javadoc.render(docs)));
+            outerBuilder.addType(TypeSpec.interfaceBuilder(stageName(stagedBuilderSpec.name(), tagName))
+                    .addModifiers(stagedBuilderSpec.visibility().apply())
+                    .addMethod(methodBuilder
+                            .addParameter(ParameterSpec.builder(tag.className(), tag.sanitizedName())
+                                    .addAnnotation(Safe.class)
+                                    .build())
+                            .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                            .addAnnotation(CheckReturnValue.class)
+                            .returns(ClassName.bestGuess(
+                                    lastTag
+                                            ? buildStage(stagedBuilderSpec.name())
+                                            : stageName(
+                                                    stagedBuilderSpec.name(),
+                                                    stagedBuilderSpec
+                                                            .stages()
+                                                            .get(i + 1)
+                                                            .name())))
+                            .build())
+                    .build());
+        }
+        MethodSpec.Builder buildMethodBuilder = MethodSpec.methodBuilder("build")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .returns(stagedBuilderSpec.className())
+                .addCode("return $L", stagedBuilderSpec.constructor());
+        MethodSpec buildMethod = buildMethodBuilder.build();
+        List<Modifier> modifiers = new ArrayList<>();
+        modifiers.addAll(List.of(Modifier.PRIVATE, Modifier.FINAL));
+        if (stagedBuilderSpec.isStatic()) {
+            modifiers.add(Modifier.STATIC);
+        }
+        outerBuilder.addType(TypeSpec.classBuilder(Custodian.anyToUpperCamel(stagedBuilderSpec.name()) + "Builder")
+                .addModifiers(modifiers.toArray(new Modifier[0]))
+                .addSuperinterfaces(stagedBuilderSpec.stages().stream()
+                        .map(stage -> ClassName.bestGuess(stageName(stagedBuilderSpec.name(), stage.name())))
+                        .collect(Collectors.toList()))
+                .addSuperinterface(ClassName.bestGuess(buildStage(stagedBuilderSpec.name())))
+                .addFields(stagedBuilderSpec.stages().stream()
+                        .map(tag -> FieldSpec.builder(tag.className(), tag.sanitizedName(), Modifier.PRIVATE)
+                                .build())
+                        .collect(Collectors.toList()))
+                .addMethod(buildMethod)
+                .addMethods(stagedBuilderSpec.stages().stream()
+                        .map(tag -> MethodSpec.methodBuilder(tag.sanitizedName())
+                                .addModifiers(Modifier.PUBLIC)
+                                .addAnnotation(Override.class)
+                                .returns(ClassName.bestGuess(
+                                        Custodian.anyToUpperCamel(stagedBuilderSpec.name()) + "Builder"))
+                                .addParameter(ParameterSpec.builder(tag.className(), tag.sanitizedName())
+                                        .addAnnotation(Safe.class)
+                                        .build())
+                                .addStatement(
+                                        "$1T.checkState(this.$2L == null, $3S)",
+                                        Preconditions.class,
+                                        tag.sanitizedName(),
+                                        tag.name() + " is already set")
+                                .addStatement(
+                                        "this.$1L = $2T.checkNotNull($1L, $3S)",
+                                        tag.sanitizedName(),
+                                        Preconditions.class,
+                                        tag.name() + " is required")
+                                .addStatement("return this")
+                                .build())
+                        .collect(Collectors.toList()))
+                .build());
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(ReservedNames.BUILDER_METHOD)
+                .addModifiers(stagedBuilderSpec.visibility().apply(Modifier.STATIC))
+                .returns(ClassName.bestGuess(stageName(
+                        stagedBuilderSpec.name(),
+                        stagedBuilderSpec.stages().get(0).name())))
+                .addAnnotation(CheckReturnValue.class)
+                .addStatement(
+                        "return new $T()",
+                        ClassName.bestGuess(Custodian.anyToUpperCamel(stagedBuilderSpec.name()) + "Builder"));
+        stagedBuilderSpec.docs().ifPresent(docs -> methodBuilder.addJavadoc(Javadoc.render(docs)));
+        outerBuilder.addMethod(methodBuilder.build());
+    }
+
+    private static MethodSpec generateConstructor(String actualName, MetricNamespace metrics) {
+        MethodSpec.Builder builder = MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PRIVATE)
+                .addParameter(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME)
+                .addStatement("this.$1L = $1L", ReservedNames.REGISTRY_NAME);
+
+        if (!metrics.getTags().isEmpty()) {
+            metrics.getTags().forEach(tagDef -> {
+                if (tagDefinitionRequiresParam(tagDef)) {
+                    builder.addParameter(getTagClassName(actualName, tagDef), Custodian.sanitizeName(tagDef.getName()));
+                    if (tagDef.getValues().isEmpty()) {
+                        builder.addStatement("this.$1L = $1L", Custodian.sanitizeName(tagDef.getName()));
+                    } else {
+                        builder.addStatement("this.$1L = $1L.getValue()", Custodian.sanitizeName(tagDef.getName()));
+                    }
+                }
+            });
+        }
+
+        return builder.build();
     }
 
     private static void generateConstants(
@@ -126,28 +308,32 @@ final class UtilityGenerator {
                 return;
             }
 
-            TypeSpec.Builder enumBuilder = TypeSpec.enumBuilder(getTagClassName(metricName, tagDef));
-            tagDef.getValues()
-                    .forEach(value -> enumBuilder.addEnumConstant(
-                            Custodian.anyToUpperUnderscore(value.getValue()),
-                            TypeSpec.anonymousClassBuilder("$S", value.getValue())
-                                    .build()));
-
-            builder.addType(enumBuilder
-                    .addModifiers(visibility.apply())
-                    .addField(FieldSpec.builder(String.class, "value", Modifier.PRIVATE, Modifier.FINAL)
-                            .build())
-                    .addMethod(MethodSpec.constructorBuilder()
-                            .addParameter(String.class, "value")
-                            .addStatement("this.value = value")
-                            .build())
-                    .addMethod(MethodSpec.methodBuilder("getValue")
-                            .addModifiers(Modifier.PRIVATE)
-                            .returns(String.class)
-                            .addStatement("return value")
-                            .build())
-                    .build());
+            generateTagEnum(builder, metricName, visibility, tagDef);
         });
+    }
+
+    private static void generateTagEnum(
+            TypeSpec.Builder builder, String metricName, ImplementationVisibility visibility, TagDefinition tagDef) {
+        TypeSpec.Builder enumBuilder = TypeSpec.enumBuilder(getTagClassName(metricName, tagDef));
+        tagDef.getValues()
+                .forEach(value -> enumBuilder.addEnumConstant(
+                        Custodian.anyToUpperUnderscore(value.getValue()),
+                        TypeSpec.anonymousClassBuilder("$S", value.getValue()).build()));
+
+        builder.addType(enumBuilder
+                .addModifiers(visibility.apply())
+                .addField(FieldSpec.builder(String.class, "value", Modifier.PRIVATE, Modifier.FINAL)
+                        .build())
+                .addMethod(MethodSpec.constructorBuilder()
+                        .addParameter(String.class, "value")
+                        .addStatement("this.value = value")
+                        .build())
+                .addMethod(MethodSpec.methodBuilder("getValue")
+                        .addModifiers(Modifier.PRIVATE)
+                        .returns(String.class)
+                        .addStatement("return value")
+                        .build())
+                .build());
     }
 
     private static String className(String namespace) {
@@ -155,22 +341,25 @@ final class UtilityGenerator {
     }
 
     private static CodeBlock metricName(
-            String namespace, String metricName, Optional<String> libraryName, MetricDefinition definition) {
+            String namespace,
+            String metricName,
+            Optional<String> libraryName,
+            MetricDefinition definition,
+            MetricNamespace metricNamespace) {
         String safeName = namespace + '.' + metricName;
         CodeBlock.Builder builder = CodeBlock.builder().add("$T.builder().safeName($S)", MetricName.class, safeName);
-        definition.getTagDefinitions().forEach(tagDef -> {
-            if (tagDef.getValues().isEmpty()) {
+        metricNamespace.getTags().forEach(tagDef -> {
+            if (tagDef.getValues().size() != 1) {
                 builder.add(".putSafeTags($S, $L)", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
-            } else if (tagDef.getValues().size() == 1) {
+            } else {
                 builder.add(
                         ".putSafeTags($S, $S)",
                         tagDef.getName(),
                         Iterables.getOnlyElement(tagDef.getValues()).getValue());
-            } else {
-                builder.add(
-                        ".putSafeTags($S, $L.getValue())", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
             }
         });
+
+        definition.getTagDefinitions().forEach(tagDef -> putSafeTags(tagDef, builder));
         ImmutableSortedSet<String> insensitiveTags = insensitiveTags(definition);
         if (libraryName.isPresent()) {
             if (!insensitiveTags.contains(ReservedNames.LIBRARY_NAME_TAG)) {
@@ -187,20 +376,54 @@ final class UtilityGenerator {
         return builder.add(".build()").build();
     }
 
+    private static void putSafeTags(TagDefinition tagDef, CodeBlock.Builder builder) {
+        if (tagDef.getValues().isEmpty()) {
+            builder.add(".putSafeTags($S, $L)", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
+        } else if (tagDef.getValues().size() == 1) {
+            builder.add(
+                    ".putSafeTags($S, $S)",
+                    tagDef.getName(),
+                    Iterables.getOnlyElement(tagDef.getValues()).getValue());
+        } else {
+            builder.add(".putSafeTags($S, $L.getValue())", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
+        }
+    }
+
     private static ImmutableSortedSet<String> insensitiveTags(MetricDefinition definition) {
         return definition.getTagDefinitions().stream()
                 .map(TagDefinition::getName)
                 .collect(ImmutableSortedSet.toImmutableSortedSet(String.CASE_INSENSITIVE_ORDER));
     }
 
-    private static MethodSpec generateToString(ClassName className) {
+    private static MethodSpec generateToString(MetricNamespace metricNamespace, ClassName className) {
+        CodeBlock tagsBlock = metricNamespace.getTags().stream()
+                .map(tagDef -> {
+                    if (tagDef.getValues().size() != 1) {
+                        return CodeBlock.of(
+                                "$S + $L",
+                                String.format(", %s=", tagDef.getName()),
+                                Custodian.sanitizeName(tagDef.getName()));
+                    } else {
+                        return CodeBlock.of(
+                                "$S",
+                                String.format(
+                                        ", %s=%s",
+                                        tagDef.getName(),
+                                        Iterables.getOnlyElement(tagDef.getValues())
+                                                .getValue()));
+                    }
+                })
+                .collect(CodeBlock.joining("+"));
+        CodeBlock concat = tagsBlock.isEmpty() ? tagsBlock : CodeBlock.of("+ $L", tagsBlock);
+        CodeBlock returnBlock = CodeBlock.of(
+                "return $S + $L $L + '}'",
+                String.format("%s{%s=", className.simpleName(), ReservedNames.REGISTRY_NAME),
+                ReservedNames.REGISTRY_NAME,
+                concat);
         return MethodSpec.methodBuilder("toString")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
-                .addStatement(
-                        "return $S + $L + '}'",
-                        String.format("%s{%s=", className.simpleName(), ReservedNames.REGISTRY_NAME),
-                        ReservedNames.REGISTRY_NAME)
+                .addStatement(returnBlock)
                 .returns(String.class)
                 .build();
     }
@@ -209,6 +432,7 @@ final class UtilityGenerator {
             String namespace,
             String metricName,
             Optional<String> libraryName,
+            MetricNamespace metricNamespace,
             MetricDefinition definition,
             ImplementationVisibility visibility) {
         boolean isGauge = MetricType.GAUGE.equals(definition.getType());
@@ -217,7 +441,7 @@ final class UtilityGenerator {
                 .addModifiers(visibility.apply())
                 .returns(MetricTypes.type(definition.getType()))
                 .addParameters(definition.getTagDefinitions().stream()
-                        .filter(tag -> tag.getValues().size() != 1)
+                        .filter(UtilityGenerator::tagDefinitionRequiresParam)
                         .map(tag -> ParameterSpec.builder(
                                         getTagClassName(metricName, tag), Custodian.sanitizeName(tag.getName()))
                                 .addAnnotation(Safe.class)
@@ -225,7 +449,7 @@ final class UtilityGenerator {
                         .collect(ImmutableList.toImmutableList()))
                 .addJavadoc(Javadoc.render(definition.getDocs()));
 
-        CodeBlock metricNameBlock = metricName(namespace, metricName, libraryName, definition);
+        CodeBlock metricNameBlock = metricName(namespace, metricName, libraryName, definition, metricNamespace);
         MethodSpec metricNameMethod = MethodSpec.methodBuilder(Custodian.sanitizeName(metricName + "MetricName"))
                 .addModifiers(visibility.apply())
                 .addModifiers(Modifier.STATIC)
@@ -262,6 +486,7 @@ final class UtilityGenerator {
             String metricName,
             Optional<String> libraryName,
             MetricDefinition definition,
+            MetricNamespace metricNamespace,
             TypeSpec.Builder outerBuilder,
             ImplementationVisibility visibility) {
         boolean isGauge = MetricType.GAUGE.equals(definition.getType());
@@ -289,7 +514,7 @@ final class UtilityGenerator {
                 .addMethods(abstractBuildMethods)
                 .build());
         ImmutableList<TagDefinition> tagList = definition.getTagDefinitions().stream()
-                .filter(tagDefinition -> tagDefinition.getValues().size() != 1)
+                .filter(UtilityGenerator::tagDefinitionRequiresParam)
                 .collect(ImmutableList.toImmutableList());
         for (int i = 0; i < tagList.size(); i++) {
             boolean lastTag = i == tagList.size() - 1;
@@ -315,7 +540,7 @@ final class UtilityGenerator {
                             .build())
                     .build());
         }
-        CodeBlock metricNameBlock = metricName(namespaceName, metricName, libraryName, definition);
+        CodeBlock metricNameBlock = metricName(namespaceName, metricName, libraryName, definition, metricNamespace);
         String metricRegistryMethod = MetricTypes.registryAccessor(definition.getType());
 
         MethodSpec buildMetricName = MethodSpec.methodBuilder("buildMetricName")
@@ -401,10 +626,14 @@ final class UtilityGenerator {
 
     private static int numArgs(MetricDefinition definition) {
         return (int) definition.getTagDefinitions().stream()
-                        .filter(tagDefinition -> tagDefinition.getValues().size() != 1)
+                        .filter(UtilityGenerator::tagDefinitionRequiresParam)
                         .count()
                 // Gauges require a gauge argument.
                 + (MetricType.GAUGE.equals(definition.getType()) ? 1 : 0);
+    }
+
+    private static boolean tagDefinitionRequiresParam(TagDefinition tagDefinition) {
+        return tagDefinition.getValues().size() != 1;
     }
 
     private static ClassName getTagClassName(String metricName, TagDefinition tag) {

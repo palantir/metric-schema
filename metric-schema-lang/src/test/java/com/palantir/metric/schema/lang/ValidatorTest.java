@@ -69,6 +69,22 @@ class ValidatorTest {
     }
 
     @Test
+    void testValidateNamespaceTags_duplicate() {
+        TagDefinition tagName = TagDefinition.builder().name("tagName").build();
+        assertThatThrownBy(() -> Validator.validate(MetricSchema.builder()
+                        .namespaces(
+                                "test",
+                                MetricNamespace.builder()
+                                        .tags(tagName)
+                                        .tags(tagName)
+                                        .docs(DOCS)
+                                        .build())
+                        .build()))
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasMessageContaining("Encountered duplicate tag names");
+    }
+
+    @Test
     void testEmptyMetricName() {
         assertThatThrownBy(() -> Validator.validate(MetricSchema.builder()
                         .namespaces(
@@ -126,7 +142,7 @@ class ValidatorTest {
                                         .build())
                         .build()))
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessageContaining("MetricDefinition tags must not be empty");
+                .hasMessageContaining("tag name must not be empty");
     }
 
     @Test
@@ -212,5 +228,51 @@ class ValidatorTest {
                                         .build())
                         .build()))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    void testValidateMetricTag_duplicateName() {
+        TagDefinition tagDefinition =
+                TagDefinition.builder().name("tagDefinition").build();
+        assertThatThrownBy(() -> Validator.validate(MetricSchema.builder()
+                        .namespaces(
+                                "test",
+                                MetricNamespace.builder()
+                                        .docs(DOCS)
+                                        .metrics(
+                                                "metric",
+                                                MetricDefinition.builder()
+                                                        .docs(DOCS)
+                                                        .type(MetricType.COUNTER)
+                                                        .tagDefinitions(tagDefinition)
+                                                        .tagDefinitions(tagDefinition)
+                                                        .build())
+                                        .build())
+                        .build()))
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasMessageContaining("Encountered duplicate tag names");
+    }
+
+    @Test
+    void testValidateMetricTag_metricTagNameDuplicatesNamespaceTagName() {
+        TagDefinition tagDefinition =
+                TagDefinition.builder().name("tagDefinition").build();
+        assertThatThrownBy(() -> Validator.validate(MetricSchema.builder()
+                        .namespaces(
+                                "test",
+                                MetricNamespace.builder()
+                                        .docs(DOCS)
+                                        .tags(tagDefinition)
+                                        .metrics(
+                                                "metric",
+                                                MetricDefinition.builder()
+                                                        .docs(DOCS)
+                                                        .type(MetricType.COUNTER)
+                                                        .tagDefinitions(tagDefinition)
+                                                        .build())
+                                        .build())
+                        .build()))
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasMessageContaining("Encountered metric tag names that duplicate namespace tag names");
     }
 }

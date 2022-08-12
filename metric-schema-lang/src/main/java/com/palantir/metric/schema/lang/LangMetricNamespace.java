@@ -17,6 +17,7 @@
 package com.palantir.metric.schema.lang;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.immutables.value.Value.Immutable;
@@ -27,6 +28,8 @@ public interface LangMetricNamespace {
     Optional<String> shortName();
 
     String docs();
+
+    List<TagDefinition> tags();
 
     Map<String, LangMetricDefinition> metrics();
 }

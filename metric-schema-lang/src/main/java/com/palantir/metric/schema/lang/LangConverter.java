@@ -24,6 +24,7 @@ import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
 import com.palantir.metric.schema.TagDefinition;
 import com.palantir.metric.schema.TagValue;
+import java.util.List;
 
 final class LangConverter {
     static MetricSchema toApi(LangMetricSchema schema) {
@@ -37,6 +38,7 @@ final class LangConverter {
         return MetricNamespace.builder()
                 .shortName(namespace.shortName())
                 .docs(Documentation.of(namespace.docs()))
+                .tags(convert(namespace.tags()))
                 .metrics(Maps.transformValues(namespace.metrics(), LangConverter::convert))
                 .build();
     }
@@ -44,17 +46,19 @@ final class LangConverter {
     private static MetricDefinition convert(LangMetricDefinition definition) {
         return MetricDefinition.builder()
                 .type(definition.type())
-                .tagDefinitions(definition.tags().stream()
-                        .map(tag -> TagDefinition.builder()
-                                .name(tag.name())
-                                .docs(tag.docs().map(Documentation::of))
-                                .values(tag.values().stream()
-                                        .map(TagValue::of)
-                                        .collect(ImmutableList.toImmutableList()))
-                                .build())
-                        .collect(ImmutableList.toImmutableList()))
+                .tagDefinitions(convert(definition.tags()))
                 .docs(Documentation.of(definition.docs()))
                 .build();
+    }
+
+    private static List<TagDefinition> convert(List<com.palantir.metric.schema.lang.TagDefinition> tags) {
+        return tags.stream()
+                .map(tag -> TagDefinition.builder()
+                        .name(tag.name())
+                        .docs(tag.docs().map(Documentation::of))
+                        .values(tag.values().stream().map(TagValue::of).collect(ImmutableList.toImmutableList()))
+                        .build())
+                .collect(ImmutableList.toImmutableList());
     }
 
     private LangConverter() {}

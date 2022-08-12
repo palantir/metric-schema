@@ -133,7 +133,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         then:
         def result = runTasksWithFailure('classes')
         result.wasExecuted(':compileMetricSchema')
-        Throwables.getRootCause(result.getFailure()).getMessage().contains("tags must match pattern")
+        Throwables.getRootCause(result.getFailure()).getMessage().contains("tags names must match pattern")
     }
 
     def 'missing definition results in task failure'() {

@@ -1,0 +1,26 @@
+namespaces:
+  namespace-tags:
+    docs: General web server metrics.
+    tags:
+      - name: locator
+        values: [ package:identifier ]
+      - noValueTag
+      - name: locatorWithMultipleValues
+        values: [ package:identifier, package:identifier2 ]
+    metrics:
+      processing:
+        docs: Measures number of installations that were processed
+        type: meter
+        tags:
+          - name: result
+            docs: The result of processing
+            values: [success, failure]
+          - type
+          - name: otherLocator
+            values: [ package:identifier, package:identifier2 ]
+      more:
+        docs: Measures more
+        type: meter
+        tags:
+          - name: otherLocator2
+            values: [ package:identifier ]

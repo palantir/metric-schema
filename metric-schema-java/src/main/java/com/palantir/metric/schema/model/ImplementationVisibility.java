@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2022 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.palantir.metric.schema;
+package com.palantir.metric.schema.model;
 
 import com.google.common.collect.ImmutableList;
 import javax.lang.model.element.Modifier;
 
-enum ImplementationVisibility {
+public enum ImplementationVisibility {
 
     /** Generated class will be public. */
     PUBLIC,
@@ -27,7 +27,7 @@ enum ImplementationVisibility {
     /** Generate class will be package private. */
     PACKAGE_PRIVATE;
 
-    static ImplementationVisibility fromString(String value) {
+    public static ImplementationVisibility fromString(String value) {
         if (value.equals("public")) {
             return PUBLIC;
         } else if (value.equals("packagePrivate")) {
@@ -36,7 +36,7 @@ enum ImplementationVisibility {
         throw new IllegalArgumentException();
     }
 
-    Modifier[] apply(Modifier... modifiers) {
+    public Modifier[] apply(Modifier... modifiers) {
         if (this == PUBLIC) {
             return ImmutableList.<Modifier>builderWithExpectedSize(modifiers.length + 1)
                     .add(Modifier.PUBLIC)

@@ -17,6 +17,7 @@ types:
             docs: A short name describing the metrics. Used to construct the name of the generated utility class.
             type: optional<string>
           docs: Documentation
+          tags: list<TagDefinition>
           metrics:
             type: map<string,MetricDefinition>
       MetricDefinition:

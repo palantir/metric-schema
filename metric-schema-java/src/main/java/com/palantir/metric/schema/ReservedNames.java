@@ -30,6 +30,7 @@ final class ReservedNames {
     static final String JAVA_VERSION_FIELD = "JAVA_VERSION";
     static final String JAVA_VERSION_TAG = "javaVersion";
     static final String FACTORY_METHOD = "of";
+    static final String BUILDER_METHOD = "builder";
     static final String GAUGE_NAME = "gauge";
     static final String REGISTRY_NAME = "registry";
 

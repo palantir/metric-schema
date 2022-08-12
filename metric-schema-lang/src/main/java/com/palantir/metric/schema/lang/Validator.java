@@ -16,6 +16,10 @@
 
 package com.palantir.metric.schema.lang;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
+import com.google.errorprone.annotations.CompileTimeConstant;
+import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.metric.schema.Documentation;
@@ -23,7 +27,9 @@ import com.palantir.metric.schema.MetricNamespace;
 import com.palantir.metric.schema.MetricSchema;
 import com.palantir.metric.schema.MetricType;
 import com.palantir.metric.schema.TagDefinition;
-import com.palantir.metric.schema.TagValue;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -57,6 +63,9 @@ final class Validator {
                 SafeArg.of("pattern", NAME_PATTERN));
         validateShortName(namespaceValue);
         validateDocumentation(namespaceValue.getDocs());
+
+        validateTagDefinitions(namespaceValue.getTags(), Set.of(), List.of(SafeArg.of("namespace", namespace)));
+
         namespaceValue.getMetrics().forEach((name, definition) -> {
             Preconditions.checkNotNull(definition, "MetricDefinition is required", SafeArg.of("namespace", namespace));
             Preconditions.checkArgument(
@@ -74,35 +83,57 @@ final class Validator {
             validateDocumentation(definition.getDocs());
             Preconditions.checkArgument(definition.getTags().isEmpty(), "tags field is replaced tagDefinition");
 
-            Set<String> uniqueNames = definition.getTagDefinitions().stream()
-                    .map(TagDefinition::getName)
-                    .collect(Collectors.toSet());
-            Preconditions.checkArgument(
-                    uniqueNames.size() == definition.getTagDefinitions().size(), "Encountered duplicate tag names");
-            definition.getTagDefinitions().forEach(tag -> {
-                Preconditions.checkArgument(
-                        !tag.getName().isEmpty(),
-                        "MetricDefinition tags must not be empty",
-                        SafeArg.of("namespace", namespace),
-                        SafeArg.of("definition", definition));
-                Preconditions.checkArgument(
-                        NAME_PREDICATE.matcher(tag.getName()).matches(),
-                        "MetricDefinition tags must match pattern",
-                        SafeArg.of("pattern", NAME_PATTERN));
-                tag.getValues().forEach(tagValue -> {
-                    Preconditions.checkArgument(
+            validateTagDefinitions(
+                    definition.getTagDefinitions(),
+                    namespaceValue.getTags().stream()
+                            .map(TagDefinition::getName)
+                            .collect(Collectors.toSet()),
+                    List.of(SafeArg.of("namespace", namespace), SafeArg.of("definition", definition)));
+        });
+    }
+
+    private static void validateTagDefinitions(
+            List<TagDefinition> tagDefinition, Set<String> namespaceTagNames, List<SafeArg<?>> errorContext) {
+        Set<String> duplicateNames =
+                getDuplicates(tagDefinition.stream().map(TagDefinition::getName).collect(Collectors.toList()));
+        checkArgumentWithErrorContext(
+                duplicateNames.isEmpty(),
+                "Encountered duplicate tag names",
+                errorContext,
+                SafeArg.of("duplicateTagNames", duplicateNames));
+        Set<String> duplicateNamespaceTagNames = tagDefinition.stream()
+                .map(TagDefinition::getName)
+                .filter(namespaceTagNames::contains)
+                .collect(Collectors.toSet());
+        checkArgumentWithErrorContext(
+                duplicateNamespaceTagNames.isEmpty(),
+                "Encountered metric tag names that duplicate namespace tag names",
+                errorContext,
+                SafeArg.of("duplicateTagNames", duplicateNames),
+                SafeArg.of("namespaceTagNames", namespaceTagNames));
+        tagDefinition.forEach(tag -> {
+            checkArgumentWithErrorContext(!tag.getName().isEmpty(), "tag name must not be empty", errorContext);
+            checkArgumentWithErrorContext(
+                    NAME_PREDICATE.matcher(tag.getName()).matches(),
+                    "tags names must match pattern",
+                    errorContext,
+                    SafeArg.of("pattern", NAME_PATTERN));
+            tag.getValues()
+                    .forEach(tagValue -> checkArgumentWithErrorContext(
                             TAG_VALUE_PREDICATE.matcher(tagValue.getValue()).matches(),
                             "tag values must match pattern",
+                            errorContext,
                             SafeArg.of("tag", tag.getName()),
                             SafeArg.of("tagValue", tagValue),
-                            SafeArg.of("pattern", TAG_VALUE_PATTERN));
-                });
-                Set<String> uniqueValues =
-                        tag.getValues().stream().map(TagValue::getValue).collect(Collectors.toSet());
-                Preconditions.checkArgument(
-                        uniqueValues.size() == tag.getValues().size(), "Encountered duplicate tag values");
-            });
+                            SafeArg.of("pattern", TAG_VALUE_PATTERN)));
         });
+    }
+
+    private static Set<String> getDuplicates(List<String> values) {
+        Multiset<String> strings = HashMultiset.create(values);
+        return strings.elementSet().stream()
+                .filter(element -> strings.count(element) > 1)
+                .collect(Collectors.toSet());
     }
 
     private static void validateShortName(MetricNamespace namespace) {
@@ -117,6 +148,16 @@ final class Validator {
 
     private static void validateDocumentation(Documentation documentation) {
         Preconditions.checkArgument(StringUtils.isNotBlank(documentation.get()), "Documentation must not be blank");
+    }
+
+    private static void checkArgumentWithErrorContext(
+            boolean expression,
+            @CompileTimeConstant String message,
+            List<SafeArg<?>> errorContext,
+            SafeArg<?>... args) {
+        List<SafeArg<?>> allArgs = new ArrayList<>(Arrays.asList(args));
+        allArgs.addAll(errorContext);
+        Preconditions.checkArgument(expression, message, allArgs.toArray(new Arg[0]));
     }
 
     private Validator() {}

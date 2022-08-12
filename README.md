@@ -36,6 +36,9 @@ namespaces:
   my.service:
     # Documentation describing the entire namespace.
     docs: Metrics helpful for monitoring a my-service instance.
+    tags:
+      # Namespace tags will get automatically propagated to all child metrics and are checked for duplicates.
+      - operationType
     metrics:
       # Results in a meter with name `my.service.failures`
       failures:
