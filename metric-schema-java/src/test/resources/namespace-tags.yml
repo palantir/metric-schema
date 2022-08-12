@@ -24,3 +24,6 @@ namespaces:
         tags:
           - name: otherLocator2
             values: [ package:identifier ]
+      gauges:
+        type: gauge
+        docs: Gauges something

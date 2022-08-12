@@ -1,5 +1,6 @@
 package com.palantir.test;
 
+import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
@@ -62,6 +63,25 @@ public final class NamespaceTagsMetrics {
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
                 .putSafeTags("javaVersion", JAVA_VERSION)
                 .build());
+    }
+
+    /**
+     * Gauges something
+     */
+    public void gauges(Gauge<?> gauge) {
+        registry.registerWithReplacement(gaugesMetricName(), gauge);
+    }
+
+    public MetricName gaugesMetricName() {
+        return MetricName.builder()
+                .safeName("namespace-tags.gauges")
+                .putSafeTags("locator", "package:identifier")
+                .putSafeTags("noValueTag", noValueTag)
+                .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValues)
+                .putSafeTags("libraryName", LIBRARY_NAME)
+                .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .putSafeTags("javaVersion", JAVA_VERSION)
+                .build();
     }
 
     @Override
