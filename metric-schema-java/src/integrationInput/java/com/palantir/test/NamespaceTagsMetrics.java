@@ -1,7 +1,10 @@
 package com.palantir.test;
 
+import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
+import com.codahale.metrics.Timer;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
@@ -49,11 +52,11 @@ public final class NamespaceTagsMetrics {
     }
 
     /**
-     * Measures more
+     * Counts something
      */
     @CheckReturnValue
-    public Meter more() {
-        return registry.meter(MetricName.builder()
+    public Counter more() {
+        return registry.counter(MetricName.builder()
                 .safeName("namespace-tags.more")
                 .putSafeTags("locator", "package:identifier")
                 .putSafeTags("noValueTag", noValueTag)
@@ -82,6 +85,38 @@ public final class NamespaceTagsMetrics {
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
                 .putSafeTags("javaVersion", JAVA_VERSION)
                 .build();
+    }
+
+    /**
+     * Times something
+     */
+    @CheckReturnValue
+    public Timer times() {
+        return registry.timer(MetricName.builder()
+                .safeName("namespace-tags.times")
+                .putSafeTags("locator", "package:identifier")
+                .putSafeTags("noValueTag", noValueTag)
+                .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValues)
+                .putSafeTags("libraryName", LIBRARY_NAME)
+                .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .putSafeTags("javaVersion", JAVA_VERSION)
+                .build());
+    }
+
+    /**
+     * Histograms something
+     */
+    @CheckReturnValue
+    public Histogram histograms() {
+        return registry.histogram(MetricName.builder()
+                .safeName("namespace-tags.histograms")
+                .putSafeTags("locator", "package:identifier")
+                .putSafeTags("noValueTag", noValueTag)
+                .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValues)
+                .putSafeTags("libraryName", LIBRARY_NAME)
+                .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .putSafeTags("javaVersion", JAVA_VERSION)
+                .build());
     }
 
     @Override
