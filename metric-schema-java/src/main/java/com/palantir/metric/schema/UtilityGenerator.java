@@ -450,9 +450,10 @@ final class UtilityGenerator {
                 .addJavadoc(Javadoc.render(definition.getDocs()));
 
         CodeBlock metricNameBlock = metricName(namespace, metricName, libraryName, definition, metricNamespace);
+        List<Modifier> extraModifiers = metricNamespace.getTags().isEmpty() ? List.of(Modifier.STATIC) : List.of();
         MethodSpec metricNameMethod = MethodSpec.methodBuilder(Custodian.sanitizeName(metricName + "MetricName"))
                 .addModifiers(visibility.apply())
-                .addModifiers(Modifier.STATIC)
+                .addModifiers(extraModifiers.toArray(new Modifier[0]))
                 .returns(MetricName.class)
                 .addCode("return $L;", metricNameBlock)
                 .build();

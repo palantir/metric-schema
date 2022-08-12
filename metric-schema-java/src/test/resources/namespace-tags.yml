@@ -19,8 +19,17 @@ namespaces:
           - name: otherLocator
             values: [ package:identifier, package:identifier2 ]
       more:
-        docs: Measures more
-        type: meter
+        docs: Counts something
+        type: counter
         tags:
           - name: otherLocator2
             values: [ package:identifier ]
+      gauges:
+        type: gauge
+        docs: Gauges something
+      times:
+        type: timer
+        docs: Times something
+      histograms:
+        type: histogram
+        docs: Histograms something
