@@ -27,13 +27,18 @@ pluginBundle {
     description = 'Schema for standard metric definitions with generators for documentation and type-safe instrumentation utilities.'
     tags = ['instrumentation', 'metrics', 'observability']
 
+}
+
+gradlePlugin {
     plugins {
         metricSchemaPlugin {
             id = 'com.palantir.metric-schema'
+            implementationClass = 'com.palantir.metric.schema.gradle.MetricSchemaPlugin'
             displayName = 'Metric Schema Plugin'
         }
         metricSchemaMarkdownPlugin {
             id = 'com.palantir.metric-schema-markdown'
+            implementationClass = 'com.palantir.metric.schema.gradle.MetricSchemaMarkdownPlugin'
             displayName = "Metric Schema Markdown Plugin"
         }
     }
