@@ -70,7 +70,7 @@ public class JavaGeneratorTest {
         DefaultTaggedMetricRegistry registry = new DefaultTaggedMetricRegistry();
         MonitorsMetrics.of(registry).more("value").mark();
         MetricName key = Iterables.getOnlyElement(registry.getMetrics().keySet());
-        assertThat(key.safeTags().get("javaVersion")).matches("\\d+\\.\\d+\\.\\d+");
+        assertThat(key.safeTags().get("javaVersion")).matches("\\d+\\.\\d+(\\.\\d+)+");
     }
 
     private void assertThatFilesAreTheSame(Path outputFile, String referenceFilesFolder) {
