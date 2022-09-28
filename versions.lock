@@ -38,7 +38,7 @@ joda-time:joda-time:2.10.8 (1 constraints: 2e16acf1)
 org.apache.commons:commons-lang3:3.12.0 (1 constraints: 38053b3b)
 org.checkerframework:checker-qual:3.12.0 (1 constraints: 480a3bbf)
 org.immutables:value:2.8.8 (1 constraints: 14051536)
-org.jetbrains:annotations:23.0.0 (1 constraints: 31115ed1)
+org.jetbrains:annotations:23.0.0 (2 constraints: 67160e0c)
 org.slf4j:slf4j-api:1.7.36 (5 constraints: b3436564)
 org.yaml:snakeyaml:1.30 (1 constraints: 6c17f527)
 
