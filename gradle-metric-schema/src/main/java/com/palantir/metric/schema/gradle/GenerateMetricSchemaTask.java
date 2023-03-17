@@ -16,9 +16,15 @@
 
 package com.palantir.metric.schema.gradle;
 
+import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import com.palantir.metric.schema.JavaGenerator;
 import com.palantir.metric.schema.JavaGeneratorArgs;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Optional;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
@@ -31,7 +37,6 @@ import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.util.GFileUtils;
 
 @CacheableTask
 public abstract class GenerateMetricSchemaTask extends DefaultTask {
@@ -53,7 +58,7 @@ public abstract class GenerateMetricSchemaTask extends DefaultTask {
     @TaskAction
     public final void generate() {
         File output = getOutputDir().getAsFile().get();
-        GFileUtils.deleteDirectory(output);
+        clearOutput(output.toPath());
         getProject().mkdir(output);
 
         JavaGenerator.generate(JavaGeneratorArgs.builder()
@@ -63,6 +68,14 @@ public abstract class GenerateMetricSchemaTask extends DefaultTask {
                 // TODO(forozco): probably want something better
                 .defaultPackageName(getProject().getGroup().toString())
                 .build());
+    }
+
+    private static void clearOutput(Path outputPath) {
+        try {
+            MoreFiles.deleteRecursively(outputPath, RecursiveDeleteOption.ALLOW_INSECURE);
+        } catch (IOException e) {
+            throw new SafeRuntimeException("Unable to clean output directory", SafeArg.of("output", outputPath));
+        }
     }
 
     private String defaultLibraryName() {

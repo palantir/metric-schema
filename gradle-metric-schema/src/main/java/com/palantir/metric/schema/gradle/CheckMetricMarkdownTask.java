@@ -22,6 +22,7 @@ import com.palantir.metric.schema.MetricSchema;
 import com.palantir.metric.schema.markdown.MarkdownRenderer;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import org.gradle.api.DefaultTask;
@@ -37,7 +38,6 @@ import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.util.GFileUtils;
 
 @CacheableTask
 public class CheckMetricMarkdownTask extends DefaultTask {
@@ -91,7 +91,7 @@ public class CheckMetricMarkdownTask extends DefaultTask {
                             + "`./gradlew --write-locks` and commit the resultant file",
                     markdown.getName(), getName()));
         } else {
-            String fromDisk = GFileUtils.readFile(markdown);
+            String fromDisk = Files.readString(markdown.toPath().toAbsolutePath());
             Preconditions.checkState(
                     fromDisk.equals(upToDateContents),
                     "%s is out of date, please run `./gradlew %s` or `./gradlew --write-locks` to update it.",
