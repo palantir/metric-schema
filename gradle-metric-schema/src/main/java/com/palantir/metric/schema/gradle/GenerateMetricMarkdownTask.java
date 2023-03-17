@@ -21,6 +21,7 @@ import com.palantir.metric.schema.MetricSchema;
 import com.palantir.metric.schema.markdown.MarkdownRenderer;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import org.gradle.api.DefaultTask;
@@ -36,7 +37,6 @@ import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.util.GFileUtils;
 
 @CacheableTask
 public class GenerateMetricMarkdownTask extends DefaultTask {
@@ -87,7 +87,7 @@ public class GenerateMetricMarkdownTask extends DefaultTask {
         }
 
         String upToDateContents = MarkdownRenderer.render(localCoordinates.get(), schemas);
-        GFileUtils.writeFile(upToDateContents, markdown);
+        Files.writeString(markdown.toPath(), upToDateContents);
     }
 
     private static boolean isEmpty(Map<String, List<MetricSchema>> schemas) {
