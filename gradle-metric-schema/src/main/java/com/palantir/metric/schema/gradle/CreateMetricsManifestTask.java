@@ -137,7 +137,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
                 ImmutableMap.builder()
                         .putAll(getLocalMetrics())
                         .putAll(getDiscoveredMetrics())
-                        .build());
+                        .buildOrThrow());
     }
 
     private Map<String, List<MetricSchema>> getLocalMetrics() {
@@ -167,7 +167,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
             }
         });
 
-        return discoveredMetrics.build();
+        return discoveredMetrics.buildOrThrow();
     }
 
     private static Optional<List<MetricSchema>> inferProjectDependencyMetrics(Project dependencyProject) {
