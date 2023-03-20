@@ -25,7 +25,7 @@ conjure {
         // consumers will fail to deserialize once
         // new features are used.
         excludeEmptyOptionals = true
-        excludeEmptyCollections = true
+        experimentalExcludeEmptyCollections = true
     }
 }
 
