@@ -42,14 +42,18 @@ public final class MonitorsMetrics {
      */
     @CheckReturnValue
     public Meter more(@Safe String type) {
-        return registry.meter(MetricName.builder()
+        return registry.meter(moreMetricName(type));
+    }
+
+    public static MetricName moreMetricName(@Safe String type) {
+        return MetricName.builder()
                 .safeName("monitors.more")
                 .putSafeTags("type", type)
                 .putSafeTags("locator", "package:identifier")
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
                 .putSafeTags("javaVersion", JAVA_VERSION)
-                .build());
+                .build();
     }
 
     @Override
@@ -92,6 +96,8 @@ public final class MonitorsMetrics {
     public interface ProcessingBuildStage {
         @CheckReturnValue
         Meter build();
+
+        MetricName buildMetricName();
     }
 
     public interface ProcessingBuilderResultStage {
@@ -124,20 +130,6 @@ public final class MonitorsMetrics {
         private Processing_OtherLocator otherLocator;
 
         @Override
-        public Meter build() {
-            return registry.meter(MetricName.builder()
-                    .safeName("monitors.processing")
-                    .putSafeTags("result", result.getValue())
-                    .putSafeTags("type", type)
-                    .putSafeTags("locator", "package:identifier")
-                    .putSafeTags("otherLocator", otherLocator.getValue())
-                    .putSafeTags("libraryName", LIBRARY_NAME)
-                    .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                    .putSafeTags("javaVersion", JAVA_VERSION)
-                    .build());
-        }
-
-        @Override
         public ProcessingBuilder result(@Safe Processing_Result result) {
             Preconditions.checkState(this.result == null, "result is already set");
             this.result = Preconditions.checkNotNull(result, "result is required");
@@ -156,6 +148,25 @@ public final class MonitorsMetrics {
             Preconditions.checkState(this.otherLocator == null, "otherLocator is already set");
             this.otherLocator = Preconditions.checkNotNull(otherLocator, "otherLocator is required");
             return this;
+        }
+
+        @Override
+        public Meter build() {
+            return registry.meter(buildMetricName());
+        }
+
+        @Override
+        public MetricName buildMetricName() {
+            return MetricName.builder()
+                    .safeName("monitors.processing")
+                    .putSafeTags("result", result.getValue())
+                    .putSafeTags("type", type)
+                    .putSafeTags("locator", "package:identifier")
+                    .putSafeTags("otherLocator", otherLocator.getValue())
+                    .putSafeTags("libraryName", LIBRARY_NAME)
+                    .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .putSafeTags("javaVersion", JAVA_VERSION)
+                    .build();
         }
     }
 }

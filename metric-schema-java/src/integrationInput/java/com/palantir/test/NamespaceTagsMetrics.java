@@ -56,7 +56,11 @@ public final class NamespaceTagsMetrics {
      */
     @CheckReturnValue
     public Counter more() {
-        return registry.counter(MetricName.builder()
+        return registry.counter(moreMetricName());
+    }
+
+    public MetricName moreMetricName() {
+        return MetricName.builder()
                 .safeName("namespace-tags.more")
                 .putSafeTags("locator", "package:identifier")
                 .putSafeTags("noValueTag", noValueTag)
@@ -65,7 +69,7 @@ public final class NamespaceTagsMetrics {
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
                 .putSafeTags("javaVersion", JAVA_VERSION)
-                .build());
+                .build();
     }
 
     /**
@@ -92,7 +96,11 @@ public final class NamespaceTagsMetrics {
      */
     @CheckReturnValue
     public Timer times() {
-        return registry.timer(MetricName.builder()
+        return registry.timer(timesMetricName());
+    }
+
+    public MetricName timesMetricName() {
+        return MetricName.builder()
                 .safeName("namespace-tags.times")
                 .putSafeTags("locator", "package:identifier")
                 .putSafeTags("noValueTag", noValueTag)
@@ -100,7 +108,7 @@ public final class NamespaceTagsMetrics {
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
                 .putSafeTags("javaVersion", JAVA_VERSION)
-                .build());
+                .build();
     }
 
     /**
@@ -108,7 +116,11 @@ public final class NamespaceTagsMetrics {
      */
     @CheckReturnValue
     public Histogram histograms() {
-        return registry.histogram(MetricName.builder()
+        return registry.histogram(histogramsMetricName());
+    }
+
+    public MetricName histogramsMetricName() {
+        return MetricName.builder()
                 .safeName("namespace-tags.histograms")
                 .putSafeTags("locator", "package:identifier")
                 .putSafeTags("noValueTag", noValueTag)
@@ -116,7 +128,7 @@ public final class NamespaceTagsMetrics {
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
                 .putSafeTags("javaVersion", JAVA_VERSION)
-                .build());
+                .build();
     }
 
     @Override
@@ -238,6 +250,8 @@ public final class NamespaceTagsMetrics {
     public interface ProcessingBuildStage {
         @CheckReturnValue
         Meter build();
+
+        MetricName buildMetricName();
     }
 
     public interface ProcessingBuilderResultStage {
@@ -270,22 +284,6 @@ public final class NamespaceTagsMetrics {
         private Processing_OtherLocator otherLocator;
 
         @Override
-        public Meter build() {
-            return registry.meter(MetricName.builder()
-                    .safeName("namespace-tags.processing")
-                    .putSafeTags("locator", "package:identifier")
-                    .putSafeTags("noValueTag", noValueTag)
-                    .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValues)
-                    .putSafeTags("result", result.getValue())
-                    .putSafeTags("type", type)
-                    .putSafeTags("otherLocator", otherLocator.getValue())
-                    .putSafeTags("libraryName", LIBRARY_NAME)
-                    .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                    .putSafeTags("javaVersion", JAVA_VERSION)
-                    .build());
-        }
-
-        @Override
         public ProcessingBuilder result(@Safe Processing_Result result) {
             Preconditions.checkState(this.result == null, "result is already set");
             this.result = Preconditions.checkNotNull(result, "result is required");
@@ -304,6 +302,27 @@ public final class NamespaceTagsMetrics {
             Preconditions.checkState(this.otherLocator == null, "otherLocator is already set");
             this.otherLocator = Preconditions.checkNotNull(otherLocator, "otherLocator is required");
             return this;
+        }
+
+        @Override
+        public Meter build() {
+            return registry.meter(buildMetricName());
+        }
+
+        @Override
+        public MetricName buildMetricName() {
+            return MetricName.builder()
+                    .safeName("namespace-tags.processing")
+                    .putSafeTags("locator", "package:identifier")
+                    .putSafeTags("noValueTag", noValueTag)
+                    .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValues)
+                    .putSafeTags("result", result.getValue())
+                    .putSafeTags("type", type)
+                    .putSafeTags("otherLocator", otherLocator.getValue())
+                    .putSafeTags("libraryName", LIBRARY_NAME)
+                    .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .putSafeTags("javaVersion", JAVA_VERSION)
+                    .build();
         }
     }
 }

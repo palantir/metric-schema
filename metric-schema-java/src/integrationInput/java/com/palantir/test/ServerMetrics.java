@@ -62,6 +62,8 @@ public final class ServerMetrics {
     public interface ResponseSizeBuildStage {
         @CheckReturnValue
         Histogram build();
+
+        MetricName buildMetricName();
     }
 
     public interface ResponseSizeBuilderServiceNameStage {
@@ -81,18 +83,6 @@ public final class ServerMetrics {
         private String endpoint;
 
         @Override
-        public Histogram build() {
-            return registry.histogram(MetricName.builder()
-                    .safeName("server.response.size")
-                    .putSafeTags("service-name", serviceName)
-                    .putSafeTags("endpoint", endpoint)
-                    .putSafeTags("libraryName", LIBRARY_NAME)
-                    .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                    .putSafeTags("javaVersion", JAVA_VERSION)
-                    .build());
-        }
-
-        @Override
         public ResponseSizeBuilder serviceName(@Safe String serviceName) {
             Preconditions.checkState(this.serviceName == null, "service-name is already set");
             this.serviceName = Preconditions.checkNotNull(serviceName, "service-name is required");
@@ -104,6 +94,23 @@ public final class ServerMetrics {
             Preconditions.checkState(this.endpoint == null, "endpoint is already set");
             this.endpoint = Preconditions.checkNotNull(endpoint, "endpoint is required");
             return this;
+        }
+
+        @Override
+        public Histogram build() {
+            return registry.histogram(buildMetricName());
+        }
+
+        @Override
+        public MetricName buildMetricName() {
+            return MetricName.builder()
+                    .safeName("server.response.size")
+                    .putSafeTags("service-name", serviceName)
+                    .putSafeTags("endpoint", endpoint)
+                    .putSafeTags("libraryName", LIBRARY_NAME)
+                    .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .putSafeTags("javaVersion", JAVA_VERSION)
+                    .build();
         }
     }
 }

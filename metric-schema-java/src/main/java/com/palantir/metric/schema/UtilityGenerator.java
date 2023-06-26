@@ -114,11 +114,11 @@ final class UtilityGenerator {
         metrics.getMetrics().forEach((metricName, definition) -> {
             generateConstants(builder, metricName, definition, visibility);
             if (numArgs(definition) <= 1) {
-                builder.addMethods(generateSimpleMetricFactory(
-                        namespace, metricName, libraryName, metrics, definition, visibility));
+                generateSimpleMetricFactory(
+                        builder, namespace, metricName, libraryName, metrics, definition, visibility);
             } else {
                 generateMetricFactoryBuilder(
-                        namespace, metricName, libraryName, definition, metrics, builder, visibility);
+                        builder, namespace, metricName, libraryName, definition, metrics, visibility);
             }
         });
 
@@ -428,7 +428,8 @@ final class UtilityGenerator {
                 .build();
     }
 
-    private static List<MethodSpec> generateSimpleMetricFactory(
+    private static void generateSimpleMetricFactory(
+            TypeSpec.Builder outerBuilder,
             String namespace,
             String metricName,
             Optional<String> libraryName,
@@ -437,28 +438,36 @@ final class UtilityGenerator {
             ImplementationVisibility visibility) {
         boolean isGauge = MetricType.GAUGE.equals(definition.getType());
 
+        List<ParameterSpec> parameters = definition.getTagDefinitions().stream()
+                .filter(UtilityGenerator::tagDefinitionRequiresParam)
+                .map(tag -> ParameterSpec.builder(
+                                getTagClassName(metricName, tag), Custodian.sanitizeName(tag.getName()))
+                        .addAnnotation(Safe.class)
+                        .build())
+                .collect(ImmutableList.toImmutableList());
+
+        MethodSpec metricNameMethod = MethodSpec.methodBuilder(Custodian.sanitizeName(metricName + "MetricName"))
+                .addModifiers(visibility.apply())
+                .addModifiers(metricNamespace.getTags().isEmpty() ? List.of(Modifier.STATIC) : List.of())
+                .addParameters(parameters)
+                .returns(MetricName.class)
+                .addCode("return $L;", metricName(namespace, metricName, libraryName, definition, metricNamespace))
+                .build();
+
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(Custodian.sanitizeName(metricName))
                 .addModifiers(visibility.apply())
                 .returns(MetricTypes.type(definition.getType()))
-                .addParameters(definition.getTagDefinitions().stream()
-                        .filter(UtilityGenerator::tagDefinitionRequiresParam)
-                        .map(tag -> ParameterSpec.builder(
-                                        getTagClassName(metricName, tag), Custodian.sanitizeName(tag.getName()))
-                                .addAnnotation(Safe.class)
-                                .build())
-                        .collect(ImmutableList.toImmutableList()))
+                .addParameters(parameters)
                 .addJavadoc(Javadoc.render(definition.getDocs()));
 
-        CodeBlock metricNameBlock = metricName(namespace, metricName, libraryName, definition, metricNamespace);
-        List<Modifier> extraModifiers = metricNamespace.getTags().isEmpty() ? List.of(Modifier.STATIC) : List.of();
-        MethodSpec metricNameMethod = MethodSpec.methodBuilder(Custodian.sanitizeName(metricName + "MetricName"))
-                .addModifiers(visibility.apply())
-                .addModifiers(extraModifiers.toArray(new Modifier[0]))
-                .returns(MetricName.class)
-                .addCode("return $L;", metricNameBlock)
-                .build();
-
-        String metricRegistryMethod = MetricTypes.registryAccessor(definition.getType());
+        CodeBlock metricNameMethodInvocation = CodeBlock.of(
+                "$N($L)",
+                metricNameMethod,
+                CodeBlock.join(
+                        parameters.stream()
+                                .map(parameter -> CodeBlock.of("$N", parameter))
+                                .collect(ImmutableList.toImmutableList()),
+                        ","));
         if (isGauge) {
             methodBuilder.addParameter(
                     ParameterizedTypeName.get(ClassName.get(Gauge.class), WildcardTypeName.subtypeOf(Object.class)),
@@ -466,31 +475,35 @@ final class UtilityGenerator {
             // TODO(ckozak): Update to use a method which can log a warning and replace existing gauges.
             // See MetricRegistries.registerWithReplacement.
             methodBuilder.addStatement(
-                    "$L.$L($L(), $L)",
+                    "$L.$L($L, $L)",
                     ReservedNames.REGISTRY_NAME,
-                    metricRegistryMethod,
-                    metricNameMethod.name,
+                    MetricTypes.registryAccessor(definition.getType()),
+                    metricNameMethodInvocation,
                     ReservedNames.GAUGE_NAME);
         } else {
             methodBuilder.addAnnotation(CheckReturnValue.class);
             methodBuilder.addStatement(
-                    "return $L.$L($L)", ReservedNames.REGISTRY_NAME, metricRegistryMethod, metricNameBlock);
+                    "return $L.$L($L)",
+                    ReservedNames.REGISTRY_NAME,
+                    MetricTypes.registryAccessor(definition.getType()),
+                    metricNameMethodInvocation);
         }
         MethodSpec method = methodBuilder.build();
 
-        return isGauge ? ImmutableList.of(method, metricNameMethod) : ImmutableList.of(method);
+        outerBuilder.addMethod(method).addMethod(metricNameMethod);
     }
 
     /** Produce a private staged builder, which implements public interfaces. */
     private static void generateMetricFactoryBuilder(
+            TypeSpec.Builder outerBuilder,
             String namespaceName,
             String metricName,
             Optional<String> libraryName,
             MetricDefinition definition,
             MetricNamespace metricNamespace,
-            TypeSpec.Builder outerBuilder,
             ImplementationVisibility visibility) {
         boolean isGauge = MetricType.GAUGE.equals(definition.getType());
+
         MethodSpec.Builder abstractBuildMethodBuilder = MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .returns(MetricTypes.type(definition.getType()));
@@ -506,13 +519,11 @@ final class UtilityGenerator {
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .returns(MetricName.class)
                 .build();
-        List<MethodSpec> abstractBuildMethods = isGauge
-                ? ImmutableList.of(abstractBuildMethod, abstractBuildMetricName)
-                : ImmutableList.of(abstractBuildMethod);
 
         outerBuilder.addType(TypeSpec.interfaceBuilder(buildStage(metricName))
                 .addModifiers(visibility.apply())
-                .addMethods(abstractBuildMethods)
+                .addMethod(abstractBuildMethod)
+                .addMethod(abstractBuildMetricName)
                 .build());
         ImmutableList<TagDefinition> tagList = definition.getTagDefinitions().stream()
                 .filter(UtilityGenerator::tagDefinitionRequiresParam)
@@ -541,14 +552,13 @@ final class UtilityGenerator {
                             .build())
                     .build());
         }
-        CodeBlock metricNameBlock = metricName(namespaceName, metricName, libraryName, definition, metricNamespace);
-        String metricRegistryMethod = MetricTypes.registryAccessor(definition.getType());
 
         MethodSpec buildMetricName = MethodSpec.methodBuilder("buildMetricName")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
                 .returns(MetricName.class)
-                .addStatement("return $L", metricNameBlock)
+                .addStatement(
+                        "return $L", metricName(namespaceName, metricName, libraryName, definition, metricNamespace))
                 .build();
 
         MethodSpec.Builder buildMethodBuilder = MethodSpec.methodBuilder("build")
@@ -564,18 +574,19 @@ final class UtilityGenerator {
                     // TODO(ckozak): Update to use a method which can log a warning and replace existing gauges.
                     // See MetricRegistries.registerWithReplacement.
                     .addStatement(
-                            "$L.$L($L(), $L)",
+                            "$L.$L($N(), $L)",
                             ReservedNames.REGISTRY_NAME,
-                            metricRegistryMethod,
-                            buildMetricName.name,
+                            MetricTypes.registryAccessor(definition.getType()),
+                            buildMetricName,
                             ReservedNames.GAUGE_NAME);
         } else {
             buildMethodBuilder.addStatement(
-                    "return $L.$L($L)", ReservedNames.REGISTRY_NAME, metricRegistryMethod, metricNameBlock);
+                    "return $L.$L($N())",
+                    ReservedNames.REGISTRY_NAME,
+                    MetricTypes.registryAccessor(definition.getType()),
+                    buildMetricName);
         }
         MethodSpec buildMethod = buildMethodBuilder.build();
-        List<MethodSpec> buildMethods =
-                isGauge ? ImmutableList.of(buildMethod, buildMetricName) : ImmutableList.of(buildMethod);
 
         outerBuilder.addType(TypeSpec.classBuilder(Custodian.anyToUpperCamel(metricName) + "Builder")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
@@ -590,7 +601,6 @@ final class UtilityGenerator {
                                         Modifier.PRIVATE)
                                 .build())
                         .collect(ImmutableList.toImmutableList()))
-                .addMethods(buildMethods)
                 .addMethods(tagList.stream()
                         .map(tag -> MethodSpec.methodBuilder(Custodian.sanitizeName(tag.getName()))
                                 .addModifiers(Modifier.PUBLIC)
@@ -613,20 +623,21 @@ final class UtilityGenerator {
                                 .addStatement("return this")
                                 .build())
                         .collect(ImmutableList.toImmutableList()))
+                .addMethod(buildMethod)
+                .addMethod(buildMetricName)
                 .build());
-
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(Custodian.sanitizeName(metricName))
+        outerBuilder.addMethod(MethodSpec.methodBuilder(Custodian.sanitizeName(metricName))
                 .addModifiers(visibility.apply())
                 .returns(
                         ClassName.bestGuess(stageName(metricName, tagList.get(0).getName())))
                 .addAnnotation(CheckReturnValue.class)
                 .addStatement("return new $T()", ClassName.bestGuess(Custodian.anyToUpperCamel(metricName) + "Builder"))
-                .addJavadoc(Javadoc.render(definition.getDocs()));
-        outerBuilder.addMethod(methodBuilder.build());
+                .addJavadoc(Javadoc.render(definition.getDocs()))
+                .build());
     }
 
-    private static int numArgs(MetricDefinition definition) {
-        return (int) definition.getTagDefinitions().stream()
+    private static long numArgs(MetricDefinition definition) {
+        return definition.getTagDefinitions().stream()
                         .filter(UtilityGenerator::tagDefinitionRequiresParam)
                         .count()
                 // Gauges require a gauge argument.

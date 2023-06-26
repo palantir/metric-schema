@@ -44,13 +44,17 @@ public final class ReservedConflictMetrics {
      */
     @CheckReturnValue
     public Meter long_(@Safe String int_) {
-        return registry.meter(MetricName.builder()
+        return registry.meter(longMetricName(int_));
+    }
+
+    public static MetricName longMetricName(@Safe String int_) {
+        return MetricName.builder()
                 .safeName("reserved.conflict.long")
                 .putSafeTags("int", int_)
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
                 .putSafeTags("javaVersion", JAVA_VERSION)
-                .build());
+                .build();
     }
 
     /**
@@ -101,6 +105,8 @@ public final class ReservedConflictMetrics {
     public interface IntBuildStage {
         @CheckReturnValue
         Histogram build();
+
+        MetricName buildMetricName();
     }
 
     public interface IntBuilderIntStage {
@@ -127,19 +133,6 @@ public final class ReservedConflictMetrics {
         private String long_;
 
         @Override
-        public Histogram build() {
-            return registry.histogram(MetricName.builder()
-                    .safeName("reserved.conflict.int")
-                    .putSafeTags("int", int_)
-                    .putSafeTags("registry", registry_)
-                    .putSafeTags("long", long_)
-                    .putSafeTags("libraryName", LIBRARY_NAME)
-                    .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                    .putSafeTags("javaVersion", JAVA_VERSION)
-                    .build());
-        }
-
-        @Override
         public IntBuilder int_(@Safe String int_) {
             Preconditions.checkState(this.int_ == null, "int is already set");
             this.int_ = Preconditions.checkNotNull(int_, "int is required");
@@ -159,6 +152,24 @@ public final class ReservedConflictMetrics {
             this.long_ = Preconditions.checkNotNull(long_, "long is required");
             return this;
         }
+
+        @Override
+        public Histogram build() {
+            return registry.histogram(buildMetricName());
+        }
+
+        @Override
+        public MetricName buildMetricName() {
+            return MetricName.builder()
+                    .safeName("reserved.conflict.int")
+                    .putSafeTags("int", int_)
+                    .putSafeTags("registry", registry_)
+                    .putSafeTags("long", long_)
+                    .putSafeTags("libraryName", LIBRARY_NAME)
+                    .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                    .putSafeTags("javaVersion", JAVA_VERSION)
+                    .build();
+        }
     }
 
     public interface DoubleBuildStage {
@@ -176,6 +187,13 @@ public final class ReservedConflictMetrics {
         private String int_;
 
         @Override
+        public DoubleBuilder int_(@Safe String int_) {
+            Preconditions.checkState(this.int_ == null, "int is already set");
+            this.int_ = Preconditions.checkNotNull(int_, "int is required");
+            return this;
+        }
+
+        @Override
         public void build(Gauge<?> gauge) {
             registry.registerWithReplacement(buildMetricName(), gauge);
         }
@@ -190,18 +208,13 @@ public final class ReservedConflictMetrics {
                     .putSafeTags("javaVersion", JAVA_VERSION)
                     .build();
         }
-
-        @Override
-        public DoubleBuilder int_(@Safe String int_) {
-            Preconditions.checkState(this.int_ == null, "int is already set");
-            this.int_ = Preconditions.checkNotNull(int_, "int is required");
-            return this;
-        }
     }
 
     public interface IncludesDefaultTagsBuildStage {
         @CheckReturnValue
         Meter build();
+
+        MetricName buildMetricName();
     }
 
     public interface IncludesDefaultTagsBuilderJavaVersionStage {
@@ -231,16 +244,6 @@ public final class ReservedConflictMetrics {
         private String libraryVersion;
 
         @Override
-        public Meter build() {
-            return registry.meter(MetricName.builder()
-                    .safeName("reserved.conflict.includes.default.tags")
-                    .putSafeTags("javaVersion", javaVersion)
-                    .putSafeTags("libraryName", libraryName)
-                    .putSafeTags("libraryVersion", libraryVersion)
-                    .build());
-        }
-
-        @Override
         public IncludesDefaultTagsBuilder javaVersion(@Safe String javaVersion) {
             Preconditions.checkState(this.javaVersion == null, "javaVersion is already set");
             this.javaVersion = Preconditions.checkNotNull(javaVersion, "javaVersion is required");
@@ -260,11 +263,28 @@ public final class ReservedConflictMetrics {
             this.libraryVersion = Preconditions.checkNotNull(libraryVersion, "libraryVersion is required");
             return this;
         }
+
+        @Override
+        public Meter build() {
+            return registry.meter(buildMetricName());
+        }
+
+        @Override
+        public MetricName buildMetricName() {
+            return MetricName.builder()
+                    .safeName("reserved.conflict.includes.default.tags")
+                    .putSafeTags("javaVersion", javaVersion)
+                    .putSafeTags("libraryName", libraryName)
+                    .putSafeTags("libraryVersion", libraryVersion)
+                    .build();
+        }
     }
 
     public interface IncludesDefaultTagsDifferentCaseBuildStage {
         @CheckReturnValue
         Meter build();
+
+        MetricName buildMetricName();
     }
 
     public interface IncludesDefaultTagsDifferentCaseBuilderJavaversionStage {
@@ -294,16 +314,6 @@ public final class ReservedConflictMetrics {
         private String libraryversion;
 
         @Override
-        public Meter build() {
-            return registry.meter(MetricName.builder()
-                    .safeName("reserved.conflict.includes.default.tags.different.case")
-                    .putSafeTags("javaversion", javaversion)
-                    .putSafeTags("libraryname", libraryname)
-                    .putSafeTags("libraryversion", libraryversion)
-                    .build());
-        }
-
-        @Override
         public IncludesDefaultTagsDifferentCaseBuilder javaversion(@Safe String javaversion) {
             Preconditions.checkState(this.javaversion == null, "javaversion is already set");
             this.javaversion = Preconditions.checkNotNull(javaversion, "javaversion is required");
@@ -322,6 +332,21 @@ public final class ReservedConflictMetrics {
             Preconditions.checkState(this.libraryversion == null, "libraryversion is already set");
             this.libraryversion = Preconditions.checkNotNull(libraryversion, "libraryversion is required");
             return this;
+        }
+
+        @Override
+        public Meter build() {
+            return registry.meter(buildMetricName());
+        }
+
+        @Override
+        public MetricName buildMetricName() {
+            return MetricName.builder()
+                    .safeName("reserved.conflict.includes.default.tags.different.case")
+                    .putSafeTags("javaversion", javaversion)
+                    .putSafeTags("libraryname", libraryname)
+                    .putSafeTags("libraryversion", libraryversion)
+                    .build();
         }
     }
 }
