@@ -35,12 +35,16 @@ final class VisibilityMetrics {
      */
     @CheckReturnValue
     Counter test() {
-        return registry.counter(MetricName.builder()
+        return registry.counter(testMetricName());
+    }
+
+    static MetricName testMetricName() {
+        return MetricName.builder()
                 .safeName("visibility.test")
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
                 .putSafeTags("javaVersion", JAVA_VERSION)
-                .build());
+                .build();
     }
 
     /**
@@ -59,6 +63,7 @@ final class VisibilityMetrics {
     interface ComplexBuildStage {
         void build(Gauge<?> gauge);
 
+        @CheckReturnValue
         MetricName buildMetricName();
     }
 
@@ -78,6 +83,20 @@ final class VisibilityMetrics {
         private String bar;
 
         @Override
+        public ComplexBuilder foo(@Safe String foo) {
+            Preconditions.checkState(this.foo == null, "foo is already set");
+            this.foo = Preconditions.checkNotNull(foo, "foo is required");
+            return this;
+        }
+
+        @Override
+        public ComplexBuilder bar(@Safe String bar) {
+            Preconditions.checkState(this.bar == null, "bar is already set");
+            this.bar = Preconditions.checkNotNull(bar, "bar is required");
+            return this;
+        }
+
+        @Override
         public void build(Gauge<?> gauge) {
             registry.registerWithReplacement(buildMetricName(), gauge);
         }
@@ -92,20 +111,6 @@ final class VisibilityMetrics {
                     .putSafeTags("libraryVersion", LIBRARY_VERSION)
                     .putSafeTags("javaVersion", JAVA_VERSION)
                     .build();
-        }
-
-        @Override
-        public ComplexBuilder foo(@Safe String foo) {
-            Preconditions.checkState(this.foo == null, "foo is already set");
-            this.foo = Preconditions.checkNotNull(foo, "foo is required");
-            return this;
-        }
-
-        @Override
-        public ComplexBuilder bar(@Safe String bar) {
-            Preconditions.checkState(this.bar == null, "bar is already set");
-            this.bar = Preconditions.checkNotNull(bar, "bar is required");
-            return this;
         }
     }
 }
