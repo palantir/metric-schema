@@ -63,6 +63,7 @@ final class VisibilityMetrics {
     interface ComplexBuildStage {
         void build(Gauge<?> gauge);
 
+        @CheckReturnValue
         MetricName buildMetricName();
     }
 

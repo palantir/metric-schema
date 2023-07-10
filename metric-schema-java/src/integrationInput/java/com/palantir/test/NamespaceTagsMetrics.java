@@ -251,6 +251,7 @@ public final class NamespaceTagsMetrics {
         @CheckReturnValue
         Meter build();
 
+        @CheckReturnValue
         MetricName buildMetricName();
     }
 

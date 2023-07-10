@@ -97,6 +97,7 @@ public final class MonitorsMetrics {
         @CheckReturnValue
         Meter build();
 
+        @CheckReturnValue
         MetricName buildMetricName();
     }
 

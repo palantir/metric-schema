@@ -517,6 +517,7 @@ final class UtilityGenerator {
         MethodSpec abstractBuildMethod = abstractBuildMethodBuilder.build();
         MethodSpec abstractBuildMetricName = MethodSpec.methodBuilder("buildMetricName")
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                .addAnnotation(CheckReturnValue.class)
                 .returns(MetricName.class)
                 .build();
 

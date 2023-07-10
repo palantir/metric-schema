@@ -106,6 +106,7 @@ public final class ReservedConflictMetrics {
         @CheckReturnValue
         Histogram build();
 
+        @CheckReturnValue
         MetricName buildMetricName();
     }
 
@@ -175,6 +176,7 @@ public final class ReservedConflictMetrics {
     public interface DoubleBuildStage {
         void build(Gauge<?> gauge);
 
+        @CheckReturnValue
         MetricName buildMetricName();
     }
 
@@ -214,6 +216,7 @@ public final class ReservedConflictMetrics {
         @CheckReturnValue
         Meter build();
 
+        @CheckReturnValue
         MetricName buildMetricName();
     }
 
@@ -284,6 +287,7 @@ public final class ReservedConflictMetrics {
         @CheckReturnValue
         Meter build();
 
+        @CheckReturnValue
         MetricName buildMetricName();
     }
 

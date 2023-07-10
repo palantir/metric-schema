@@ -63,6 +63,7 @@ public final class ServerMetrics {
         @CheckReturnValue
         Histogram build();
 
+        @CheckReturnValue
         MetricName buildMetricName();
     }
 

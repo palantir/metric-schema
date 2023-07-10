@@ -63,6 +63,7 @@ public final class MyNamespaceMetrics {
         @CheckReturnValue
         Histogram build();
 
+        @CheckReturnValue
         MetricName buildMetricName();
     }
 
