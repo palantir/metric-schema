@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
@@ -106,28 +107,39 @@ public final class MarkdownRenderer {
                 .append(metric.getDocs().get())
                 .append('\n');
         if (hasComplexTags) {
-            allTags.forEach(tagDefinition -> {
-                output.append("  - `").append(tagDefinition.getName()).append("`");
-                if (!tagDefinition.getValues().isEmpty()) {
-                    output.append(" values ")
-                            .append(tagDefinition.getValues().stream()
-                                    .map(TagValue::getValue)
-                                    .sorted()
-                                    .collect(Collectors.joining("`,`", "(`", "`)")));
-                }
-                tagDefinition.getDocs().ifPresent(docs -> {
-                    output.append(": ").append(docs);
-                });
-                output.append("\n");
-
-                tagDefinition.getValues().forEach(value -> {
-                    value.getDocs()
-                            .ifPresent(_doc -> output.append(String.format(
-                                    "    - `%s`: %s\n",
-                                    value.getValue(), value.getDocs().get())));
-                });
-            });
+            renderComplexTags(allTags, output);
         }
+    }
+
+    private static void renderComplexTags(List<TagDefinition> tagDefinitions, StringBuilder output) {
+        tagDefinitions.forEach(tagDefinition -> {
+            boolean hasEnumValueDocs =
+                    tagDefinition.getValues().stream().map(TagValue::getDocs).anyMatch(Optional::isPresent);
+
+            output.append("  - `").append(tagDefinition.getName()).append("`");
+            if (!tagDefinition.getValues().isEmpty() && !hasEnumValueDocs) {
+                output.append(" values ")
+                        .append(tagDefinition.getValues().stream()
+                                .map(TagValue::getValue)
+                                .sorted()
+                                .collect(Collectors.joining("`,`", "(`", "`)")));
+            }
+
+            tagDefinition.getDocs().ifPresent(docs -> {
+                output.append(": ").append(docs);
+            });
+            output.append("\n");
+
+            if (hasEnumValueDocs) {
+                tagDefinition.getValues().stream()
+                        .sorted(Comparator.comparing(TagValue::getValue))
+                        .forEach(value -> {
+                            output.append(String.format("    - `%s`", value.getValue()));
+                            value.getDocs().ifPresent(docs -> output.append(String.format(": %s", docs)));
+                            output.append("\n");
+                        });
+            }
+        });
     }
 
     private static ImmutableList<Section> namespaces(String localCoordinate, Map<String, List<MetricSchema>> schemas) {

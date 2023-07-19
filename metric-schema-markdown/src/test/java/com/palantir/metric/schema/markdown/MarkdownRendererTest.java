@@ -213,6 +213,15 @@ class MarkdownRendererTest {
                                                         .name("endpoint")
                                                         .docs(Documentation.of("Some docs"))
                                                         .build())
+                                                .tagDefinitions(TagDefinition.builder()
+                                                        .name("processing")
+                                                        .values(TagValue.builder()
+                                                                .value("foo")
+                                                                .build())
+                                                        .values(TagValue.builder()
+                                                                .value("bar")
+                                                                .build())
+                                                        .build())
                                                 .docs(Documentation.of("metric docs"))
                                                 .build())
                                 .build())
@@ -230,9 +239,11 @@ class MarkdownRendererTest {
                         + "namespace docs\n"
                         + "- `namespace.metric` (meter): metric docs\n"
                         + "  - `namespaceTag`\n"
-                        + "  - `result` values (`failure`,`success`)\n"
+                        + "  - `result`\n"
+                        + "    - `failure`\n"
                         + "    - `success`: This is a success enum\n"
-                        + "  - `endpoint`: Some docs");
+                        + "  - `endpoint`: Some docs\n"
+                        + "  - `processing` values (`bar`,`foo`)");
     }
 
     @Test
