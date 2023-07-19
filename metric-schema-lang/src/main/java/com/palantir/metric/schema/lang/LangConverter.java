@@ -56,9 +56,18 @@ final class LangConverter {
                 .map(tag -> TagDefinition.builder()
                         .name(tag.name())
                         .docs(tag.docs().map(Documentation::of))
-                        .values(tag.values().stream().map(TagValue::of).collect(ImmutableList.toImmutableList()))
+                        .values(tag.values().stream()
+                                .map(LangConverter::convert)
+                                .collect(ImmutableList.toImmutableList()))
                         .build())
                 .collect(ImmutableList.toImmutableList());
+    }
+
+    private static TagValue convert(com.palantir.metric.schema.lang.TagValue tagValue) {
+        return TagValue.builder()
+                .value(tagValue.value())
+                .docs(tagValue.docs().map(Documentation::of))
+                .build();
     }
 
     private LangConverter() {}

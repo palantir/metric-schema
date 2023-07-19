@@ -62,6 +62,9 @@ public final class MonitorsMetrics {
     }
 
     public enum Processing_Result {
+        /**
+         * Successful installations processed
+         */
         SUCCESS("success"),
 
         FAILURE("failure");

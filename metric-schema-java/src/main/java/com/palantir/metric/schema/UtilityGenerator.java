@@ -315,10 +315,11 @@ final class UtilityGenerator {
     private static void generateTagEnum(
             TypeSpec.Builder builder, String metricName, ImplementationVisibility visibility, TagDefinition tagDef) {
         TypeSpec.Builder enumBuilder = TypeSpec.enumBuilder(getTagClassName(metricName, tagDef));
-        tagDef.getValues()
-                .forEach(value -> enumBuilder.addEnumConstant(
-                        Custodian.anyToUpperUnderscore(value.getValue()),
-                        TypeSpec.anonymousClassBuilder("$S", value.getValue()).build()));
+        tagDef.getValues().forEach(value -> {
+            TypeSpec.Builder tagValueBuilder = TypeSpec.anonymousClassBuilder("$S", value.getValue());
+            value.getDocs().map(Javadoc::render).ifPresent(tagValueBuilder::addJavadoc);
+            enumBuilder.addEnumConstant(Custodian.anyToUpperUnderscore(value.getValue()), tagValueBuilder.build());
+        });
 
         builder.addType(enumBuilder
                 .addModifiers(visibility.apply())

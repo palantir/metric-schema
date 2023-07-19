@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2021 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2023 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,27 +22,24 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
-@JsonDeserialize(using = TagDefinition.TagDefinitionDeserializer.class)
-public interface TagDefinition {
-    String name();
+@JsonDeserialize(using = TagValue.TagValueDeserializer.class)
+public interface TagValue {
+    String value();
 
     Optional<String> docs();
 
-    List<TagValue> values();
-
-    final class TagDefinitionDeserializer extends JsonDeserializer<TagDefinition> {
+    final class TagValueDeserializer extends JsonDeserializer<TagValue> {
         @Override
-        public TagDefinition deserialize(JsonParser parser, DeserializationContext _ctxt) throws IOException {
+        public TagValue deserialize(JsonParser parser, DeserializationContext _ctxt) throws IOException {
             if (parser.currentToken() == JsonToken.VALUE_STRING) {
-                String name = parser.getValueAsString();
-                return ImmutableTagDefinition.builder().name(name).build();
+                String value = parser.getValueAsString();
+                return ImmutableTagValue.builder().value(value).build();
             }
-            return ImmutableTagDefinition.fromJson(parser.readValueAs(ImmutableTagDefinition.Json.class));
+            return ImmutableTagValue.fromJson(parser.readValueAs(ImmutableTagValue.Json.class));
         }
     }
 }

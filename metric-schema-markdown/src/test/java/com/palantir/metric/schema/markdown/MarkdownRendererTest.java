@@ -203,12 +203,24 @@ class MarkdownRendererTest {
                                                 .type(MetricType.METER)
                                                 .tagDefinitions(TagDefinition.builder()
                                                         .name("result")
-                                                        .values(TagValue.of("success"))
-                                                        .values(TagValue.of("failure"))
+                                                        .values(TagValue.of(
+                                                                "success", Documentation.of("This is a success enum")))
+                                                        .values(TagValue.builder()
+                                                                .value("failure")
+                                                                .build())
                                                         .build())
                                                 .tagDefinitions(TagDefinition.builder()
                                                         .name("endpoint")
                                                         .docs(Documentation.of("Some docs"))
+                                                        .build())
+                                                .tagDefinitions(TagDefinition.builder()
+                                                        .name("processing")
+                                                        .values(TagValue.builder()
+                                                                .value("foo")
+                                                                .build())
+                                                        .values(TagValue.builder()
+                                                                .value("bar")
+                                                                .build())
                                                         .build())
                                                 .docs(Documentation.of("metric docs"))
                                                 .build())
@@ -227,8 +239,11 @@ class MarkdownRendererTest {
                         + "namespace docs\n"
                         + "- `namespace.metric` (meter): metric docs\n"
                         + "  - `namespaceTag`\n"
-                        + "  - `result` values (`failure`,`success`)\n"
-                        + "  - `endpoint`: Some docs");
+                        + "  - `result`\n"
+                        + "    - `success`: This is a success enum\n"
+                        + "    - `failure`\n"
+                        + "  - `endpoint`: Some docs\n"
+                        + "  - `processing` values (`foo`,`bar`)");
     }
 
     @Test
