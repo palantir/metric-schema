@@ -8,7 +8,10 @@ namespaces:
         tags:
           - name: result
             docs: The result of processing
-            values: [success, failure]
+            values:
+              - value: success
+                docs: Successful installations processed
+              - failure
           - type
           - name: locator
             values: [ package:identifier ]

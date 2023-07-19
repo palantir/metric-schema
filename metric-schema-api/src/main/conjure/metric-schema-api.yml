@@ -44,3 +44,4 @@ types:
       TagValue:
         fields:
           value: string
+          docs: optional<Documentation>

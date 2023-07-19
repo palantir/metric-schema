@@ -119,6 +119,13 @@ public final class MarkdownRenderer {
                     output.append(": ").append(docs);
                 });
                 output.append("\n");
+
+                tagDefinition.getValues().forEach(value -> {
+                    value.getDocs()
+                            .ifPresent(_doc -> output.append(String.format(
+                                    "    - `%s`: %s\n",
+                                    value.getValue(), value.getDocs().get())));
+                });
             });
         }
     }
