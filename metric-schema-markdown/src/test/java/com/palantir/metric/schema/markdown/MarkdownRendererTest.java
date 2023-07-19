@@ -240,10 +240,10 @@ class MarkdownRendererTest {
                         + "- `namespace.metric` (meter): metric docs\n"
                         + "  - `namespaceTag`\n"
                         + "  - `result`\n"
-                        + "    - `failure`\n"
                         + "    - `success`: This is a success enum\n"
+                        + "    - `failure`\n"
                         + "  - `endpoint`: Some docs\n"
-                        + "  - `processing` values (`bar`,`foo`)");
+                        + "  - `processing` values (`foo`,`bar`)");
     }
 
     @Test

@@ -121,7 +121,6 @@ public final class MarkdownRenderer {
                 output.append(" values ")
                         .append(tagDefinition.getValues().stream()
                                 .map(TagValue::getValue)
-                                .sorted()
                                 .collect(Collectors.joining("`,`", "(`", "`)")));
             }
 
@@ -131,13 +130,11 @@ public final class MarkdownRenderer {
             output.append("\n");
 
             if (hasEnumValueDocs) {
-                tagDefinition.getValues().stream()
-                        .sorted(Comparator.comparing(TagValue::getValue))
-                        .forEach(value -> {
-                            output.append(String.format("    - `%s`", value.getValue()));
-                            value.getDocs().ifPresent(docs -> output.append(String.format(": %s", docs)));
-                            output.append("\n");
-                        });
+                tagDefinition.getValues().forEach(value -> {
+                    output.append(String.format("    - `%s`", value.getValue()));
+                    value.getDocs().ifPresent(docs -> output.append(String.format(": %s", docs)));
+                    output.append("\n");
+                });
             }
         });
     }
