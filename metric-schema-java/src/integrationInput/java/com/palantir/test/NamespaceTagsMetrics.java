@@ -75,7 +75,7 @@ public final class NamespaceTagsMetrics {
     /**
      * Gauges something
      */
-    public void gauges(Gauge<?> gauge) {
+    public void gauges(Gauge<? extends Number> gauge) {
         registry.registerWithReplacement(gaugesMetricName(), gauge);
     }
 

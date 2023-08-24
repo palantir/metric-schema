@@ -61,7 +61,7 @@ final class VisibilityMetrics {
     }
 
     interface ComplexBuildStage {
-        void build(Gauge<?> gauge);
+        void build(Gauge<? extends Number> gauge);
 
         @CheckReturnValue
         MetricName buildMetricName();
@@ -97,7 +97,7 @@ final class VisibilityMetrics {
         }
 
         @Override
-        public void build(Gauge<?> gauge) {
+        public void build(Gauge<? extends Number> gauge) {
             registry.registerWithReplacement(buildMetricName(), gauge);
         }
 

@@ -41,7 +41,7 @@ public final class ServerMetrics {
     /**
      * A gauge of the ratio of active workers to the number of workers.
      */
-    public void workerUtilization(Gauge<?> gauge) {
+    public void workerUtilization(Gauge<? extends Number> gauge) {
         registry.registerWithReplacement(workerUtilizationMetricName(), gauge);
     }
 
