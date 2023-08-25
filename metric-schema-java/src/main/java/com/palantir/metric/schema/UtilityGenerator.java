@@ -471,7 +471,7 @@ final class UtilityGenerator {
                         ","));
         if (isGauge) {
             methodBuilder.addParameter(
-                    ParameterizedTypeName.get(ClassName.get(Gauge.class), WildcardTypeName.subtypeOf(Object.class)),
+                    ParameterizedTypeName.get(ClassName.get(Gauge.class), WildcardTypeName.subtypeOf(Number.class)),
                     ReservedNames.GAUGE_NAME);
             // TODO(ckozak): Update to use a method which can log a warning and replace existing gauges.
             // See MetricRegistries.registerWithReplacement.
@@ -510,7 +510,7 @@ final class UtilityGenerator {
                 .returns(MetricTypes.type(definition.getType()));
         if (isGauge) {
             abstractBuildMethodBuilder.addParameter(
-                    ParameterizedTypeName.get(ClassName.get(Gauge.class), WildcardTypeName.subtypeOf(Object.class)),
+                    ParameterizedTypeName.get(ClassName.get(Gauge.class), WildcardTypeName.subtypeOf(Number.class)),
                     ReservedNames.GAUGE_NAME);
         } else {
             abstractBuildMethodBuilder.addAnnotation(CheckReturnValue.class);
@@ -571,7 +571,7 @@ final class UtilityGenerator {
             buildMethodBuilder
                     .addParameter(
                             ParameterizedTypeName.get(
-                                    ClassName.get(Gauge.class), WildcardTypeName.subtypeOf(Object.class)),
+                                    ClassName.get(Gauge.class), WildcardTypeName.subtypeOf(Number.class)),
                             ReservedNames.GAUGE_NAME)
                     // TODO(ckozak): Update to use a method which can log a warning and replace existing gauges.
                     // See MetricRegistries.registerWithReplacement.

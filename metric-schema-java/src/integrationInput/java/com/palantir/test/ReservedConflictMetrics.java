@@ -60,7 +60,7 @@ public final class ReservedConflictMetrics {
     /**
      * Gauge metric with a single no tags.
      */
-    public void float_(Gauge<?> gauge) {
+    public void float_(Gauge<? extends Number> gauge) {
         registry.registerWithReplacement(floatMetricName(), gauge);
     }
 
@@ -174,7 +174,7 @@ public final class ReservedConflictMetrics {
     }
 
     public interface DoubleBuildStage {
-        void build(Gauge<?> gauge);
+        void build(Gauge<? extends Number> gauge);
 
         @CheckReturnValue
         MetricName buildMetricName();
@@ -196,7 +196,7 @@ public final class ReservedConflictMetrics {
         }
 
         @Override
-        public void build(Gauge<?> gauge) {
+        public void build(Gauge<? extends Number> gauge) {
             registry.registerWithReplacement(buildMetricName(), gauge);
         }
 
