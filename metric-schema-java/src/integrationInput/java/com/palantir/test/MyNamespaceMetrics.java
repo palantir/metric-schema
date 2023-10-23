@@ -20,6 +20,13 @@ public final class MyNamespaceMetrics {
     private static final String LIBRARY_VERSION =
             Objects.requireNonNullElse(MyNamespaceMetrics.class.getPackage().getImplementationVersion(), "unknown");
 
+    private static final MetricName workerUtilizationMetricName = MetricName.builder()
+            .safeName("com.palantir.very.long.namespace.worker.utilization")
+            .putSafeTags("libraryName", LIBRARY_NAME)
+            .putSafeTags("libraryVersion", LIBRARY_VERSION)
+            .putSafeTags("javaVersion", JAVA_VERSION)
+            .build();
+
     private final TaggedMetricRegistry registry;
 
     private MyNamespaceMetrics(TaggedMetricRegistry registry) {
@@ -46,12 +53,7 @@ public final class MyNamespaceMetrics {
     }
 
     public static MetricName workerUtilizationMetricName() {
-        return MetricName.builder()
-                .safeName("com.palantir.very.long.namespace.worker.utilization")
-                .putSafeTags("libraryName", LIBRARY_NAME)
-                .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                .putSafeTags("javaVersion", JAVA_VERSION)
-                .build();
+        return workerUtilizationMetricName;
     }
 
     @Override
