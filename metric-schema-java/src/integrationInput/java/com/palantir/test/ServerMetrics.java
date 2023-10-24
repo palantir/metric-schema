@@ -20,6 +20,13 @@ public final class ServerMetrics {
     private static final String LIBRARY_VERSION =
             Objects.requireNonNullElse(ServerMetrics.class.getPackage().getImplementationVersion(), "unknown");
 
+    private static final MetricName workerUtilizationMetricName = MetricName.builder()
+            .safeName("server.worker.utilization")
+            .putSafeTags("libraryName", LIBRARY_NAME)
+            .putSafeTags("libraryVersion", LIBRARY_VERSION)
+            .putSafeTags("javaVersion", JAVA_VERSION)
+            .build();
+
     private final TaggedMetricRegistry registry;
 
     private ServerMetrics(TaggedMetricRegistry registry) {
@@ -46,12 +53,7 @@ public final class ServerMetrics {
     }
 
     public static MetricName workerUtilizationMetricName() {
-        return MetricName.builder()
-                .safeName("server.worker.utilization")
-                .putSafeTags("libraryName", LIBRARY_NAME)
-                .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                .putSafeTags("javaVersion", JAVA_VERSION)
-                .build();
+        return workerUtilizationMetricName;
     }
 
     @Override

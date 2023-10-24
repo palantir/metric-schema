@@ -21,6 +21,13 @@ public final class ReservedConflictMetrics {
     private static final String LIBRARY_VERSION = Objects.requireNonNullElse(
             ReservedConflictMetrics.class.getPackage().getImplementationVersion(), "unknown");
 
+    private static final MetricName floatMetricName = MetricName.builder()
+            .safeName("reserved.conflict.float")
+            .putSafeTags("libraryName", LIBRARY_NAME)
+            .putSafeTags("libraryVersion", LIBRARY_VERSION)
+            .putSafeTags("javaVersion", JAVA_VERSION)
+            .build();
+
     private final TaggedMetricRegistry registry;
 
     private ReservedConflictMetrics(TaggedMetricRegistry registry) {
@@ -65,12 +72,7 @@ public final class ReservedConflictMetrics {
     }
 
     public static MetricName floatMetricName() {
-        return MetricName.builder()
-                .safeName("reserved.conflict.float")
-                .putSafeTags("libraryName", LIBRARY_NAME)
-                .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                .putSafeTags("javaVersion", JAVA_VERSION)
-                .build();
+        return floatMetricName;
     }
 
     /**

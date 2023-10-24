@@ -25,17 +25,50 @@ public final class NamespaceTagsMetrics {
 
     private final TaggedMetricRegistry registry;
 
-    private final String noValueTag;
+    private final String noValueTagValue;
 
-    private final String locatorWithMultipleValues;
+    private final String locatorWithMultipleValuesValue;
+
+    private final MetricName gaugesMetricName;
+
+    private final MetricName timesMetricName;
+
+    private final MetricName histogramsMetricName;
 
     private NamespaceTagsMetrics(
             TaggedMetricRegistry registry,
             String noValueTag,
             NamespaceTags_LocatorWithMultipleValues locatorWithMultipleValues) {
         this.registry = registry;
-        this.noValueTag = noValueTag;
-        this.locatorWithMultipleValues = locatorWithMultipleValues.getValue();
+        this.noValueTagValue = noValueTag;
+        this.locatorWithMultipleValuesValue = locatorWithMultipleValues.getValue();
+        this.gaugesMetricName = MetricName.builder()
+                .safeName("namespace-tags.gauges")
+                .putSafeTags("locator", "package:identifier")
+                .putSafeTags("noValueTag", noValueTagValue)
+                .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValuesValue)
+                .putSafeTags("libraryName", LIBRARY_NAME)
+                .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .putSafeTags("javaVersion", JAVA_VERSION)
+                .build();
+        this.timesMetricName = MetricName.builder()
+                .safeName("namespace-tags.times")
+                .putSafeTags("locator", "package:identifier")
+                .putSafeTags("noValueTag", noValueTagValue)
+                .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValuesValue)
+                .putSafeTags("libraryName", LIBRARY_NAME)
+                .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .putSafeTags("javaVersion", JAVA_VERSION)
+                .build();
+        this.histogramsMetricName = MetricName.builder()
+                .safeName("namespace-tags.histograms")
+                .putSafeTags("locator", "package:identifier")
+                .putSafeTags("noValueTag", noValueTagValue)
+                .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValuesValue)
+                .putSafeTags("libraryName", LIBRARY_NAME)
+                .putSafeTags("libraryVersion", LIBRARY_VERSION)
+                .putSafeTags("javaVersion", JAVA_VERSION)
+                .build();
     }
 
     @CheckReturnValue
@@ -63,8 +96,8 @@ public final class NamespaceTagsMetrics {
         return MetricName.builder()
                 .safeName("namespace-tags.more")
                 .putSafeTags("locator", "package:identifier")
-                .putSafeTags("noValueTag", noValueTag)
-                .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValues)
+                .putSafeTags("noValueTag", noValueTagValue)
+                .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValuesValue)
                 .putSafeTags("otherLocator2", "package:identifier")
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
@@ -80,15 +113,7 @@ public final class NamespaceTagsMetrics {
     }
 
     public MetricName gaugesMetricName() {
-        return MetricName.builder()
-                .safeName("namespace-tags.gauges")
-                .putSafeTags("locator", "package:identifier")
-                .putSafeTags("noValueTag", noValueTag)
-                .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValues)
-                .putSafeTags("libraryName", LIBRARY_NAME)
-                .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                .putSafeTags("javaVersion", JAVA_VERSION)
-                .build();
+        return gaugesMetricName;
     }
 
     /**
@@ -100,15 +125,7 @@ public final class NamespaceTagsMetrics {
     }
 
     public MetricName timesMetricName() {
-        return MetricName.builder()
-                .safeName("namespace-tags.times")
-                .putSafeTags("locator", "package:identifier")
-                .putSafeTags("noValueTag", noValueTag)
-                .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValues)
-                .putSafeTags("libraryName", LIBRARY_NAME)
-                .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                .putSafeTags("javaVersion", JAVA_VERSION)
-                .build();
+        return timesMetricName;
     }
 
     /**
@@ -120,21 +137,13 @@ public final class NamespaceTagsMetrics {
     }
 
     public MetricName histogramsMetricName() {
-        return MetricName.builder()
-                .safeName("namespace-tags.histograms")
-                .putSafeTags("locator", "package:identifier")
-                .putSafeTags("noValueTag", noValueTag)
-                .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValues)
-                .putSafeTags("libraryName", LIBRARY_NAME)
-                .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                .putSafeTags("javaVersion", JAVA_VERSION)
-                .build();
+        return histogramsMetricName;
     }
 
     @Override
     public String toString() {
         return "NamespaceTagsMetrics{registry=" + registry + ", locator=package:identifier" + ", noValueTag="
-                + noValueTag + ", locatorWithMultipleValues=" + locatorWithMultipleValues + '}';
+                + noValueTagValue + ", locatorWithMultipleValues=" + locatorWithMultipleValuesValue + '}';
     }
 
     public enum NamespaceTags_LocatorWithMultipleValues {
@@ -315,8 +324,8 @@ public final class NamespaceTagsMetrics {
             return MetricName.builder()
                     .safeName("namespace-tags.processing")
                     .putSafeTags("locator", "package:identifier")
-                    .putSafeTags("noValueTag", noValueTag)
-                    .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValues)
+                    .putSafeTags("noValueTag", noValueTagValue)
+                    .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValuesValue)
                     .putSafeTags("result", result.getValue())
                     .putSafeTags("type", type)
                     .putSafeTags("otherLocator", otherLocator.getValue())

@@ -20,6 +20,13 @@ final class VisibilityMetrics {
     private static final String LIBRARY_VERSION =
             Objects.requireNonNullElse(VisibilityMetrics.class.getPackage().getImplementationVersion(), "unknown");
 
+    private static final MetricName testMetricName = MetricName.builder()
+            .safeName("visibility.test")
+            .putSafeTags("libraryName", LIBRARY_NAME)
+            .putSafeTags("libraryVersion", LIBRARY_VERSION)
+            .putSafeTags("javaVersion", JAVA_VERSION)
+            .build();
+
     private final TaggedMetricRegistry registry;
 
     private VisibilityMetrics(TaggedMetricRegistry registry) {
@@ -39,12 +46,7 @@ final class VisibilityMetrics {
     }
 
     static MetricName testMetricName() {
-        return MetricName.builder()
-                .safeName("visibility.test")
-                .putSafeTags("libraryName", LIBRARY_NAME)
-                .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                .putSafeTags("javaVersion", JAVA_VERSION)
-                .build();
+        return testMetricName;
     }
 
     /**
