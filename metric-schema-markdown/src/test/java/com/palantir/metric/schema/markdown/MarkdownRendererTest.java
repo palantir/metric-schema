@@ -247,6 +247,37 @@ class MarkdownRendererTest {
     }
 
     @Test
+    void testTaggedWithDocsOnlyOnTag() {
+        MetricSchema schema = MetricSchema.builder()
+                .namespaces(
+                        "namespace",
+                        MetricNamespace.builder()
+                                .docs(Documentation.of("namespace docs"))
+                                .metrics(
+                                        "metric",
+                                        MetricDefinition.builder()
+                                                .type(MetricType.METER)
+                                                .tagDefinitions(TagDefinition.builder()
+                                                        .name("result")
+                                                        .docs(Documentation.of("This is a result tag"))
+                                                        .build())
+                                                .docs(Documentation.of("metric docs"))
+                                                .build())
+                                .build())
+                .build();
+        String markdown = MarkdownRenderer.render(
+                "com.palantir:test", ImmutableMap.of("com.palantir:test:1.0.0", ImmutableList.of(schema)));
+        assertThat(markdown)
+                .isEqualTo("# Metrics\n\n"
+                        + "## Test\n\n"
+                        + "`com.palantir:test`\n\n"
+                        + "### namespace\n"
+                        + "namespace docs\n"
+                        + "- `namespace.metric` (meter): metric docs\n"
+                        + "  - `result`: This is a result tag");
+    }
+
+    @Test
     void testEmptyNamespacesExcluded() {
         String markdown = MarkdownRenderer.render(
                 "com.palantir:test",

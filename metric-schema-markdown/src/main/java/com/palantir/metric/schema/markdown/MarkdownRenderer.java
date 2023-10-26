@@ -87,8 +87,7 @@ public final class MarkdownRenderer {
                 .addAll(metric.getTagDefinitions())
                 .build();
         output.append("- `").append(namespace).append('.').append(metricName).append('`');
-        boolean hasComplexTags =
-                allTags.stream().anyMatch(definition -> !definition.getValues().isEmpty());
+        boolean hasComplexTags = hasComplexTags(allTags);
         if (!metric.getTags().isEmpty()) {
             output.append(" tagged ")
                     .append(metric.getTags().stream()
@@ -109,6 +108,12 @@ public final class MarkdownRenderer {
         if (hasComplexTags) {
             renderComplexTags(allTags, output);
         }
+    }
+
+    private static boolean hasComplexTags(List<TagDefinition> tags) {
+        return tags.stream()
+                .anyMatch(definition -> definition.getDocs().isPresent()
+                        || !definition.getValues().isEmpty());
     }
 
     private static void renderComplexTags(List<TagDefinition> tagDefinitions, StringBuilder output) {
