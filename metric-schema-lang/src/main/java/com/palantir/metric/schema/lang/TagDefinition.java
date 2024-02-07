@@ -37,6 +37,7 @@ public interface TagDefinition {
 
     final class TagDefinitionDeserializer extends JsonDeserializer<TagDefinition> {
         @Override
+        @SuppressWarnings("deprecation") // internal use permitted
         public TagDefinition deserialize(JsonParser parser, DeserializationContext _ctxt) throws IOException {
             if (parser.currentToken() == JsonToken.VALUE_STRING) {
                 String name = parser.getValueAsString();

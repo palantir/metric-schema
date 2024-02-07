@@ -29,7 +29,7 @@ final class ObjectMappers {
 
     static List<MetricSchema> loadMetricSchema(File file) {
         try {
-            return ObjectMappers.mapper.readValue(file, new TypeReference<List<MetricSchema>>() {});
+            return ObjectMappers.mapper.readValue(file, new TypeReference<>() {});
         } catch (IOException e) {
             throw new GradleException("Failed to load metrics from file: " + file, e);
         }
