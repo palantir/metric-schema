@@ -25,8 +25,9 @@ import org.gradle.api.file.Directory;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.plugins.JavaLibraryPlugin;
-import org.gradle.api.plugins.JavaPluginConvention;
+import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
 import org.gradle.plugins.ide.idea.model.IdeaModule;
@@ -39,6 +40,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
     public static final String CHECK_METRICS_MARKDOWN = "checkMetricsMarkdown";
     public static final String GENERATE_METRICS_MARKDOWN = "generateMetricsMarkdown";
     public static final String CREATE_METRICS_MANIFEST = "createMetricsManifest";
+    public static final String GENERATE_METRICS = "generateMetrics";
 
     @Override
     public void apply(Project project) {
@@ -52,14 +54,13 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
 
         Provider<Directory> generatedJavaOutputDir = metricSchemaDir.map(file -> file.dir("generated_src"));
         TaskProvider<GenerateMetricSchemaTask> generateMetricsTask = project.getTasks()
-                .register("generateMetrics", GenerateMetricSchemaTask.class, task -> {
+                .register(GENERATE_METRICS, GenerateMetricSchemaTask.class, task -> {
                     task.setGroup(TASK_GROUP);
                     task.setDescription("Generates bindings for producing well defined metrics");
                     task.getInputFile().set(compileSchemaTask.flatMap(CompileMetricSchemaTask::getOutputFile));
                     task.getOutputDir().set(generatedJavaOutputDir);
                 });
-        project.getTasks().named("compileJava", compileJava -> compileJava.dependsOn(generateMetricsTask));
-
+        configureDependentTasks(project, generateMetricsTask);
         configureJavaSource(project, generatedJavaOutputDir);
         configureIdea(project, generateMetricsTask, generatedJavaOutputDir);
         configureEclipse(project, generateMetricsTask);
@@ -69,6 +70,16 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         project.getPluginManager()
                 .withPlugin("com.palantir.sls-java-service-distribution", _plugin -> project.getPluginManager()
                         .apply(MetricSchemaMarkdownPlugin.class));
+    }
+
+    private static void configureDependentTasks(Project project, TaskProvider<? extends Task> task) {
+        SourceSet mainSourceSet = getMainSourceSet(project);
+        project.getTasks()
+                .named(mainSourceSet.getCompileJavaTaskName())
+                .configure(compileJava -> compileJava.dependsOn(task));
+        project.getTasks()
+                .named(mainSourceSet.getSourcesJarTaskName())
+                .configure(sourcesJar -> sourcesJar.dependsOn(task));
     }
 
     private static void createManifestTask(
@@ -88,17 +99,18 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
     private static TaskProvider<CompileMetricSchemaTask> createCompileSchemaTask(
             Project project, Provider<Directory> metricSchemaDir, SourceDirectorySet sourceSet) {
         Provider<RegularFile> schemaFile = metricSchemaDir.map(dir -> dir.file(METRIC_SCHEMA_RESOURCE));
-        JavaPluginConvention javaPlugin = project.getConvention().getPlugin(JavaPluginConvention.class);
+
         TaskProvider<CompileMetricSchemaTask> compileMetricSchema = project.getTasks()
                 .register(COMPILE_METRIC_SCHEMA, CompileMetricSchemaTask.class, task -> {
                     task.getSource().from(sourceSet);
                     task.getOutputFile().set(schemaFile);
                 });
+        configureDependentTasks(project, compileMetricSchema);
         project.getTasks()
                 .named("processResources")
                 .configure(processResources -> processResources.dependsOn(compileMetricSchema));
 
-        javaPlugin.getSourceSets().getByName("main").resources(resources -> {
+        getMainSourceSet(project).resources(resources -> {
             SourceDirectorySet sourceDir = project.getObjects()
                     .sourceDirectorySet("metricSchema", "metric schema")
                     .srcDir(metricSchemaDir);
@@ -117,9 +129,14 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         return sourceSet;
     }
 
+    private static SourceSet getMainSourceSet(Project project) {
+        JavaPluginExtension javaPlugin = project.getExtensions().getByType(JavaPluginExtension.class);
+        javaPlugin.withSourcesJar();
+        return javaPlugin.getSourceSets().getByName("main");
+    }
+
     private static void configureJavaSource(Project project, Provider<Directory> outputDir) {
-        JavaPluginConvention javaPlugin = project.getConvention().findPlugin(JavaPluginConvention.class);
-        javaPlugin.getSourceSets().getByName("main").getJava().srcDir(outputDir);
+        getMainSourceSet(project).getJava().srcDir(outputDir);
     }
 
     private static void configureEclipse(Project project, TaskProvider<? extends Task> generateMetrics) {
