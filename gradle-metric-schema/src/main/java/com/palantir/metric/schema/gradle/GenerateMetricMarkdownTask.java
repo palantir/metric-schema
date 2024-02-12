@@ -77,8 +77,7 @@ public class GenerateMetricMarkdownTask extends DefaultTask {
         File markdown = outputFile.get().getAsFile();
         File manifest = getManifestFile().getAsFile().get();
 
-        Map<String, List<MetricSchema>> schemas =
-                ObjectMappers.mapper.readValue(manifest, new TypeReference<Map<String, List<MetricSchema>>>() {});
+        Map<String, List<MetricSchema>> schemas = ObjectMappers.mapper.readValue(manifest, new TypeReference<>() {});
         if (isEmpty(schemas)) {
             if (markdown.exists()) {
                 markdown.delete();

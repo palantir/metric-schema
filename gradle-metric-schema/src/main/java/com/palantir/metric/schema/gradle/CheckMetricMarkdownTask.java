@@ -76,8 +76,7 @@ public class CheckMetricMarkdownTask extends DefaultTask {
     public final void check() throws IOException {
         File manifest = getManifestFile().getAsFile().get();
 
-        Map<String, List<MetricSchema>> schemas =
-                ObjectMappers.mapper.readValue(manifest, new TypeReference<Map<String, List<MetricSchema>>>() {});
+        Map<String, List<MetricSchema>> schemas = ObjectMappers.mapper.readValue(manifest, new TypeReference<>() {});
         if (isEmpty(schemas)) {
             return;
         }
