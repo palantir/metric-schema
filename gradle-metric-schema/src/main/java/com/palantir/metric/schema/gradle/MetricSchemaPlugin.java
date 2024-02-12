@@ -61,11 +61,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                     task.getOutputDir().set(generatedJavaOutputDir);
                 });
 
-        SourceSet mainSourceSet = getMainSourceSet(project);
-        mainSourceSet.getJava().srcDirs(generateMetricsTask);
-        project.getTasks()
-                .named(mainSourceSet.getCompileJavaTaskName())
-                .configure(compileJava -> compileJava.dependsOn(generateMetricsTask));
+        getMainSourceSet(project).getJava().srcDir(generateMetricsTask);
         configureIdea(project, generateMetricsTask, generatedJavaOutputDir);
         configureEclipse(project, generateMetricsTask);
         configureProjectDependencies(project);
