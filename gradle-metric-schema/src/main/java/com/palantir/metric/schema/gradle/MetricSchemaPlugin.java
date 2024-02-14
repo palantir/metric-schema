@@ -25,6 +25,7 @@ import org.gradle.api.file.Directory;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.plugins.JavaLibraryPlugin;
+import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
@@ -77,12 +78,12 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
             Provider<Directory> metricSchemaDir,
             TaskProvider<CompileMetricSchemaTask> compileSchemaTask) {
         Provider<RegularFile> manifestFile = metricSchemaDir.map(dir -> dir.file("manifest.json"));
-        Configuration runtimeClasspath = project.getConfigurations().getByName("runtimeClasspath");
+        Configuration runtimeClasspath =
+                project.getConfigurations().getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME);
         project.getTasks().register(CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class, task -> {
             task.getMetricsFile().set(compileSchemaTask.flatMap(CompileMetricSchemaTask::getOutputFile));
             task.getOutputFile().set(manifestFile);
             task.getConfiguration().set(runtimeClasspath);
-            task.dependsOn(compileSchemaTask);
         });
     }
 
@@ -90,14 +91,14 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
             Project project, Provider<Directory> metricSchemaDir, SourceDirectorySet sourceSet) {
         Provider<RegularFile> schemaFile = metricSchemaDir.map(dir -> dir.file(METRIC_SCHEMA_RESOURCE));
 
-        TaskProvider<CompileMetricSchemaTask> compileMetricSchema = project.getTasks()
+        TaskProvider<CompileMetricSchemaTask> compileMetricSchemaTask = project.getTasks()
                 .register(COMPILE_METRIC_SCHEMA, CompileMetricSchemaTask.class, task -> {
                     task.getSource().from(sourceSet);
                     task.getOutputFile().set(schemaFile);
                 });
         project.getTasks()
-                .named("processResources")
-                .configure(processResources -> processResources.dependsOn(compileMetricSchema));
+                .named(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+                .configure(processResources -> processResources.dependsOn(compileMetricSchemaTask));
 
         project.getExtensions()
                 .getByType(JavaPluginExtension.class)
@@ -111,7 +112,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                     resources.source(sourceDir);
                 });
 
-        return compileMetricSchema;
+        return compileMetricSchemaTask;
     }
 
     private static SourceDirectorySet createSourceSet(Project project) {
@@ -133,10 +134,10 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                 });
     }
 
-    private static void configureEclipse(Project project, TaskProvider<? extends Task> generateMetrics) {
+    private static void configureEclipse(Project project, TaskProvider<? extends Task> generateMetricsTask) {
         project.getPluginManager().withPlugin("eclipse", _plugin -> {
             try {
-                project.getTasks().named("eclipseClasspath").configure(t -> t.dependsOn(generateMetrics));
+                project.getTasks().named("eclipseClasspath").configure(t -> t.dependsOn(generateMetricsTask));
             } catch (UnknownDomainObjectException e) {
                 // eclipseClasspath is not always registered
             }
@@ -144,9 +145,9 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
     }
 
     private static void configureIdea(
-            Project project, TaskProvider<? extends Task> generateMetrics, Provider<Directory> outputDir) {
+            Project project, TaskProvider<? extends Task> generateMetricsTask, Provider<Directory> outputDir) {
         project.getPluginManager().withPlugin("idea", _plugin -> {
-            project.getTasks().named("ideaModule").configure(task -> task.dependsOn(generateMetrics));
+            project.getTasks().named("ideaModule").configure(task -> task.dependsOn(generateMetricsTask));
             project.getExtensions().configure(IdeaModel.class, idea -> {
                 IdeaModule module = idea.getModule();
                 module.getSourceDirs().add(outputDir.get().getAsFile());
