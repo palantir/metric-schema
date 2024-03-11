@@ -66,6 +66,23 @@ public class JavaGeneratorTest {
     }
 
     @Test
+    void specific_libraryVersion() {
+        JavaGenerator.generate(JavaGeneratorArgs.builder()
+                        .output(outputDir)
+                        .input(compileAndEmit(ImmutableList.of(
+                                Paths.get("src/test/resources/provided-version/provided-version.yml"))))
+                        .defaultPackageName("com.palantir.test")
+                        .libraryName("specific_libraryVersion")
+                        .libraryVersion("1.0.0")
+                        .build())
+                .stream()
+                .map(outputDir::relativize)
+                .map(Path::toString)
+                .forEach(relativePath ->
+                        assertThatFilesAreTheSame(outputDir.resolve(relativePath), REFERENCE_FILES_FOLDER));
+    }
+
+    @Test
     public void testJavaVersionTag() {
         DefaultTaggedMetricRegistry registry = new DefaultTaggedMetricRegistry();
         MonitorsMetrics.of(registry).more("value").mark();
@@ -91,7 +108,7 @@ public class JavaGeneratorTest {
     private List<Path> listFiles(Path path) {
         Preconditions.checkArgument(Files.isDirectory(path), "Expected a directory", SafeArg.of("path", path));
         try (Stream<Path> stream = Files.list(path)) {
-            return stream.collect(ImmutableList.toImmutableList());
+            return stream.filter(Files::isRegularFile).collect(ImmutableList.toImmutableList());
         } catch (IOException e) {
             throw new SafeRuntimeException("Failed to list directory", e, SafeArg.of("path", path));
         }
