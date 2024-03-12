@@ -11,6 +11,7 @@ com.palantir.tritium:tritium-registry = 0.76.0
 com.palantir.conjure.java:* = 8.10.0
 com.palantir.conjure.java.runtime:* = 7.60.0
 com.palantir.conjure:conjure = 4.40.0
+com.palantir.sls.versions:* = 1.5.0
 com.fasterxml.jackson.*:jackson-* = 2.15.3
 com.squareup:javapoet = 1.13.0
 com.atlassian.commonmark:* = 0.12.1
