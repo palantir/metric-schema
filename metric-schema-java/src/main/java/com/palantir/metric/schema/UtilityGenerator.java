@@ -84,7 +84,9 @@ final class UtilityGenerator {
                             Modifier.STATIC,
                             Modifier.FINAL)
                     .initializer(libraryVersion
+                            // When a libraryVersion value is provided, use the string constant:
                             .map(version -> CodeBlock.of("$S", version))
+                            // Otherwise fall back to package.getImplementationVersion()
                             .orElseGet(() -> CodeBlock.of(
                                     "$T.requireNonNullElse($T.class.getPackage().getImplementationVersion(), $S)",
                                     Objects.class,
