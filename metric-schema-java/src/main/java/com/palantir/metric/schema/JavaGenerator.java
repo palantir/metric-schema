@@ -44,6 +44,7 @@ public final class JavaGenerator {
                             entry.getKey(),
                             entry.getValue(),
                             args.libraryName(),
+                            args.libraryVersion(),
                             getPackage(args, schema),
                             getVisibility(schema));
                 }))

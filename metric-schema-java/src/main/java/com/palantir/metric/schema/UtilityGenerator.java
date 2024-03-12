@@ -50,6 +50,7 @@ final class UtilityGenerator {
             String namespace,
             MetricNamespace metrics,
             Optional<String> libraryName,
+            Optional<String> libraryVersion,
             String packageName,
             ImplementationVisibility visibility) {
         String name = metrics.getShortName().orElse(namespace);
@@ -82,10 +83,15 @@ final class UtilityGenerator {
                             Modifier.PRIVATE,
                             Modifier.STATIC,
                             Modifier.FINAL)
-                    .initializer(
-                            "$T.requireNonNullElse($T.class.getPackage().getImplementationVersion(), \"unknown\")",
-                            Objects.class,
-                            className)
+                    .initializer(libraryVersion
+                            // When a libraryVersion value is provided, use the string constant:
+                            .map(version -> CodeBlock.of("$S", version))
+                            // Otherwise fall back to package.getImplementationVersion()
+                            .orElseGet(() -> CodeBlock.of(
+                                    "$T.requireNonNullElse($T.class.getPackage().getImplementationVersion(), $S)",
+                                    Objects.class,
+                                    className,
+                                    "unknown")))
                     .build());
         }
 

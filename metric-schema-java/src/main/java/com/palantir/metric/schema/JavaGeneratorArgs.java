@@ -48,6 +48,9 @@ public abstract class JavaGeneratorArgs {
     /** Used to add the libraryName tag to all metrics. */
     abstract Optional<String> libraryName();
 
+    /** Used to add the libraryVersion tag to all metrics. */
+    abstract Optional<String> libraryVersion();
+
     /** The default Java package name for generated classes. */
     abstract String defaultPackageName();
 

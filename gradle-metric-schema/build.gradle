@@ -11,6 +11,7 @@ dependencies {
     implementation project(':metric-schema-markdown')
     implementation 'com.google.guava:guava'
     implementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
+    implementation 'com.palantir.sls.versions:sls-versions'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
 
     testImplementation gradleTestKit()
