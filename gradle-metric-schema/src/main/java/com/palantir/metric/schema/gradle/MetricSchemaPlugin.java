@@ -129,9 +129,8 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                 .getByType(JavaPluginExtension.class)
                 .getSourceSets()
                 .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
-                .java(java -> {
-                    java.srcDir(generateMetricSchemaTask);
-                });
+                .getJava()
+                .srcDir(generateMetricSchemaTask);
     }
 
     private static void configureEclipse(Project project, TaskProvider<? extends Task> generateMetricsTask) {
