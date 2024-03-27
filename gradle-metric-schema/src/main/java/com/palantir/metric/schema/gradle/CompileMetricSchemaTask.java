@@ -22,9 +22,12 @@ import java.io.File;
 import java.io.IOException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
-import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.file.RegularFile;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
@@ -32,20 +35,25 @@ import org.gradle.api.tasks.TaskAction;
 
 @CacheableTask
 public abstract class CompileMetricSchemaTask extends DefaultTask {
+
+    static final String NAME = "compileMetricSchema";
+
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
     public abstract ConfigurableFileCollection getSource();
 
+    @OutputDirectory
+    public abstract DirectoryProperty getOutputDir();
+
     @OutputFile
-    public abstract RegularFileProperty getOutputFile();
+    public final Provider<RegularFile> getMetricsJsonFile() {
+        return getOutputDir().file(MetricSchemaPlugin.METRICS_JSON_FILE);
+    }
 
     @TaskAction
     public final void action() throws IOException {
-        File output = getOutputFile().getAsFile().get();
-        getProject().mkdir(output.getParent());
-
         ObjectMappers.mapper.writeValue(
-                output,
+                getMetricsJsonFile().get().getAsFile(),
                 getSource().getFiles().stream()
                         .map(File::toPath)
                         .map(MetricSchemaCompiler::compile)

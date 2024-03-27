@@ -27,50 +27,30 @@ import java.util.List;
 import java.util.Map;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
-import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputFile;
-import org.gradle.api.tasks.Optional;
+import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
 
 @CacheableTask
-public class CheckMetricMarkdownTask extends DefaultTask {
-    private final RegularFileProperty markdownFile = getProject().getObjects().fileProperty();
-    private final RegularFileProperty manifestFile = getProject().getObjects().fileProperty();
-    private final Property<String> localCoordinates = getProject()
-            .getObjects()
-            .property(String.class)
-            .value(getProject()
-                    .provider(() ->
-                            "" + getProject().getGroup() + ':' + getProject().getName()));
+public abstract class CheckMetricMarkdownTask extends DefaultTask {
 
-    @InputFile
-    @PathSensitive(PathSensitivity.RELATIVE)
-    public final RegularFileProperty getManifestFile() {
-        return manifestFile;
-    }
+    static final String NAME = "checkMetricsMarkdown";
 
-    @Optional
-    @InputFile
+    @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
-    public final Provider<RegularFile> getMarkdownFile() {
-        return ProviderUtils.filterNonExistentFile(getProject(), markdownFile);
-    }
+    public abstract RegularFileProperty getManifestFile();
 
     @Input
-    public final Property<String> getLocalCoordinates() {
-        return localCoordinates;
-    }
+    public abstract Property<String> getLocalCoordinates();
 
-    final void setMarkdownFile(File value) {
-        markdownFile.set(value);
-    }
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public abstract RegularFileProperty getMarkdownFile();
 
     @TaskAction
     public final void check() throws IOException {
@@ -81,8 +61,8 @@ public class CheckMetricMarkdownTask extends DefaultTask {
             return;
         }
 
-        File markdown = markdownFile.get().getAsFile();
-        String upToDateContents = MarkdownRenderer.render(localCoordinates.get(), schemas);
+        File markdown = getMarkdownFile().get().getAsFile();
+        String upToDateContents = MarkdownRenderer.render(getLocalCoordinates().get(), schemas);
 
         if (!markdown.exists()) {
             throw new GradleException(String.format(
@@ -95,7 +75,7 @@ public class CheckMetricMarkdownTask extends DefaultTask {
                     fromDisk.equals(upToDateContents),
                     "%s is out of date, please run `./gradlew %s` or `./gradlew --write-locks` to update it.",
                     markdown.getName(),
-                    MetricSchemaPlugin.GENERATE_METRICS_MARKDOWN);
+                    GenerateMetricMarkdownTask.NAME);
         }
     }
 

@@ -16,11 +16,13 @@
 
 package com.palantir.metric.schema.gradle;
 
+import com.palantir.sls.versions.OrderableSlsVersion;
+import com.palantir.sls.versions.SlsVersion;
+import com.palantir.sls.versions.SlsVersionType;
+import java.util.Objects;
+import javax.annotation.Nullable;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.Task;
-import org.gradle.api.UnknownDomainObjectException;
-import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.SourceDirectorySet;
@@ -31,127 +33,90 @@ import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.plugins.ide.idea.model.IdeaModel;
-import org.gradle.plugins.ide.idea.model.IdeaModule;
 
 public final class MetricSchemaPlugin implements Plugin<Project> {
-    private static final String TASK_GROUP = "MetricSchema";
-    public static final String METRIC_SCHEMA_RESOURCE = "metric-schema/metrics.json";
 
-    public static final String COMPILE_METRIC_SCHEMA = "compileMetricSchema";
-    public static final String CHECK_METRICS_MARKDOWN = "checkMetricsMarkdown";
-    public static final String GENERATE_METRICS_MARKDOWN = "generateMetricsMarkdown";
-    public static final String CREATE_METRICS_MANIFEST = "createMetricsManifest";
-    public static final String GENERATE_METRICS = "generateMetrics";
+    public static final String TASK_GROUP = "MetricSchema";
+
+    public static final String METRICS_JSON_FILE = "metric-schema/metrics.json";
 
     @Override
     public void apply(Project project) {
         project.getPluginManager().apply(JavaLibraryPlugin.class);
-        SourceDirectorySet sourceSet = createSourceSet(project);
+
+        Provider<Directory> generatedJavaDir =
+                project.getLayout().getBuildDirectory().dir("generated/sources/metric-schema/java/main");
+        Provider<Directory> generatedResourcesDir =
+                project.getLayout().getBuildDirectory().dir("generated/sources/metric-schema/resources/main");
         Provider<Directory> metricSchemaDir =
                 project.getLayout().getBuildDirectory().dir("metricSchema");
 
-        TaskProvider<CompileMetricSchemaTask> compileSchemaTask =
-                createCompileSchemaTask(project, metricSchemaDir, sourceSet);
-
-        Provider<Directory> generatedJavaOutputDir = metricSchemaDir.map(file -> file.dir("generated_src"));
-        TaskProvider<GenerateMetricSchemaTask> generateMetricSchemaTask = project.getTasks()
-                .register(GENERATE_METRICS, GenerateMetricSchemaTask.class, task -> {
-                    task.setGroup(TASK_GROUP);
-                    task.setDescription("Generates bindings for producing well defined metrics");
-                    task.getInputFile().set(compileSchemaTask.flatMap(CompileMetricSchemaTask::getOutputFile));
-                    task.getOutputDir().set(generatedJavaOutputDir);
-                });
-
-        configureJavaSource(project, generateMetricSchemaTask);
-        configureIdea(project, generateMetricSchemaTask, generatedJavaOutputDir);
-        configureEclipse(project, generateMetricSchemaTask);
-        configureProjectDependencies(project);
-
-        createManifestTask(project, metricSchemaDir, compileSchemaTask);
-        project.getPluginManager()
-                .withPlugin("com.palantir.sls-java-service-distribution", _plugin -> project.getPluginManager()
-                        .apply(MetricSchemaMarkdownPlugin.class));
-    }
-
-    private static void createManifestTask(
-            Project project,
-            Provider<Directory> metricSchemaDir,
-            TaskProvider<CompileMetricSchemaTask> compileSchemaTask) {
-        Provider<RegularFile> manifestFile = metricSchemaDir.map(dir -> dir.file("manifest.json"));
-        Configuration runtimeClasspath =
-                project.getConfigurations().getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME);
-        project.getTasks().register(CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class, task -> {
-            task.getMetricsFile().set(compileSchemaTask.flatMap(CompileMetricSchemaTask::getOutputFile));
-            task.getOutputFile().set(manifestFile);
-            task.getConfiguration().set(runtimeClasspath);
-        });
-    }
-
-    private static TaskProvider<CompileMetricSchemaTask> createCompileSchemaTask(
-            Project project, Provider<Directory> metricSchemaDir, SourceDirectorySet sourceSet) {
-        Provider<RegularFile> schemaFile = metricSchemaDir.map(dir -> dir.file(METRIC_SCHEMA_RESOURCE));
+        SourceDirectorySet metricSchemaSourceDirectorySet =
+                project.getObjects().sourceDirectorySet("metricSchema", "Metric Schema source set");
+        metricSchemaSourceDirectorySet.srcDir("src/main/metrics");
+        metricSchemaSourceDirectorySet.include("**/*.yml");
 
         TaskProvider<CompileMetricSchemaTask> compileMetricSchemaTask = project.getTasks()
-                .register(COMPILE_METRIC_SCHEMA, CompileMetricSchemaTask.class, task -> {
-                    task.getSource().from(sourceSet);
-                    task.getOutputFile().set(schemaFile);
-                });
-        project.getTasks()
-                .named(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
-                .configure(processResources -> processResources.dependsOn(compileMetricSchemaTask));
-
-        project.getExtensions()
-                .getByType(JavaPluginExtension.class)
-                .getSourceSets()
-                .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
-                .resources(resources -> {
-                    SourceDirectorySet sourceDir = project.getObjects()
-                            .sourceDirectorySet("metricSchema", "metric schema")
-                            .srcDir(metricSchemaDir);
-                    sourceDir.include("metric-schema/**");
-                    resources.source(sourceDir);
+                .register(CompileMetricSchemaTask.NAME, CompileMetricSchemaTask.class, task -> {
+                    task.setGroup(TASK_GROUP);
+                    task.getSource().from(metricSchemaSourceDirectorySet);
+                    task.getOutputDir().set(generatedResourcesDir);
                 });
 
-        return compileMetricSchemaTask;
-    }
+        Provider<RegularFile> metricsFiles =
+                compileMetricSchemaTask.flatMap(CompileMetricSchemaTask::getMetricsJsonFile);
 
-    private static SourceDirectorySet createSourceSet(Project project) {
-        SourceDirectorySet sourceSet =
-                project.getObjects().sourceDirectorySet("metricSchema", "Metric Schema source set");
-        sourceSet.srcDir("src/main/metrics");
-        sourceSet.include("**/*.yml");
-        return sourceSet;
-    }
+        TaskProvider<GenerateMetricsTask> generateMetricsTask = project.getTasks()
+                .register(GenerateMetricsTask.NAME, GenerateMetricsTask.class, task -> {
+                    task.setGroup(TASK_GROUP);
+                    task.setDescription("Generates bindings for producing well defined metrics");
+                    task.getInputFile().set(metricsFiles);
+                    task.getLibraryName().convention(defaultLibraryName(project));
+                    task.getLibraryVersion().convention(defaultLibraryVersion(project));
+                    task.getOutputDir().set(generatedJavaDir);
+                });
 
-    private static void configureJavaSource(
-            Project project, TaskProvider<GenerateMetricSchemaTask> generateMetricSchemaTask) {
-        project.getExtensions()
-                .getByType(JavaPluginExtension.class)
-                .getSourceSets()
-                .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
-                .getJava()
-                .srcDir(generateMetricSchemaTask);
-    }
-
-    private static void configureEclipse(Project project, TaskProvider<? extends Task> generateMetricsTask) {
-        project.getPluginManager().withPlugin("eclipse", _plugin -> {
-            try {
-                project.getTasks().named("eclipseClasspath").configure(t -> t.dependsOn(generateMetricsTask));
-            } catch (UnknownDomainObjectException e) {
-                // eclipseClasspath is not always registered
-            }
+        project.getTasks().register(CreateMetricsManifestTask.NAME, CreateMetricsManifestTask.class, task -> {
+            task.setGroup(TASK_GROUP);
+            task.getMetricsFile().set(metricsFiles);
+            task.getOutputFile().set(metricSchemaDir.map(dir -> dir.file("manifest.json")));
+            task.getConfiguration()
+                    .set(project.getConfigurations().getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME));
         });
+
+        JavaPluginExtension javaPluginExtension = project.getExtensions().getByType(JavaPluginExtension.class);
+
+        javaPluginExtension
+                .getSourceSets()
+                .named(SourceSet.MAIN_SOURCE_SET_NAME)
+                .configure(sourceSet -> {
+                    sourceSet.getJava().srcDir(generateMetricsTask);
+                    sourceSet.getResources().srcDir(compileMetricSchemaTask.map(CompileMetricSchemaTask::getOutputDir));
+                });
+
+        project.getPluginManager().withPlugin("com.palantir.sls-java-service-distribution", _plugin -> {
+            project.getPluginManager().apply(MetricSchemaMarkdownPlugin.class);
+        });
+
+        configureIdea(project, generatedJavaDir, generatedResourcesDir);
+
+        configureProjectDependencies(project);
     }
 
     private static void configureIdea(
-            Project project, TaskProvider<? extends Task> generateMetricsTask, Provider<Directory> outputDir) {
+            Project project, Provider<Directory> generatedJavaDir, Provider<Directory> generatedResourcesDir) {
         project.getPluginManager().withPlugin("idea", _plugin -> {
-            project.getTasks().named("ideaModule").configure(task -> task.dependsOn(generateMetricsTask));
-            project.getExtensions().configure(IdeaModel.class, idea -> {
-                IdeaModule module = idea.getModule();
-                module.getSourceDirs().add(outputDir.get().getAsFile());
-                module.getGeneratedSourceDirs().add(outputDir.get().getAsFile());
-            });
+            IdeaModel ideaModel = project.getExtensions().getByType(IdeaModel.class);
+
+            ideaModel.getModule().getSourceDirs().add(generatedJavaDir.get().getAsFile());
+            ideaModel
+                    .getModule()
+                    .getGeneratedSourceDirs()
+                    .add(generatedJavaDir.get().getAsFile());
+            ideaModel
+                    .getModule()
+                    .getResourceDirs()
+                    .add(generatedResourcesDir.get().getAsFile());
         });
     }
 
@@ -159,5 +124,26 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         project.getDependencies().add("api", "com.palantir.tritium:tritium-registry");
         project.getDependencies().add("api", "com.palantir.safe-logging:preconditions");
         project.getDependencies().add("api", "com.google.errorprone:error_prone_annotations");
+    }
+
+    private String defaultLibraryName(Project project) {
+        String rootProjectName = project.getRootProject().getName();
+        return rootProjectName.replaceAll("-root$", "");
+    }
+
+    @Nullable
+    private String defaultLibraryVersion(Project project) {
+        // Gradle returns 'unspecified' when there is no version information, which is not orderable.
+        String version = Objects.toString(project.getRootProject().getVersion());
+        return OrderableSlsVersion.safeValueOf(version)
+                // Only provide version data for releases and release candidates, not snapshots. This way we
+                // don't invalidate build caches on each commit.
+                // We prefer passing along version information at this level because it will not be mutated
+                // by shading, where the fallback based on 'package.getImplementationVersion()' will reflect
+                // the shadow jar version.
+                .filter(ver ->
+                        ver.getType() == SlsVersionType.RELEASE || ver.getType() == SlsVersionType.RELEASE_CANDIDATE)
+                .map(SlsVersion::getValue)
+                .orElse(null);
     }
 }

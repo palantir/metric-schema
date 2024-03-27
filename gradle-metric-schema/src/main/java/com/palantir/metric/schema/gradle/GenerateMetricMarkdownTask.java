@@ -25,56 +25,34 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputFile;
-import org.gradle.api.tasks.Optional;
+import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
 
 @CacheableTask
-public class GenerateMetricMarkdownTask extends DefaultTask {
-    private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
-    private final RegularFileProperty manifestFile = getProject().getObjects().fileProperty();
-    private final Property<String> localCoordinates = getProject()
-            .getObjects()
-            .property(String.class)
-            .value(getProject()
-                    .provider(() ->
-                            "" + getProject().getGroup() + ':' + getProject().getName()));
+public abstract class GenerateMetricMarkdownTask extends DefaultTask {
 
-    @InputFile
-    @PathSensitive(PathSensitivity.RELATIVE)
-    public final RegularFileProperty getManifestFile() {
-        return manifestFile;
-    }
+    static final String NAME = "generateMetricsMarkdown";
 
-    @Optional
-    @InputFile
+    @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
-    public final Provider<RegularFile> getMarkdownFile() {
-        return ProviderUtils.filterNonExistentFile(getProject(), outputFile);
-    }
+    public abstract RegularFileProperty getManifestFile();
 
     @Input
-    public final Property<String> getLocalCoordinates() {
-        return localCoordinates;
-    }
+    public abstract Property<String> getLocalCoordinates();
 
     @OutputFile
-    public final RegularFileProperty getOutputFile() {
-        return outputFile;
-    }
+    public abstract RegularFileProperty getMarkdownFile();
 
     @TaskAction
     public final void generate() throws IOException {
-        File markdown = outputFile.get().getAsFile();
+        File markdown = getMarkdownFile().get().getAsFile();
         File manifest = getManifestFile().getAsFile().get();
 
         Map<String, List<MetricSchema>> schemas = ObjectMappers.mapper.readValue(manifest, new TypeReference<>() {});
@@ -85,7 +63,7 @@ public class GenerateMetricMarkdownTask extends DefaultTask {
             return;
         }
 
-        String upToDateContents = MarkdownRenderer.render(localCoordinates.get(), schemas);
+        String upToDateContents = MarkdownRenderer.render(getLocalCoordinates().get(), schemas);
         Files.writeString(markdown.toPath(), upToDateContents);
     }
 
