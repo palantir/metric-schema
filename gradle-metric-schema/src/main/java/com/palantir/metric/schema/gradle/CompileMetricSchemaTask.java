@@ -17,35 +17,45 @@
 package com.palantir.metric.schema.gradle;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Files;
 import com.palantir.metric.schema.lang.MetricSchemaCompiler;
 import java.io.File;
 import java.io.IOException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
-import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.file.RegularFile;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.OutputFile;
+import org.gradle.api.tasks.Internal;
+import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
 
 @CacheableTask
 public abstract class CompileMetricSchemaTask extends DefaultTask {
+
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
     public abstract ConfigurableFileCollection getSource();
 
-    @OutputFile
-    public abstract RegularFileProperty getOutputFile();
+    @OutputDirectory
+    public abstract DirectoryProperty getOutputDir();
+
+    @Internal
+    public final Provider<RegularFile> getMetricsJsonFile() {
+        return getOutputDir().file(MetricSchemaPlugin.METRICS_JSON_FILE);
+    }
 
     @TaskAction
     public final void action() throws IOException {
-        File output = getOutputFile().getAsFile().get();
-        getProject().mkdir(output.getParent());
+        File metricsJsonFile = getMetricsJsonFile().get().getAsFile();
+        Files.createParentDirs(metricsJsonFile);
 
         ObjectMappers.mapper.writeValue(
-                output,
+                metricsJsonFile,
                 getSource().getFiles().stream()
                         .map(File::toPath)
                         .map(MetricSchemaCompiler::compile)

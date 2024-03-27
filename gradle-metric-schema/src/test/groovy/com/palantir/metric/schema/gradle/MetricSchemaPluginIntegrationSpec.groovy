@@ -101,7 +101,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         then:
         def result = runTasksSuccessfully('classes')
         result.wasExecuted(':generateMetrics')
-        fileExists("build/metricSchema/generated_src/com/palantir/test/ServerMetrics.java")
+        fileExists("build/generated/metric-schema/java/main/com/palantir/test/ServerMetrics.java")
     }
 
     def 'build cache works'() {
