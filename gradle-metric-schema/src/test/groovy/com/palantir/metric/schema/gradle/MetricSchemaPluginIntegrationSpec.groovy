@@ -101,7 +101,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         then:
         def result = runTasksSuccessfully('classes')
         result.wasExecuted(':generateMetrics')
-        fileExists("build/metricSchema/generated_src/com/palantir/test/ServerMetrics.java")
+        fileExists("build/generated/sources/metric-schema/java/main/com/palantir/test/ServerMetrics.java")
     }
 
     def 'build cache works'() {
@@ -110,7 +110,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         file('src/main/metrics/metrics.yml') << METRICS
 
         runTasksSuccessfully('generateMetrics')
-        fileExists("build/metricSchema/generated_src/com/palantir/test/ServerMetrics.java")
+        fileExists("build/generated/sources/metric-schema/java/main/com/palantir/test/ServerMetrics.java")
 
         // we want cache hits no matter where the project is checked out on disk
         File originalProjectDir = getProjectDir()
@@ -119,7 +119,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         FileUtils.copyDirectory(originalProjectDir, newProjectDir)
         setProjectDir(newProjectDir)
         FileUtils.deleteDirectory(originalProjectDir)
-        FileUtils.deleteDirectory(file("build/metricSchema/generated_src/"))
+        FileUtils.deleteDirectory(file("build/generated/sources/metric-schema"))
 
         then:
         ExecutionResult result = runTasksSuccessfully('generateMetrics')

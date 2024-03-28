@@ -177,7 +177,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
         CompileMetricSchemaTask compileMetricSchemaTask = (CompileMetricSchemaTask)
                 dependencyProject.getTasks().getByName(MetricSchemaPlugin.COMPILE_METRIC_SCHEMA);
 
-        File file = compileMetricSchemaTask.getOutputFile().get().getAsFile();
+        File file = compileMetricSchemaTask.getMetricsJsonFile().get().getAsFile();
         if (!file.isFile()) {
             log.debug("File {} does not exist", file);
             return Optional.empty();
@@ -195,7 +195,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
         }
 
         try (ZipFile zipFile = new ZipFile(artifact.getFile())) {
-            ZipEntry manifestEntry = zipFile.getEntry(MetricSchemaPlugin.METRIC_SCHEMA_RESOURCE);
+            ZipEntry manifestEntry = zipFile.getEntry(MetricSchemaPlugin.METRICS_JSON_FILE);
             if (manifestEntry == null) {
                 log.debug("Manifest file does not exist in JAR: {}", id);
                 return Optional.empty();
