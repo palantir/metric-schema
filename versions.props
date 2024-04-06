@@ -1,4 +1,4 @@
-com.fasterxml.jackson.core:jackson-databind = 2.15.3
+com.fasterxml.jackson.core:jackson-databind = 2.16.1
 org.junit.jupiter:* = 5.10.0
 org.junit.vintage:* = 5.10.0
 com.google.guava:guava = 32.1.2-jre
@@ -12,7 +12,7 @@ com.palantir.conjure.java:* = 8.17.0
 com.palantir.conjure.java.runtime:* = 7.60.0
 com.palantir.conjure:conjure = 4.47.0
 com.palantir.sls.versions:* = 1.5.0
-com.fasterxml.jackson.*:jackson-* = 2.15.3
+com.fasterxml.jackson.*:jackson-* = 2.16.1
 com.squareup:javapoet = 1.13.0
 com.atlassian.commonmark:* = 0.12.1
 org.apache.commons:commons-lang3 = 3.13.0
