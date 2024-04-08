@@ -21,6 +21,8 @@ import java.util.List;
 import org.gradle.StartParameter;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.file.RegularFile;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 
@@ -32,33 +34,41 @@ public final class MetricSchemaMarkdownPlugin implements Plugin<Project> {
         project.getPluginManager().apply(MetricSchemaPlugin.class);
 
         TaskProvider<CreateMetricsManifestTask> createMetricsManifest =
-                project.getTasks().named(MetricSchemaPlugin.CREATE_METRICS_MANIFEST, CreateMetricsManifestTask.class);
+                project.getTasks().named(CreateMetricsManifestTask.NAME, CreateMetricsManifestTask.class);
 
-        TaskProvider<CheckMetricMarkdownTask> checkMetricsMarkdown = project.getTasks()
-                .register(MetricSchemaPlugin.CHECK_METRICS_MARKDOWN, CheckMetricMarkdownTask.class, task -> {
-                    task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
-                    task.setMarkdownFile(project.file("metrics.md"));
-                    task.dependsOn(createMetricsManifest);
+        Provider<RegularFile> manifestFile = createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile);
+        Provider<String> localCoordinates = project.provider(() -> "" + project.getGroup() + ':' + project.getName());
+        RegularFile markdownFile = project.getLayout().getProjectDirectory().file("metrics.md");
+
+        TaskProvider<GenerateMetricMarkdownTask> generateMetricMarkdownTask = project.getTasks()
+                .register(GenerateMetricMarkdownTask.NAME, GenerateMetricMarkdownTask.class, task -> {
+                    task.setGroup(MetricSchemaPlugin.TASK_GROUP);
+                    task.getManifestFile().set(manifestFile);
+                    task.getLocalCoordinates().set(localCoordinates);
+                    task.getMarkdownFile().set(markdownFile);
                 });
 
-        project.getTasks()
-                .register(MetricSchemaPlugin.GENERATE_METRICS_MARKDOWN, GenerateMetricMarkdownTask.class, task -> {
-                    task.getManifestFile().set(createMetricsManifest.flatMap(CreateMetricsManifestTask::getOutputFile));
-                    task.getOutputFile().set(project.file("metrics.md"));
-                    task.dependsOn(createMetricsManifest);
-                    // Avoid a race when both checkMetricsMarkdown and generateMetricsMarkdown are requested
-                    task.mustRunAfter(checkMetricsMarkdown);
+        TaskProvider<CheckMetricMarkdownTask> checkMetricsMarkdownTask = project.getTasks()
+                .register(CheckMetricMarkdownTask.NAME, CheckMetricMarkdownTask.class, task -> {
+                    task.setGroup(MetricSchemaPlugin.TASK_GROUP);
+                    task.getManifestFile().set(manifestFile);
+                    task.getLocalCoordinates().set(localCoordinates);
+                    task.getMarkdownFile().set(markdownFile);
+
+                    task.mustRunAfter(generateMetricMarkdownTask);
                 });
 
-        project.getTasks().named("check").configure(check -> check.dependsOn(checkMetricsMarkdown));
+        project.getTasks().named(LifecycleBasePlugin.CHECK_TASK_NAME).configure(check -> {
+            check.dependsOn(checkMetricsMarkdownTask);
+        });
 
         // Wire up dependencies so running `./gradlew --write-locks` will update the markdown
         StartParameter startParam = project.getGradle().getStartParameter();
         if (startParam.isWriteDependencyLocks()
-                && !startParam.getTaskNames().contains(MetricSchemaPlugin.GENERATE_METRICS_MARKDOWN)) {
+                && !startParam.getTaskNames().contains(GenerateMetricMarkdownTask.NAME)) {
             List<String> taskNames = ImmutableList.<String>builder()
                     .addAll(startParam.getTaskNames())
-                    .add(MetricSchemaPlugin.GENERATE_METRICS_MARKDOWN)
+                    .add(GenerateMetricMarkdownTask.NAME)
                     .build();
             startParam.setTaskNames(taskNames);
         }

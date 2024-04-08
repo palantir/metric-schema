@@ -56,6 +56,8 @@ import org.gradle.api.tasks.TaskAction;
 public class CreateMetricsManifestTask extends DefaultTask {
     private static final Logger log = Logging.getLogger(CreateMetricsManifestTask.class);
 
+    static final String NAME = "createMetricsManifest";
+
     private final Provider<FileCollection> projectDependencyMetrics;
     private final RegularFileProperty metricsFile = getProject().getObjects().fileProperty();
     private final Property<Configuration> configuration =
@@ -129,11 +131,8 @@ public class CreateMetricsManifestTask extends DefaultTask {
 
     @TaskAction
     public final void createManifest() throws IOException {
-        File output = getOutputFile().getAsFile().get();
-        getProject().mkdir(output.getParent());
-
         ObjectMappers.mapper.writeValue(
-                output,
+                getOutputFile().get().getAsFile(),
                 ImmutableMap.builder()
                         .putAll(getLocalMetrics())
                         .putAll(getDiscoveredMetrics())
@@ -174,10 +173,10 @@ public class CreateMetricsManifestTask extends DefaultTask {
         if (!dependencyProject.getPlugins().hasPlugin(MetricSchemaPlugin.class)) {
             return Optional.empty();
         }
-        CompileMetricSchemaTask compileMetricSchemaTask = (CompileMetricSchemaTask)
-                dependencyProject.getTasks().getByName(MetricSchemaPlugin.COMPILE_METRIC_SCHEMA);
+        CompileMetricSchemaTask compileMetricSchemaTask =
+                (CompileMetricSchemaTask) dependencyProject.getTasks().getByName(CompileMetricSchemaTask.NAME);
 
-        File file = compileMetricSchemaTask.getOutputFile().get().getAsFile();
+        File file = compileMetricSchemaTask.getMetricsJsonFile().get().getAsFile();
         if (!file.isFile()) {
             log.debug("File {} does not exist", file);
             return Optional.empty();
@@ -195,7 +194,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
         }
 
         try (ZipFile zipFile = new ZipFile(artifact.getFile())) {
-            ZipEntry manifestEntry = zipFile.getEntry(MetricSchemaPlugin.METRIC_SCHEMA_RESOURCE);
+            ZipEntry manifestEntry = zipFile.getEntry(MetricSchemaPlugin.METRICS_JSON_FILE);
             if (manifestEntry == null) {
                 log.debug("Manifest file does not exist in JAR: {}", id);
                 return Optional.empty();
