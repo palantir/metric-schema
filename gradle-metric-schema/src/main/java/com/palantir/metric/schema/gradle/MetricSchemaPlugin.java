@@ -45,9 +45,9 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         project.getPluginManager().apply(JavaLibraryPlugin.class);
 
         Provider<Directory> generatedJavaDir =
-                project.getLayout().getBuildDirectory().dir("generated/sources/metric-schema/java/main");
+                project.getLayout().getBuildDirectory().dir("generated/sources/metricSchema/java/main");
         Provider<Directory> generatedResourcesDir =
-                project.getLayout().getBuildDirectory().dir("generated/sources/metric-schema/resources/main");
+                project.getLayout().getBuildDirectory().dir("generated/sources/metricSchema/resources/main");
         Provider<Directory> metricSchemaDir =
                 project.getLayout().getBuildDirectory().dir("metricSchema");
 
