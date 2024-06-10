@@ -33,6 +33,13 @@ public final class ServerMetrics {
         this.registry = registry;
     }
 
+    /**
+     * Returns the tagged metric registry backing this object.
+     */
+    public TaggedMetricRegistry registry() {
+        return registry;
+    }
+
     public static ServerMetrics of(TaggedMetricRegistry registry) {
         return new ServerMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
     }

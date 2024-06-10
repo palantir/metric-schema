@@ -25,6 +25,13 @@ public final class MonitorsMetrics {
         this.registry = registry;
     }
 
+    /**
+     * Returns the tagged metric registry backing this object.
+     */
+    public TaggedMetricRegistry registry() {
+        return registry;
+    }
+
     public static MonitorsMetrics of(TaggedMetricRegistry registry) {
         return new MonitorsMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
     }

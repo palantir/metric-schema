@@ -71,6 +71,13 @@ public final class NamespaceTagsMetrics {
                 .build();
     }
 
+    /**
+     * Returns the tagged metric registry backing this object.
+     */
+    public TaggedMetricRegistry registry() {
+        return registry;
+    }
+
     @CheckReturnValue
     public static NamespaceTagsBuilderRegistryStage builder() {
         return new NamespaceTagsBuilder();

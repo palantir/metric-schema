@@ -28,6 +28,13 @@ public final class ProvidedVersionMetrics {
         this.registry = registry;
     }
 
+    /**
+     * Returns the tagged metric registry backing this object.
+     */
+    public TaggedMetricRegistry registry() {
+        return registry;
+    }
+
     public static ProvidedVersionMetrics of(TaggedMetricRegistry registry) {
         return new ProvidedVersionMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
     }
