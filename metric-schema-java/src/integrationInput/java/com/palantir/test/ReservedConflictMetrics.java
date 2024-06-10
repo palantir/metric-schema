@@ -34,6 +34,13 @@ public final class ReservedConflictMetrics {
         this.registry = registry;
     }
 
+    /**
+     * Returns the tagged metric registry backing this object.
+     */
+    public TaggedMetricRegistry registry() {
+        return registry;
+    }
+
     public static ReservedConflictMetrics of(TaggedMetricRegistry registry) {
         return new ReservedConflictMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
     }

@@ -59,6 +59,12 @@ final class UtilityGenerator {
                 .addModifiers(visibility.apply(Modifier.FINAL))
                 .addJavadoc(Javadoc.render(metrics.getDocs()))
                 .addField(TaggedMetricRegistry.class, ReservedNames.REGISTRY_NAME, Modifier.PRIVATE, Modifier.FINAL)
+                .addMethod(MethodSpec.methodBuilder(ReservedNames.REGISTRY_NAME)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addJavadoc("Returns the tagged metric registry backing this object.")
+                        .returns(TaggedMetricRegistry.class)
+                        .addStatement("return $N", ReservedNames.REGISTRY_NAME)
+                        .build())
                 .addField(FieldSpec.builder(
                                 String.class,
                                 ReservedNames.JAVA_VERSION_FIELD,

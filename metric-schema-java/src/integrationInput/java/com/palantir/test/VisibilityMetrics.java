@@ -33,6 +33,13 @@ final class VisibilityMetrics {
         this.registry = registry;
     }
 
+    /**
+     * Returns the tagged metric registry backing this object.
+     */
+    public TaggedMetricRegistry registry() {
+        return registry;
+    }
+
     static VisibilityMetrics of(TaggedMetricRegistry registry) {
         return new VisibilityMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
     }
