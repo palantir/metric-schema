@@ -32,3 +32,6 @@ out/
 
 # Log Files
 */var/log/
+
+# Gradle JDKs setup
+!gradle/*
