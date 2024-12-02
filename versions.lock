@@ -47,7 +47,7 @@ org.yaml:snakeyaml:2.3 (1 constraints: 3d178c10)
 [Test dependencies]
 cglib:cglib-nodep:3.2.2 (1 constraints: 490ded24)
 com.netflix.nebula:nebula-test:10.0.0 (1 constraints: 3305273b)
-com.palantir.gradle.plugintesting:plugin-testing-core:0.2.0 (1 constraints: 0405f135)
+com.palantir.gradle.plugintesting:plugin-testing-core:0.4.0 (1 constraints: 0605f735)
 commons-io:commons-io:2.13.0 (1 constraints: 3805383b)
 junit:junit:4.13.2 (3 constraints: a523497e)
 net.bytebuddy:byte-buddy:1.14.6 (2 constraints: c216a84f)
