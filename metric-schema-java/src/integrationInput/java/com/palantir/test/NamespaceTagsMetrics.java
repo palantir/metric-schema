@@ -12,9 +12,7 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Objects;
 
-/**
- * General web server metrics.
- */
+/** General web server metrics. */
 public final class NamespaceTagsMetrics {
     private static final String JAVA_VERSION = System.getProperty("java.version", "unknown");
 
@@ -76,17 +74,13 @@ public final class NamespaceTagsMetrics {
         return new NamespaceTagsBuilder();
     }
 
-    /**
-     * Measures number of installations that were processed
-     */
+    /** Measures number of installations that were processed */
     @CheckReturnValue
     public ProcessingBuilderResultStage processing() {
         return new ProcessingBuilder();
     }
 
-    /**
-     * Counts something
-     */
+    /** Counts something */
     @CheckReturnValue
     public Counter more() {
         return registry.counter(moreMetricName());
@@ -105,9 +99,7 @@ public final class NamespaceTagsMetrics {
                 .build();
     }
 
-    /**
-     * Gauges something
-     */
+    /** Gauges something */
     public void gauges(Gauge<? extends Number> gauge) {
         registry.registerWithReplacement(gaugesMetricName(), gauge);
     }
@@ -116,9 +108,7 @@ public final class NamespaceTagsMetrics {
         return gaugesMetricName;
     }
 
-    /**
-     * Times something
-     */
+    /** Times something */
     @CheckReturnValue
     public Timer times() {
         return registry.timer(timesMetricName());
@@ -128,9 +118,7 @@ public final class NamespaceTagsMetrics {
         return timesMetricName;
     }
 
-    /**
-     * Histograms something
-     */
+    /** Histograms something */
     @CheckReturnValue
     public Histogram histograms() {
         return registry.histogram(histogramsMetricName());
@@ -265,9 +253,7 @@ public final class NamespaceTagsMetrics {
     }
 
     public interface ProcessingBuilderResultStage {
-        /**
-         * The result of processing
-         */
+        /** The result of processing */
         @CheckReturnValue
         ProcessingBuilderTypeStage result(@Safe Processing_Result result);
     }

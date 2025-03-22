@@ -8,9 +8,7 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Objects;
 
-/**
- * General web server metrics.
- */
+/** General web server metrics. */
 public final class MonitorsMetrics {
     private static final String JAVA_VERSION = System.getProperty("java.version", "unknown");
 
@@ -29,17 +27,13 @@ public final class MonitorsMetrics {
         return new MonitorsMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
     }
 
-    /**
-     * Measures number of installations that were processed
-     */
+    /** Measures number of installations that were processed */
     @CheckReturnValue
     public ProcessingBuilderResultStage processing() {
         return new ProcessingBuilder();
     }
 
-    /**
-     * Measures more
-     */
+    /** Measures more */
     @CheckReturnValue
     public Meter more(@Safe String type) {
         return registry.meter(moreMetricName(type));
@@ -62,9 +56,7 @@ public final class MonitorsMetrics {
     }
 
     public enum Processing_Result {
-        /**
-         * Successful installations processed
-         */
+        /** Successful installations processed */
         SUCCESS("success"),
 
         FAILURE("failure");
@@ -105,9 +97,7 @@ public final class MonitorsMetrics {
     }
 
     public interface ProcessingBuilderResultStage {
-        /**
-         * The result of processing
-         */
+        /** The result of processing */
         @CheckReturnValue
         ProcessingBuilderTypeStage result(@Safe Processing_Result result);
     }

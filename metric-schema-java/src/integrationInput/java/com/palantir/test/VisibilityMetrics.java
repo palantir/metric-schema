@@ -9,9 +9,7 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Objects;
 
-/**
- * Tests we respect javaVisibility
- */
+/** Tests we respect javaVisibility */
 final class VisibilityMetrics {
     private static final String JAVA_VERSION = System.getProperty("java.version", "unknown");
 
@@ -37,9 +35,7 @@ final class VisibilityMetrics {
         return new VisibilityMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
     }
 
-    /**
-     * just a metric
-     */
+    /** just a metric */
     @CheckReturnValue
     Counter test() {
         return registry.counter(testMetricName());
@@ -49,9 +45,7 @@ final class VisibilityMetrics {
         return testMetricName;
     }
 
-    /**
-     * Tagged gauge metric.
-     */
+    /** Tagged gauge metric. */
     @CheckReturnValue
     ComplexBuilderFooStage complex() {
         return new ComplexBuilder();
