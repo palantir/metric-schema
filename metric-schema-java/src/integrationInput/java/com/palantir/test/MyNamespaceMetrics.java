@@ -9,9 +9,7 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Objects;
 
-/**
- * General web server metrics.
- */
+/** General web server metrics. */
 public final class MyNamespaceMetrics {
     private static final String JAVA_VERSION = System.getProperty("java.version", "unknown");
 
@@ -37,17 +35,13 @@ public final class MyNamespaceMetrics {
         return new MyNamespaceMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
     }
 
-    /**
-     * A histogram of the number of bytes written into the response.
-     */
+    /** A histogram of the number of bytes written into the response. */
     @CheckReturnValue
     public ResponseSizeBuilderServiceNameStage responseSize() {
         return new ResponseSizeBuilder();
     }
 
-    /**
-     * A gauge of the ratio of active workers to the number of workers.
-     */
+    /** A gauge of the ratio of active workers to the number of workers. */
     public void workerUtilization(Gauge<? extends Number> gauge) {
         registry.registerWithReplacement(workerUtilizationMetricName(), gauge);
     }

@@ -5,9 +5,7 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 
-/**
- * Test data metric.
- */
+/** Test data metric. */
 public final class ProvidedVersionMetrics {
     private static final String JAVA_VERSION = System.getProperty("java.version", "unknown");
 
@@ -32,9 +30,7 @@ public final class ProvidedVersionMetrics {
         return new ProvidedVersionMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
     }
 
-    /**
-     * Test data.
-     */
+    /** Test data. */
     public void utilization(Gauge<? extends Number> gauge) {
         registry.registerWithReplacement(utilizationMetricName(), gauge);
     }

@@ -10,9 +10,7 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Objects;
 
-/**
- * Tests that reserved words are escaped.
- */
+/** Tests that reserved words are escaped. */
 public final class ReservedConflictMetrics {
     private static final String JAVA_VERSION = System.getProperty("java.version", "unknown");
 
@@ -38,17 +36,13 @@ public final class ReservedConflictMetrics {
         return new ReservedConflictMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
     }
 
-    /**
-     * Uh-oh!
-     */
+    /** Uh-oh! */
     @CheckReturnValue
     public IntBuilderIntStage int_() {
         return new IntBuilder();
     }
 
-    /**
-     * Meter with a single tag.
-     */
+    /** Meter with a single tag. */
     @CheckReturnValue
     public Meter long_(@Safe String int_) {
         return registry.meter(longMetricName(int_));
@@ -64,9 +58,7 @@ public final class ReservedConflictMetrics {
                 .build();
     }
 
-    /**
-     * Gauge metric with a single no tags.
-     */
+    /** Gauge metric with a single no tags. */
     public void float_(Gauge<? extends Number> gauge) {
         registry.registerWithReplacement(floatMetricName(), gauge);
     }
@@ -75,25 +67,19 @@ public final class ReservedConflictMetrics {
         return floatMetricName;
     }
 
-    /**
-     * Gauge metric with a single tag.
-     */
+    /** Gauge metric with a single tag. */
     @CheckReturnValue
     public DoubleBuilderIntStage double_() {
         return new DoubleBuilder();
     }
 
-    /**
-     * docs.
-     */
+    /** docs. */
     @CheckReturnValue
     public IncludesDefaultTagsBuilderJavaVersionStage includesDefaultTags() {
         return new IncludesDefaultTagsBuilder();
     }
 
-    /**
-     * docs.
-     */
+    /** docs. */
     @CheckReturnValue
     public IncludesDefaultTagsDifferentCaseBuilderJavaversionStage includesDefaultTagsDifferentCase() {
         return new IncludesDefaultTagsDifferentCaseBuilder();
