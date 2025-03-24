@@ -72,7 +72,7 @@ public abstract class GenerateMetricsTask extends DefaultTask {
                 .libraryName(Optional.ofNullable(getLibraryName().getOrNull()))
                 .libraryVersion(Optional.ofNullable(getLibraryVersion().getOrNull()))
                 // TODO(forozco): probably want something better
-                .defaultPackageName(getProjectGroup().get())
+                .defaultPackageName(getPackageName().get())
                 .build());
     }
 
