@@ -74,6 +74,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                     task.getLibraryName().convention(defaultLibraryName(project));
                     task.getLibraryVersion().convention(defaultLibraryVersion(project));
                     task.getOutputDir().set(generatedJavaDir);
+                    task.getPackageName().set(project.getGroup().toString());
                 });
 
         project.getTasks().register(CreateMetricsManifestTask.NAME, CreateMetricsManifestTask.class, task -> {

@@ -48,6 +48,9 @@ public abstract class GenerateMetricsTask extends DefaultTask {
     public abstract RegularFileProperty getInputFile();
 
     @Input
+    public abstract Property<String> getPackageName();
+
+    @Input
     @org.gradle.api.tasks.Optional
     public abstract Property<String> getLibraryName();
 
@@ -62,15 +65,13 @@ public abstract class GenerateMetricsTask extends DefaultTask {
     public final void generate() {
         File output = getOutputDir().getAsFile().get();
         clearOutput(output.toPath());
-        getProject().mkdir(output);
 
         JavaGenerator.generate(JavaGeneratorArgs.builder()
                 .input(getInputFile().getAsFile().get().toPath())
                 .output(output.toPath())
                 .libraryName(Optional.ofNullable(getLibraryName().getOrNull()))
                 .libraryVersion(Optional.ofNullable(getLibraryVersion().getOrNull()))
-                // TODO(forozco): probably want something better
-                .defaultPackageName(getProject().getGroup().toString())
+                .defaultPackageName(getPackageName().get())
                 .build());
     }
 
