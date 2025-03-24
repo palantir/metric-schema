@@ -48,7 +48,7 @@ public abstract class GenerateMetricsTask extends DefaultTask {
     public abstract RegularFileProperty getInputFile();
 
     @Input
-    public abstract Property<String> getProjectGroup();
+    public abstract Property<String> getPackageName();
 
     @Input
     @org.gradle.api.tasks.Optional
