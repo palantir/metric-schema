@@ -1,5 +1,5 @@
 type: fix
-improvement:
+fix:
   description: Remove usage of getProject() during task execution.
   links:
   - https://github.com/palantir/metric-schema/pull/1335
