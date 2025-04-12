@@ -20,7 +20,7 @@ org.apache.commons:commons-lang3 = 3.17.0
 com.netflix.nebula:nebula-test = 10.6.2
 com.palantir.safe-logging:preconditions = 3.9.0
 com.palantir.goethe:* = 0.14.0
-commons-io:commons-io = 2.18.0
+commons-io:commons-io = 2.19.0
 
 # conflict resolution
 com.google.code.findbugs:jsr305 = 3.0.2
