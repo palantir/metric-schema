@@ -105,6 +105,7 @@ public class JavaGeneratorTest {
         assertThat(outputFile).hasSameTextualContentAs(expectedFile);
     }
 
+    @SuppressWarnings("for-rollout:PreferredInterfaceType")
     private List<Path> listFiles(Path path) {
         Preconditions.checkArgument(Files.isDirectory(path), "Expected a directory", SafeArg.of("path", path));
         try (Stream<Path> stream = Files.list(path)) {

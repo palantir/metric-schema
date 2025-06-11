@@ -173,6 +173,7 @@ final class UtilityGenerator {
             MetricNamespace metricNamespace,
             TypeSpec.Builder outerBuilder,
             ImplementationVisibility visibility1) {
+        @SuppressWarnings("for-rollout:PreferredInterfaceType")
         List<BuilderStage> builderStages = ImmutableList.<BuilderStage>builder()
                 .add(BuilderStage.builder()
                         .name(ReservedNames.REGISTRY_NAME)
@@ -210,6 +211,7 @@ final class UtilityGenerator {
                 .returns(stagedBuilderSpec.className());
         abstractBuildMethodBuilder.addAnnotation(CheckReturnValue.class);
         MethodSpec abstractBuildMethod = abstractBuildMethodBuilder.build();
+        @SuppressWarnings("for-rollout:PreferredInterfaceType")
         List<MethodSpec> abstractBuildMethods = ImmutableList.of(abstractBuildMethod);
         outerBuilder.addType(TypeSpec.interfaceBuilder(buildStage(stagedBuilderSpec.name()))
                 .addModifiers(stagedBuilderSpec.visibility().apply())
@@ -476,6 +478,7 @@ final class UtilityGenerator {
             ImplementationVisibility visibility) {
         boolean isGauge = MetricType.GAUGE.equals(definition.getType());
 
+        @SuppressWarnings("for-rollout:PreferredInterfaceType")
         List<ParameterSpec> parameters = definition.getTagDefinitions().stream()
                 .filter(UtilityGenerator::tagDefinitionRequiresParam)
                 .map(tag -> ParameterSpec.builder(tagClassName(metricName, tag), Custodian.sanitizeName(tag.getName()))

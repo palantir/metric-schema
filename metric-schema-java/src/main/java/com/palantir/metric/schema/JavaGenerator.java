@@ -36,6 +36,7 @@ public final class JavaGenerator {
      */
     private static final String JAVA_VISIBILITY = "javaVisibility";
 
+    @SuppressWarnings("for-rollout:PreferredInterfaceType")
     @CanIgnoreReturnValue
     public static List<Path> generate(JavaGeneratorArgs args) {
         return SchemaParser.get().parseFile(args.input()).stream()
