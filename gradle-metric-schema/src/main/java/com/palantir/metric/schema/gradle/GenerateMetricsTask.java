@@ -75,6 +75,7 @@ public abstract class GenerateMetricsTask extends DefaultTask {
                 .build());
     }
 
+    @SuppressWarnings("for-rollout:UnusedException")
     private static void clearOutput(Path outputPath) {
         try {
             MoreFiles.deleteRecursively(outputPath, RecursiveDeleteOption.ALLOW_INSECURE);

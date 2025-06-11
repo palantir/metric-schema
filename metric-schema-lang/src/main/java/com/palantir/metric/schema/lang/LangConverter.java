@@ -51,6 +51,7 @@ final class LangConverter {
                 .build();
     }
 
+    @SuppressWarnings("for-rollout:PreferredInterfaceType")
     private static List<TagDefinition> convert(List<com.palantir.metric.schema.lang.TagDefinition> tags) {
         return tags.stream()
                 .map(tag -> TagDefinition.builder()

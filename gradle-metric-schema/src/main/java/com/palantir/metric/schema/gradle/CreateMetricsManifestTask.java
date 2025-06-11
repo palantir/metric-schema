@@ -113,10 +113,9 @@ public class CreateMetricsManifestTask extends DefaultTask {
 
                         // Depend on the ConfigureProductDependenciesTask, if it exists, which will wire up the jar
                         // manifest with recommended product dependencies.
-                        if (id instanceof ProjectComponentIdentifier) {
-                            Project dependencyProject = getProject()
-                                    .getRootProject()
-                                    .project(((ProjectComponentIdentifier) id).getProjectPath());
+                        if (id instanceof ProjectComponentIdentifier projectComponentIdentifier) {
+                            Project dependencyProject =
+                                    getProject().getRootProject().project(projectComponentIdentifier.getProjectPath());
                             return Stream.of(dependencyProject.getTasks().withType(CompileMetricSchemaTask.class));
                         }
                         return Stream.empty();
@@ -148,14 +147,15 @@ public class CreateMetricsManifestTask extends DefaultTask {
         return Collections.emptyMap();
     }
 
+    @SuppressWarnings("for-rollout:PreferredInterfaceType")
     private Map<String, List<MetricSchema>> getDiscoveredMetrics() {
         ImmutableMap.Builder<String, List<MetricSchema>> discoveredMetrics = ImmutableMap.builder();
 
         configuration.get().getResolvedConfiguration().getResolvedArtifacts().forEach(artifact -> {
             ComponentIdentifier id = artifact.getId().getComponentIdentifier();
 
-            if (id instanceof ProjectComponentIdentifier) {
-                Project dependencyProject = getProject().project(((ProjectComponentIdentifier) id).getProjectPath());
+            if (id instanceof ProjectComponentIdentifier projectComponentIdentifier) {
+                Project dependencyProject = getProject().project(projectComponentIdentifier.getProjectPath());
                 if (!dependencyProject.equals(getProject())) {
                     inferProjectDependencyMetrics(dependencyProject)
                             .ifPresent(metrics ->
@@ -184,6 +184,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
         return Optional.of(ObjectMappers.loadMetricSchema(file));
     }
 
+    @SuppressWarnings({"for-rollout:ThrowSpecificExceptions", "for-rollout:UnusedException"})
     private static Optional<List<MetricSchema>> getExternalMetrics(ComponentIdentifier id, ResolvedArtifact artifact) {
         if (!artifact.getFile().exists()) {
             log.debug("Artifact did not exist: {}", artifact.getFile());

@@ -36,6 +36,7 @@ public enum ImplementationVisibility {
         throw new IllegalArgumentException();
     }
 
+    @SuppressWarnings("for-rollout:AvoidObjectArrays")
     public Modifier[] apply(Modifier... modifiers) {
         if (this == PUBLIC) {
             return ImmutableList.<Modifier>builderWithExpectedSize(modifiers.length + 1)
