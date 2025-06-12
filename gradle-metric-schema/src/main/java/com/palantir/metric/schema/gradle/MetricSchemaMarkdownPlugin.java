@@ -66,7 +66,6 @@ public final class MetricSchemaMarkdownPlugin implements Plugin<Project> {
         StartParameter startParam = project.getGradle().getStartParameter();
         if (startParam.isWriteDependencyLocks()
                 && !startParam.getTaskNames().contains(GenerateMetricMarkdownTask.NAME)) {
-            @SuppressWarnings("for-rollout:PreferredInterfaceType")
             List<String> taskNames = ImmutableList.<String>builder()
                     .addAll(startParam.getTaskNames())
                     .add(GenerateMetricMarkdownTask.NAME)

@@ -147,7 +147,6 @@ public class CreateMetricsManifestTask extends DefaultTask {
         return Collections.emptyMap();
     }
 
-    @SuppressWarnings("for-rollout:PreferredInterfaceType")
     private Map<String, List<MetricSchema>> getDiscoveredMetrics() {
         ImmutableMap.Builder<String, List<MetricSchema>> discoveredMetrics = ImmutableMap.builder();
 
@@ -184,7 +183,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
         return Optional.of(ObjectMappers.loadMetricSchema(file));
     }
 
-    @SuppressWarnings({"for-rollout:ThrowSpecificExceptions", "for-rollout:UnusedException"})
+    @SuppressWarnings("for-rollout:UnusedException")
     private static Optional<List<MetricSchema>> getExternalMetrics(ComponentIdentifier id, ResolvedArtifact artifact) {
         if (!artifact.getFile().exists()) {
             log.debug("Artifact did not exist: {}", artifact.getFile());
