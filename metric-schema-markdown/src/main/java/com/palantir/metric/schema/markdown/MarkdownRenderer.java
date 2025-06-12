@@ -82,7 +82,6 @@ public final class MarkdownRenderer {
             MetricNamespace metricNamespace,
             MetricDefinition metric,
             StringBuilder output) {
-        @SuppressWarnings("for-rollout:PreferredInterfaceType")
         List<TagDefinition> allTags = ImmutableList.<TagDefinition>builder()
                 .addAll(metricNamespace.getTags())
                 .addAll(metric.getTagDefinitions())
