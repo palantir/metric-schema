@@ -183,7 +183,6 @@ public class CreateMetricsManifestTask extends DefaultTask {
         return Optional.of(ObjectMappers.loadMetricSchema(file));
     }
 
-    @SuppressWarnings("for-rollout:UnusedException")
     private static Optional<List<MetricSchema>> getExternalMetrics(ComponentIdentifier id, ResolvedArtifact artifact) {
         if (!artifact.getFile().exists()) {
             log.debug("Artifact did not exist: {}", artifact.getFile());
