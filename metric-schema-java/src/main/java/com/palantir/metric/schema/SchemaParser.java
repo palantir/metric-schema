@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Suppliers;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -39,12 +39,11 @@ final class SchemaParser {
 
     private final ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
 
-    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     List<MetricSchema> parseFile(Path file) {
         try (InputStream stream = Files.newInputStream(file)) {
             return mapper.readValue(stream, new TypeReference<List<MetricSchema>>() {});
         } catch (IOException e) {
-            throw new SafeRuntimeException("Failed to parse file", e, SafeArg.of("file", file));
+            throw new SafeUncheckedIoException("Failed to parse file", e, SafeArg.of("file", file));
         }
     }
 }
