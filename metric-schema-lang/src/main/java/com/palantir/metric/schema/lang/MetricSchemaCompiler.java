@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import com.palantir.metric.schema.MetricSchema;
 import java.io.File;
 import java.io.IOException;
@@ -37,12 +37,11 @@ public final class MetricSchemaCompiler {
         return metricSchema;
     }
 
-    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private static MetricSchema readFile(File file) {
         try {
             return LangConverter.toApi(reader.readValue(file));
         } catch (IOException e) {
-            throw new SafeRuntimeException("Failed to deserialize file", e, SafeArg.of("file", file));
+            throw new SafeUncheckedIoException("Failed to deserialize file", e, SafeArg.of("file", file));
         }
     }
 

@@ -25,7 +25,7 @@ import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import com.palantir.metric.schema.lang.MetricSchemaCompiler;
 import com.palantir.test.MonitorsMetrics;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
@@ -90,7 +90,6 @@ public class JavaGeneratorTest {
         assertThat(key.safeTags().get("javaVersion")).matches("\\d+\\.\\d+(\\.\\d+)+");
     }
 
-    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private void assertThatFilesAreTheSame(Path outputFile, String referenceFilesFolder) {
         Path relativized = outputDir.relativize(outputFile);
         Path expectedFile = Paths.get(referenceFilesFolder, relativized.toString());
@@ -100,23 +99,21 @@ public class JavaGeneratorTest {
                 Files.deleteIfExists(expectedFile);
                 Files.copy(outputFile, expectedFile);
             } catch (IOException e) {
-                throw new SafeRuntimeException("Failed to recreate test data", e);
+                throw new SafeUncheckedIoException("Failed to recreate test data", e);
             }
         }
         assertThat(outputFile).hasSameTextualContentAs(expectedFile);
     }
 
-    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private List<Path> listFiles(Path path) {
         Preconditions.checkArgument(Files.isDirectory(path), "Expected a directory", SafeArg.of("path", path));
         try (Stream<Path> stream = Files.list(path)) {
             return stream.filter(Files::isRegularFile).collect(ImmutableList.toImmutableList());
         } catch (IOException e) {
-            throw new SafeRuntimeException("Failed to list directory", e, SafeArg.of("path", path));
+            throw new SafeUncheckedIoException("Failed to list directory", e, SafeArg.of("path", path));
         }
     }
 
-    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private Path compileAndEmit(List<Path> inputFiles) {
         Path outputFile = inputDir.resolve("metrics.json");
         try {
@@ -125,7 +122,7 @@ public class JavaGeneratorTest {
                     inputFiles.stream().map(MetricSchemaCompiler::compile).collect(ImmutableSet.toImmutableSet()));
             return outputFile;
         } catch (IOException e) {
-            throw new SafeRuntimeException("Failed to compile", e, SafeArg.of("inputFiles", inputFiles));
+            throw new SafeUncheckedIoException("Failed to compile", e, SafeArg.of("inputFiles", inputFiles));
         }
     }
 }
