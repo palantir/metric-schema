@@ -37,6 +37,7 @@ public final class MetricSchemaCompiler {
         return metricSchema;
     }
 
+    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private static MetricSchema readFile(File file) {
         try {
             return LangConverter.toApi(reader.readValue(file));
