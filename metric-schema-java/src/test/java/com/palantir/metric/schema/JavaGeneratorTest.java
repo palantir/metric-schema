@@ -90,6 +90,7 @@ public class JavaGeneratorTest {
         assertThat(key.safeTags().get("javaVersion")).matches("\\d+\\.\\d+(\\.\\d+)+");
     }
 
+    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private void assertThatFilesAreTheSame(Path outputFile, String referenceFilesFolder) {
         Path relativized = outputDir.relativize(outputFile);
         Path expectedFile = Paths.get(referenceFilesFolder, relativized.toString());
@@ -105,6 +106,7 @@ public class JavaGeneratorTest {
         assertThat(outputFile).hasSameTextualContentAs(expectedFile);
     }
 
+    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private List<Path> listFiles(Path path) {
         Preconditions.checkArgument(Files.isDirectory(path), "Expected a directory", SafeArg.of("path", path));
         try (Stream<Path> stream = Files.list(path)) {
@@ -114,6 +116,7 @@ public class JavaGeneratorTest {
         }
     }
 
+    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private Path compileAndEmit(List<Path> inputFiles) {
         Path outputFile = inputDir.resolve("metrics.json");
         try {

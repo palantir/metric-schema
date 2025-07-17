@@ -39,6 +39,7 @@ final class SchemaParser {
 
     private final ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
 
+    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     List<MetricSchema> parseFile(Path file) {
         try (InputStream stream = Files.newInputStream(file)) {
             return mapper.readValue(stream, new TypeReference<List<MetricSchema>>() {});
