@@ -53,15 +53,23 @@ import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
+@SuppressWarnings("for-rollout:NonAbstractGradleType")
 public class CreateMetricsManifestTask extends DefaultTask {
     private static final Logger log = Logging.getLogger(CreateMetricsManifestTask.class);
 
     static final String NAME = "createMetricsManifest";
 
+    @SuppressWarnings("for-rollout:GradleTypesAsFields")
     private final Provider<FileCollection> projectDependencyMetrics;
+
+    @SuppressWarnings("for-rollout:GradleTypesAsFields")
     private final RegularFileProperty metricsFile = getProject().getObjects().fileProperty();
+
+    @SuppressWarnings("for-rollout:GradleTypesAsFields")
     private final Property<Configuration> configuration =
             getProject().getObjects().property(Configuration.class);
+
+    @SuppressWarnings("for-rollout:GradleTypesAsFields")
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
 
     @InputFiles
