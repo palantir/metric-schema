@@ -17,6 +17,7 @@
 package com.palantir.metric.schema;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.commonmark.node.Paragraph;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.Renderer;
@@ -54,7 +55,7 @@ final class Javadoc {
             return "";
         }
         String renderedHtml = renderer.render(parser.parse(rawDocumentation));
-        return StringUtils.appendIfMissing(renderedHtml, "\n");
+        return Strings.CS.appendIfMissing(renderedHtml, "\n");
     }
 
     private Javadoc() {}
