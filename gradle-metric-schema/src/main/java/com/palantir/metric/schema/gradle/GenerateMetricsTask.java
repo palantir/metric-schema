@@ -19,7 +19,6 @@ package com.palantir.metric.schema.gradle;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import com.palantir.metric.schema.JavaGenerator;
 import com.palantir.metric.schema.JavaGeneratorArgs;
