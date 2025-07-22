@@ -75,12 +75,11 @@ public abstract class GenerateMetricsTask extends DefaultTask {
                 .build());
     }
 
-    @SuppressWarnings("for-rollout:UnusedException")
     private static void clearOutput(Path outputPath) {
         try {
             MoreFiles.deleteRecursively(outputPath, RecursiveDeleteOption.ALLOW_INSECURE);
         } catch (IOException e) {
-            throw new SafeRuntimeException("Unable to clean output directory", SafeArg.of("output", outputPath));
+            throw new SafeRuntimeException("Unable to clean output directory", e, SafeArg.of("output", outputPath));
         }
     }
 }

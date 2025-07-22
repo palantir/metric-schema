@@ -23,6 +23,7 @@ import com.palantir.metric.schema.MetricSchema;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -211,7 +212,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
                 return Optional.of(ObjectMappers.mapper.readValue(is, new TypeReference<>() {}));
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load external monitors", e);
+            throw new UncheckedIOException("Failed to load external monitors", e);
         }
     }
 
