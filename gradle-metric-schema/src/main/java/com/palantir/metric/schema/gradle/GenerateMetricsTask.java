@@ -19,7 +19,7 @@ package com.palantir.metric.schema.gradle;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import com.palantir.metric.schema.JavaGenerator;
 import com.palantir.metric.schema.JavaGeneratorArgs;
 import java.io.File;
@@ -79,7 +79,7 @@ public abstract class GenerateMetricsTask extends DefaultTask {
         try {
             MoreFiles.deleteRecursively(outputPath, RecursiveDeleteOption.ALLOW_INSECURE);
         } catch (IOException e) {
-            throw new SafeRuntimeException("Unable to clean output directory", SafeArg.of("output", outputPath));
+            throw new SafeUncheckedIoException("Unable to clean output directory", e, SafeArg.of("output", outputPath));
         }
     }
 }
