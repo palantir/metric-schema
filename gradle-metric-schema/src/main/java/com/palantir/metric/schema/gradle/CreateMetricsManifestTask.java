@@ -211,7 +211,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
                 return Optional.of(ObjectMappers.mapper.readValue(is, new TypeReference<>() {}));
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load external monitors");
+            throw new RuntimeException("Failed to load external monitors", e);
         }
     }
 
