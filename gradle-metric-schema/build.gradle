@@ -19,6 +19,13 @@ dependencies {
     testImplementation 'com.netflix.nebula:nebula-test'
     testImplementation 'commons-io:commons-io'
 
+    // These need to contain the dependencies added by the plugin
+    testRuntimeOnly 'com.google.errorprone:error_prone_annotations'
+    testRuntimeOnly 'com.palantir.tritium:tritium-registry'
+    testRuntimeOnly 'com.palantir.safe-logging:preconditions'
+    testRuntimeOnly 'com.palantir.safe-logging:safe-logging'
+    testRuntimeOnly 'io.dropwizard.metrics:metrics-core'
+
     compileOnly 'org.immutables:value::annotations'
 }
 

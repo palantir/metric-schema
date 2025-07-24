@@ -125,6 +125,8 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         project.getDependencies().add("api", "com.palantir.tritium:tritium-registry");
         project.getDependencies().add("api", "com.palantir.safe-logging:preconditions");
         project.getDependencies().add("api", "com.google.errorprone:error_prone_annotations");
+        project.getDependencies().add("implementation", "com.palantir.safe-logging:safe-logging");
+        project.getDependencies().add("implementation", "io.dropwizard.metrics:metrics-core");
     }
 
     private String defaultLibraryName(Project project) {
