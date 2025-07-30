@@ -17,6 +17,8 @@
 package com.palantir.metric.schema.gradle
 
 import com.google.common.base.Throwables
+import com.palantir.gradle.plugintesting.TestContentHelpers
+
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import nebula.test.IntegrationSpec
@@ -57,6 +59,19 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
     void setup() {
         buildFile << """
+        buildscript {
+            repositories {
+                mavenCentral()
+                gradlePluginPortal()
+            }
+
+            dependencies {
+                classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:2.32.0'
+                classpath 'com.palantir.baseline:gradle-baseline-java:6.25.0'
+            }
+        }
+
+        apply plugin: 'com.palantir.consistent-versions'
         allprojects {
             ${applyPlugin(MetricSchemaPlugin.class)}
             group 'com.palantir.test'
@@ -64,15 +79,16 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
             repositories {
                 mavenCentral()
             }
-
-            configurations.all {
-                resolutionStrategy {
-                    force 'com.palantir.tritium:tritium-registry:${Versions.TRITIUM}'
-                    force 'com.palantir.safe-logging:preconditions:${Versions.SAFE_LOGGING}'
-                }
-            }
         }
         """.stripIndent()
+        TestContentHelpers.addVersionsToPropsFile(file('versions.props'), [
+                'com.google.errorprone:error_prone_annotations',
+                'com.palantir.tritium:tritium-registry',
+                'com.palantir.safe-logging:preconditions',
+                'com.palantir.safe-logging:safe-logging',
+                'io.dropwizard.metrics:metrics-core'
+        ])
+        runTasksSuccessfully('--write-locks')
     }
 
     def 'handles shorthand schema'() {
@@ -320,5 +336,25 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
         then:
         fileExists('foo-server/build/metricSchema/manifest.json')
+    }
+
+    def 'declare exact dependencies'() {
+        setup:
+        buildFile << """
+        apply plugin: 'com.palantir.baseline'
+        """.stripIndent(true)
+        file('src/main/metrics/metrics.yml') << METRICS
+
+        when:
+        ExecutionResult result = runTasksSuccessfully("classes", "checkImplicitDependencies", "checkUnusedDependencies")
+
+        then:
+        result.wasExecuted(':generateMetrics')
+        fileExists("build/generated/sources/metricSchema/java/main/com/palantir/test/ServerMetrics.java")
+
+        result.wasExecuted(":checkImplicitDependenciesMain")
+        !result.wasSkipped(":checkImplicitDependenciesMain")
+        result.wasExecuted(":checkUnusedDependenciesMain")
+        !result.wasSkipped(":checkUnusedDependenciesMain")
     }
 }
