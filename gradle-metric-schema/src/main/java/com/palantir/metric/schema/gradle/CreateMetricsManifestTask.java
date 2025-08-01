@@ -63,14 +63,14 @@ public class CreateMetricsManifestTask extends DefaultTask {
     @SuppressWarnings("for-rollout:GradleTypesAsFields")
     private final Provider<FileCollection> projectDependencyMetrics;
 
-    @SuppressWarnings("for-rollout:GradleTypesAsFields")
+    @SuppressWarnings({"for-rollout:GradleTypesAsFields", "for-rollout:IllegalMethodCalledDuringTaskExecution"})
     private final RegularFileProperty metricsFile = getProject().getObjects().fileProperty();
 
-    @SuppressWarnings("for-rollout:GradleTypesAsFields")
+    @SuppressWarnings({"for-rollout:GradleTypesAsFields", "for-rollout:IllegalMethodCalledDuringTaskExecution"})
     private final Property<Configuration> configuration =
             getProject().getObjects().property(Configuration.class);
 
-    @SuppressWarnings("for-rollout:GradleTypesAsFields")
+    @SuppressWarnings({"for-rollout:GradleTypesAsFields", "for-rollout:IllegalMethodCalledDuringTaskExecution"})
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
 
     @InputFiles
@@ -115,6 +115,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
         return getConfiguration().map(productDeps -> {
             // Using a ConfigurableFileCollection simply because it implements Buildable and provides a convenient API
             // to wire up task dependencies to it in a lazy way.
+            @SuppressWarnings("for-rollout:IllegalMethodCalledDuringTaskExecution")
             ConfigurableFileCollection emptyFileCollection = getProject().files();
             productDeps.getIncoming().getArtifacts().getArtifacts().stream()
                     .flatMap(artifact -> {
@@ -123,6 +124,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
                         // Depend on the ConfigureProductDependenciesTask, if it exists, which will wire up the jar
                         // manifest with recommended product dependencies.
                         if (id instanceof ProjectComponentIdentifier projectComponentIdentifier) {
+                            @SuppressWarnings("for-rollout:IllegalMethodCalledDuringTaskExecution")
                             Project dependencyProject =
                                     getProject().getRootProject().project(projectComponentIdentifier.getProjectPath());
                             return Stream.of(dependencyProject.getTasks().withType(CompileMetricSchemaTask.class));
@@ -147,6 +149,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
                         .buildOrThrow());
     }
 
+    @SuppressWarnings("for-rollout:IllegalMethodCalledDuringTaskExecution")
     private Map<String, List<MetricSchema>> getLocalMetrics() {
         if (getMetricsFile().getAsFile().isPresent()) {
             return ImmutableMap.of(
@@ -156,6 +159,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
         return Collections.emptyMap();
     }
 
+    @SuppressWarnings("for-rollout:IllegalMethodCalledDuringTaskExecution")
     private Map<String, List<MetricSchema>> getDiscoveredMetrics() {
         ImmutableMap.Builder<String, List<MetricSchema>> discoveredMetrics = ImmutableMap.builder();
 
@@ -163,6 +167,7 @@ public class CreateMetricsManifestTask extends DefaultTask {
             ComponentIdentifier id = artifact.getId().getComponentIdentifier();
 
             if (id instanceof ProjectComponentIdentifier projectComponentIdentifier) {
+                @SuppressWarnings("for-rollout:IllegalMethodCalledDuringTaskExecution")
                 Project dependencyProject = getProject().project(projectComponentIdentifier.getProjectPath());
                 if (!dependencyProject.equals(getProject())) {
                     inferProjectDependencyMetrics(dependencyProject)
