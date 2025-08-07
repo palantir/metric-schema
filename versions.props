@@ -18,7 +18,7 @@ com.atlassian.commonmark:* = 0.12.1
 org.apache.commons:commons-lang3 = 3.18.0
 com.netflix.nebula:nebula-test = 10.6.2
 com.palantir.safe-logging:preconditions = 3.9.0
-com.palantir.goethe:* = 0.15.0
+com.palantir.goethe:* = 0.16.0
 commons-io:commons-io = 2.20.0
 
 # conflict resolution
