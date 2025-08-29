@@ -58,7 +58,7 @@ com.palantir.safe-logging:preconditions:3.9.0 (9 constraints: e08d5231)
 
 com.palantir.safe-logging:safe-logging:3.9.0 (9 constraints: 2e9b0f4c)
 
-com.palantir.sls.versions:sls-versions:1.6.0 (1 constraints: 09050236)
+com.palantir.sls.versions:sls-versions:1.8.0 (1 constraints: 0b050836)
 
 com.palantir.tokens:auth-tokens:3.18.0 (1 constraints: 2410a8a9)
 
