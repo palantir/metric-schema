@@ -24,15 +24,15 @@ com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.19.2 (1 constraints: 84
 
 com.google.code.findbugs:jsr305:3.0.2 (3 constraints: e830a05a)
 
-com.google.errorprone:error_prone_annotations:2.41.0 (10 constraints: 759bb316)
+com.google.errorprone:error_prone_annotations:2.41.0 (10 constraints: 719b6810)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.4.8-jre (6 constraints: c176d61b)
+com.google.guava:guava:33.5.0-jre (6 constraints: ba763413)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
-com.google.j2objc:j2objc-annotations:3.0.0 (1 constraints: 150aeab4)
+com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
 com.palantir.conjure.java:conjure-lib:8.55.0 (2 constraints: c321de78)
 
