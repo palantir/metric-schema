@@ -2,11 +2,11 @@
 
 com.atlassian.commonmark:commonmark:0.12.1 (1 constraints: 36052a3b)
 
-com.fasterxml.jackson.core:jackson-annotations:2.19.2 (8 constraints: 9194da28)
+com.fasterxml.jackson.core:jackson-annotations:2.19.2 (8 constraints: 9694e928)
 
 com.fasterxml.jackson.core:jackson-core:2.19.2 (10 constraints: 57e0e1f3)
 
-com.fasterxml.jackson.core:jackson-databind:2.19.2 (13 constraints: 8e0d4463)
+com.fasterxml.jackson.core:jackson-databind:2.19.2 (13 constraints: 930d5363)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.19.2 (1 constraints: 841cada4)
 
@@ -34,9 +34,9 @@ com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 c
 
 com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
-com.palantir.conjure.java:conjure-lib:8.55.0 (2 constraints: c321de78)
+com.palantir.conjure.java:conjure-lib:8.56.0 (2 constraints: c321de78)
 
-com.palantir.conjure.java.api:errors:2.63.0 (1 constraints: 2310a7a9)
+com.palantir.conjure.java.api:errors:2.65.0 (1 constraints: 2510ada9)
 
 com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.24.0 (1 constraints: 841cc4a4)
 
@@ -48,19 +48,19 @@ com.palantir.javapoet:javapoet:0.7.0 (1 constraints: c70b75eb)
 
 com.palantir.ri:resource-identifier:2.11.0 (1 constraints: 1c108da9)
 
-com.palantir.safe-logging:logger:3.9.0 (4 constraints: 4749a06c)
+com.palantir.safe-logging:logger:3.9.0 (4 constraints: 4c497c6d)
 
 com.palantir.safe-logging:logger-slf4j:3.9.0 (1 constraints: 070e6e42)
 
 com.palantir.safe-logging:logger-spi:3.9.0 (2 constraints: 1d1e0c7c)
 
-com.palantir.safe-logging:preconditions:3.9.0 (9 constraints: e08d5231)
+com.palantir.safe-logging:preconditions:3.9.0 (9 constraints: e58d1433)
 
 com.palantir.safe-logging:safe-logging:3.9.0 (9 constraints: 2e9b0f4c)
 
 com.palantir.sls.versions:sls-versions:1.8.0 (1 constraints: 0b050836)
 
-com.palantir.tokens:auth-tokens:3.18.0 (1 constraints: 2410a8a9)
+com.palantir.tokens:auth-tokens:3.19.0 (1 constraints: 2510aba9)
 
 com.palantir.tritium:tritium-ids:0.109.0 (1 constraints: f80f86a6)
 
@@ -84,7 +84,7 @@ org.jetbrains:annotations:26.0.2 (3 constraints: 3826c998)
 
 org.jspecify:jspecify:1.0.0 (3 constraints: f8291c20)
 
-org.slf4j:slf4j-api:2.0.17 (5 constraints: a443135e)
+org.slf4j:slf4j-api:2.0.17 (5 constraints: 9d437d5b)
 
 org.yaml:snakeyaml:2.4 (1 constraints: 3e178d10)
 
