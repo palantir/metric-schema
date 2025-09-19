@@ -104,13 +104,13 @@ commons-io:commons-io:2.20.0 (1 constraints: 3605333b)
 
 junit:junit:4.13.2 (3 constraints: 052421c6)
 
-net.bytebuddy:byte-buddy:1.17.6 (2 constraints: c716ff4f)
+net.bytebuddy:byte-buddy:1.17.7 (2 constraints: 9e161a3f)
 
 net.bytebuddy:byte-buddy-agent:1.17.6 (1 constraints: 490b4dde)
 
 org.apiguardian:apiguardian-api:1.1.2 (7 constraints: cc761de9)
 
-org.assertj:assertj-core:3.27.4 (1 constraints: 4205523b)
+org.assertj:assertj-core:3.27.5 (1 constraints: 4305533b)
 
 org.codehaus.groovy:groovy:3.0.25 (3 constraints: 14347add)
 
