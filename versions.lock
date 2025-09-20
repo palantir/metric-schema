@@ -104,9 +104,9 @@ commons-io:commons-io:2.20.0 (1 constraints: 3605333b)
 
 junit:junit:4.13.2 (3 constraints: 052421c6)
 
-net.bytebuddy:byte-buddy:1.17.7 (2 constraints: 9e161a3f)
+net.bytebuddy:byte-buddy:1.17.7 (2 constraints: 9f161b3f)
 
-net.bytebuddy:byte-buddy-agent:1.17.6 (1 constraints: 490b4dde)
+net.bytebuddy:byte-buddy-agent:1.17.7 (1 constraints: 4a0b4ede)
 
 org.apiguardian:apiguardian-api:1.1.2 (7 constraints: cc761de9)
 
@@ -134,7 +134,7 @@ org.junit.platform:junit-platform-launcher:1.13.4 (1 constraints: 3b05363b)
 
 org.junit.vintage:junit-vintage-engine:5.13.4 (1 constraints: 3f054e3b)
 
-org.mockito:mockito-core:5.19.0 (1 constraints: 41055c3b)
+org.mockito:mockito-core:5.20.0 (1 constraints: 3905453b)
 
 org.objenesis:objenesis:3.3 (2 constraints: 9b17f557)
 
