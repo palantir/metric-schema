@@ -28,19 +28,19 @@ com.google.errorprone:error_prone_annotations:2.41.0 (10 constraints: 719b6810)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.5.0-jre (6 constraints: ba763413)
+com.google.guava:guava:33.5.0-jre (6 constraints: b376970e)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
 com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
-com.palantir.conjure.java:conjure-lib:8.56.0 (2 constraints: c321de78)
+com.palantir.conjure.java:conjure-lib:8.56.0 (2 constraints: c621e778)
 
 com.palantir.conjure.java.api:errors:2.65.0 (1 constraints: 2510ada9)
 
-com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.24.0 (1 constraints: 841cc4a4)
+com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.25.0 (1 constraints: 851cc7a4)
 
-com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.24.0 (1 constraints: 4005633b)
+com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.25.0 (1 constraints: 4105663b)
 
 com.palantir.goethe:goethe:0.16.0 (1 constraints: 3905353b)
 
@@ -64,11 +64,11 @@ com.palantir.tokens:auth-tokens:3.19.0 (1 constraints: 2510aba9)
 
 com.palantir.tritium:tritium-ids:0.109.0 (1 constraints: f80f86a6)
 
-com.palantir.tritium:tritium-registry:0.109.0 (2 constraints: 1622ffad)
+com.palantir.tritium:tritium-registry:0.109.0 (2 constraints: 1b220eae)
 
 com.squareup:javapoet:1.13.0 (2 constraints: 2b113eee)
 
-io.dropwizard.metrics:metrics-core:4.2.37 (2 constraints: 4b2d0797)
+io.dropwizard.metrics:metrics-core:4.2.37 (2 constraints: 4f2dc797)
 
 joda-time:joda-time:2.12.7 (1 constraints: 2f16b1f1)
 
@@ -110,7 +110,7 @@ net.bytebuddy:byte-buddy-agent:1.17.7 (1 constraints: 4a0b4ede)
 
 org.apiguardian:apiguardian-api:1.1.2 (7 constraints: cc761de9)
 
-org.assertj:assertj-core:3.27.5 (1 constraints: 4305533b)
+org.assertj:assertj-core:3.27.6 (1 constraints: 4405543b)
 
 org.codehaus.groovy:groovy:3.0.25 (3 constraints: 14347add)
 
