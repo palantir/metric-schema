@@ -28,7 +28,7 @@ com.google.errorprone:error_prone_annotations:2.41.0 (10 constraints: 719b6810)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.5.0-jre (6 constraints: b376970e)
+com.google.guava:guava:33.5.0-jre (6 constraints: a576f00c)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
@@ -62,9 +62,9 @@ com.palantir.sls.versions:sls-versions:1.8.0 (1 constraints: 0b050836)
 
 com.palantir.tokens:auth-tokens:3.19.0 (1 constraints: 2510aba9)
 
-com.palantir.tritium:tritium-ids:0.109.0 (1 constraints: f80f86a6)
+com.palantir.tritium:tritium-ids:0.110.0 (1 constraints: f80f86a6)
 
-com.palantir.tritium:tritium-registry:0.109.0 (2 constraints: 1b220eae)
+com.palantir.tritium:tritium-registry:0.110.0 (2 constraints: 13227fab)
 
 com.squareup:javapoet:1.13.0 (2 constraints: 2b113eee)
 
