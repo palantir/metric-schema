@@ -1,4 +1,5 @@
-com.fasterxml.jackson.*:* = 2.19.2
+com.fasterxml.jackson.*:* = 2.20.0
+com.fasterxml.jackson.core:jackson-annotations = 2.20
 org.junit.jupiter:* = 6.0.0
 org.junit.platform:* = 6.0.0
 org.junit.vintage:* = 6.0.0
