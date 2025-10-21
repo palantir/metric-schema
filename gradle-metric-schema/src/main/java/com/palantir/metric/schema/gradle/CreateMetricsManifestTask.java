@@ -54,8 +54,7 @@ import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
-@SuppressWarnings("for-rollout:NonAbstractGradleType")
-public class CreateMetricsManifestTask extends DefaultTask {
+public abstract class CreateMetricsManifestTask extends DefaultTask {
     private static final Logger log = Logging.getLogger(CreateMetricsManifestTask.class);
 
     static final String NAME = "createMetricsManifest";
