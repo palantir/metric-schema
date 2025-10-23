@@ -16,14 +16,17 @@
 
 package com.palantir.metric.schema.gradle;
 
+import com.google.common.collect.ImmutableSetMultimap;
 import com.palantir.sls.versions.OrderableSlsVersion;
 import com.palantir.sls.versions.SlsVersion;
 import com.palantir.sls.versions.SlsVersionType;
+import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.file.Directory;
+import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.plugins.JavaLibraryPlugin;
@@ -99,38 +102,49 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
             project.getPluginManager().apply(MetricSchemaMarkdownPlugin.class);
         });
 
-        configureIdea(project, generatedJavaDir, generatedResourcesDir);
+        configureIdea(project, generatedJavaDir);
 
-        // Only add dependencies if we're going to generate code
-        if (!metricSchemaSourceDirectorySet.getFiles().isEmpty()) {
-            configureProjectDependencies(project);
-        }
+        configureDependencies(project, metricSchemaSourceDirectorySet);
     }
 
-    private static void configureIdea(
-            Project project, Provider<Directory> generatedJavaDir, Provider<Directory> generatedResourcesDir) {
+    private static void configureIdea(Project project, Provider<Directory> generatedJavaDir) {
         project.getPluginManager().withPlugin("idea", _plugin -> {
             IdeaModel ideaModel = project.getExtensions().getByType(IdeaModel.class);
 
-            ideaModel.getModule().getSourceDirs().add(generatedJavaDir.get().getAsFile());
             ideaModel
                     .getModule()
                     .getGeneratedSourceDirs()
                     .add(generatedJavaDir.get().getAsFile());
-            ideaModel
-                    .getModule()
-                    .getResourceDirs()
-                    .add(generatedResourcesDir.get().getAsFile());
         });
     }
 
-    private static void configureProjectDependencies(Project project) {
-        project.getDependencies().add("api", "com.palantir.tritium:tritium-registry");
-        project.getDependencies().add("api", "com.palantir.safe-logging:preconditions");
-        project.getDependencies().add("api", "com.google.errorprone:error_prone_annotations");
-        // Metric types like Gauge are part of the generated code's public API
-        project.getDependencies().add("api", "io.dropwizard.metrics:metrics-core");
-        project.getDependencies().add("implementation", "com.palantir.safe-logging:safe-logging");
+    private static void configureDependencies(Project project, FileCollection metricSchemaSourceDirectorySet) {
+        ImmutableSetMultimap<String, String> allDependencies = ImmutableSetMultimap.<String, String>builder()
+                .put("api", "com.palantir.tritium:tritium-registry")
+                .put("api", "com.palantir.safe-logging:preconditions")
+                .put("api", "com.google.errorprone:error_prone_annotations")
+                // Metric types like Gauge are part of the generated code's public API
+                .put("api", "io.dropwizard.metrics:metrics-core")
+                .put("implementation", "com.palantir.safe-logging:safe-logging")
+                .build();
+
+        allDependencies.asMap().forEach((configurationName, dependencies) -> {
+            project.getConfigurations().named(configurationName, configuration -> {
+                configuration
+                        .getDependencies()
+                        .addAllLater(
+                                metricSchemaSourceDirectorySet.getElements().map(files -> {
+                                    // Don't add dependencies if we're not going to generate code
+                                    if (files.isEmpty()) {
+                                        return List.of();
+                                    }
+
+                                    return dependencies.stream()
+                                            .map(project.getDependencies()::create)
+                                            .toList();
+                                }));
+            });
+        });
     }
 
     private String defaultLibraryName(Project project) {
