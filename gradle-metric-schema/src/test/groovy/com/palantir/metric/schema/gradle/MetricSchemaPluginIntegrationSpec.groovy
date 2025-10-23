@@ -357,4 +357,23 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         result.wasExecuted(":checkUnusedDependenciesMain")
         !result.wasSkipped(":checkUnusedDependenciesMain")
     }
+
+    def 'declare exact dependencies even without generated metrics'() {
+        setup:
+        buildFile << """
+        apply plugin: 'com.palantir.baseline'
+        """.stripIndent(true)
+
+        when:
+        ExecutionResult result = runTasksSuccessfully("classes", "checkImplicitDependencies", "checkUnusedDependencies")
+
+        then:
+        result.wasExecuted(':generateMetrics')
+        !fileExists("build/generated/sources/metricSchema/java/main/com/palantir/test/ServerMetrics.java")
+
+        result.wasExecuted(":checkImplicitDependenciesMain")
+        !result.wasSkipped(":checkImplicitDependenciesMain")
+        result.wasExecuted(":checkUnusedDependenciesMain")
+        !result.wasSkipped(":checkUnusedDependenciesMain")
+    }
 }
