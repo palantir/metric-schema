@@ -101,7 +101,10 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
 
         configureIdea(project, generatedJavaDir, generatedResourcesDir);
 
-        configureProjectDependencies(project);
+        // Only add dependencies if we're going to generate code
+        if (!metricSchemaSourceDirectorySet.getFiles().isEmpty()) {
+            configureProjectDependencies(project);
+        }
     }
 
     private static void configureIdea(
@@ -125,8 +128,9 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         project.getDependencies().add("api", "com.palantir.tritium:tritium-registry");
         project.getDependencies().add("api", "com.palantir.safe-logging:preconditions");
         project.getDependencies().add("api", "com.google.errorprone:error_prone_annotations");
+        // Metric types like Gauge are part of the generated code's public API
+        project.getDependencies().add("api", "io.dropwizard.metrics:metrics-core");
         project.getDependencies().add("implementation", "com.palantir.safe-logging:safe-logging");
-        project.getDependencies().add("implementation", "io.dropwizard.metrics:metrics-core");
     }
 
     private String defaultLibraryName(Project project) {
