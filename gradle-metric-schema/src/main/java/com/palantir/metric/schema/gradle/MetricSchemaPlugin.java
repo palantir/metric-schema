@@ -20,13 +20,17 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.palantir.sls.versions.OrderableSlsVersion;
 import com.palantir.sls.versions.SlsVersion;
 import com.palantir.sls.versions.SlsVersionType;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.file.Directory;
-import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.plugins.JavaLibraryPlugin;
@@ -104,7 +108,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
 
         configureIdea(project, generatedJavaDir);
 
-        configureDependencies(project, metricSchemaSourceDirectorySet);
+        configureDependencies(project, generateMetricsTask);
     }
 
     private static void configureIdea(Project project, Provider<Directory> generatedJavaDir) {
@@ -118,7 +122,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         });
     }
 
-    private static void configureDependencies(Project project, FileCollection metricSchemaSourceDirectorySet) {
+    private static void configureDependencies(Project project, TaskProvider<GenerateMetricsTask> generateMetricsTask) {
         ImmutableSetMultimap<String, String> allDependencies = ImmutableSetMultimap.<String, String>builder()
                 .put("api", "com.palantir.tritium:tritium-registry")
                 .put("api", "com.palantir.safe-logging:preconditions")
@@ -132,11 +136,17 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
             project.getConfigurations().named(configurationName, configuration -> {
                 configuration
                         .getDependencies()
-                        .addAllLater(
-                                metricSchemaSourceDirectorySet.getElements().map(files -> {
+                        .addAllLater(generateMetricsTask
+                                .map(GenerateMetricsTask::getOutputDir)
+                                .map(dir -> {
                                     // Don't add dependencies if we're not going to generate code
-                                    if (files.isEmpty()) {
-                                        return List.of();
+                                    try (Stream<Path> files =
+                                            Files.list(dir.get().getAsFile().toPath())) {
+                                        if (files.findAny().isEmpty()) {
+                                            return List.of();
+                                        }
+                                    } catch (IOException e) {
+                                        throw new UncheckedIOException(e);
                                     }
 
                                     return dependencies.stream()
