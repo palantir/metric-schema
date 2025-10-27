@@ -16,7 +16,8 @@
 
 package com.palantir.metric.schema.gradle;
 
-import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Multimap;
+import com.palantir.metric.schema.DependencyRequirements;
 import com.palantir.sls.versions.OrderableSlsVersion;
 import com.palantir.sls.versions.SlsVersion;
 import com.palantir.sls.versions.SlsVersionType;
@@ -26,7 +27,7 @@ import javax.annotation.Nullable;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.file.Directory;
-import org.gradle.api.file.FileCollection;
+import org.gradle.api.file.FileSystemLocation;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.plugins.JavaLibraryPlugin;
@@ -118,33 +119,20 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         });
     }
 
-    private static void configureDependencies(Project project, FileCollection metricSchemaSourceDirectorySet) {
-        ImmutableSetMultimap<String, String> allDependencies = ImmutableSetMultimap.<String, String>builder()
-                .put("api", "com.palantir.tritium:tritium-registry")
-                .put("api", "com.palantir.safe-logging:preconditions")
-                .put("api", "com.google.errorprone:error_prone_annotations")
-                // Metric types like Gauge are part of the generated code's public API
-                .put("api", "io.dropwizard.metrics:metrics-core")
-                .put("implementation", "com.palantir.safe-logging:safe-logging")
-                .build();
+    private static void configureDependencies(Project project, SourceDirectorySet metricSchemaSourceDirectorySet) {
+        Provider<Multimap<String, String>> dependencies = metricSchemaSourceDirectorySet
+                .getElements()
+                .map(metricsFiles -> DependencyRequirements.getDependencies(
+                        metricsFiles.stream().map(FileSystemLocation::getAsFile).toList()));
 
-        allDependencies.asMap().forEach((configurationName, dependencies) -> {
-            project.getConfigurations().named(configurationName, configuration -> {
-                configuration
-                        .getDependencies()
-                        .addAllLater(
-                                metricSchemaSourceDirectorySet.getElements().map(files -> {
-                                    // Don't add dependencies if we're not going to generate code
-                                    if (files.isEmpty()) {
-                                        return List.of();
-                                    }
-
-                                    return dependencies.stream()
-                                            .map(project.getDependencies()::create)
-                                            .toList();
-                                }));
-            });
-        });
+        List.of(JavaPlugin.API_CONFIGURATION_NAME, JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)
+                .forEach(configurationName -> project.getConfigurations().named(configurationName, configuration -> {
+                    configuration
+                            .getDependencies()
+                            .addAllLater(dependencies.map(deps -> deps.get(configurationName).stream()
+                                    .map(project.getDependencies()::create)
+                                    .toList()));
+                }));
     }
 
     private String defaultLibraryName(Project project) {

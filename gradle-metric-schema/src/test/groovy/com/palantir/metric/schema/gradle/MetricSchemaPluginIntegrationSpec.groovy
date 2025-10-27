@@ -44,6 +44,16 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
                 docs: A gauge of the ratio of active workers to the number of workers.
         """.stripIndent()
 
+    public static final String METRICS_NO_TAGS = """
+        namespaces:
+          server:
+            docs: General web server metrics.
+            metrics:
+              worker.utilization:
+                type: gauge
+                docs: A gauge of the ratio of active workers to the number of workers.
+        """.stripIndent()
+
     public static final String METRICS_INVALID = """
         namespaces:
           server:
@@ -370,6 +380,26 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         then:
         result.wasExecuted(':generateMetrics')
         !fileExists("build/generated/sources/metricSchema/java/main/com/palantir/test/ServerMetrics.java")
+
+        result.wasExecuted(":checkImplicitDependenciesMain")
+        !result.wasSkipped(":checkImplicitDependenciesMain")
+        result.wasExecuted(":checkUnusedDependenciesMain")
+        !result.wasSkipped(":checkUnusedDependenciesMain")
+    }
+
+    def 'declare exact dependencies even with metrics without safety-annotated tags'() {
+        setup:
+        buildFile << """
+        apply plugin: 'com.palantir.baseline'
+        """.stripIndent(true)
+        file('src/main/metrics/metrics.yml') << METRICS_NO_TAGS
+
+        when:
+        ExecutionResult result = runTasksSuccessfully("classes", "checkImplicitDependencies", "checkUnusedDependencies")
+
+        then:
+        result.wasExecuted(':generateMetrics')
+        fileExists("build/generated/sources/metricSchema/java/main/com/palantir/test/ServerMetrics.java")
 
         result.wasExecuted(":checkImplicitDependenciesMain")
         !result.wasSkipped(":checkImplicitDependenciesMain")

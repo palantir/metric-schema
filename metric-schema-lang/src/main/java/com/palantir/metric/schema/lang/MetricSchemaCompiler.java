@@ -39,10 +39,14 @@ public final class MetricSchemaCompiler {
 
     private static MetricSchema readFile(File file) {
         try {
-            return LangConverter.toApi(reader.readValue(file));
+            return LangConverter.toApi(parseRawSchema(file));
         } catch (IOException e) {
             throw new SafeUncheckedIoException("Failed to deserialize file", e, SafeArg.of("file", file));
         }
+    }
+
+    public static LangMetricSchema parseRawSchema(File inputFile) throws IOException {
+        return reader.readValue(inputFile);
     }
 
     private MetricSchemaCompiler() {}
