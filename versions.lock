@@ -2,11 +2,11 @@
 
 com.atlassian.commonmark:commonmark:0.12.1 (1 constraints: 36052a3b)
 
-com.fasterxml.jackson.core:jackson-annotations:2.20 (9 constraints: cd971bd6)
+com.fasterxml.jackson.core:jackson-annotations:2.20 (9 constraints: fd96af9e)
 
-com.fasterxml.jackson.core:jackson-core:2.20.0 (10 constraints: 07e08186)
+com.fasterxml.jackson.core:jackson-core:2.20.0 (10 constraints: fddf5c83)
 
-com.fasterxml.jackson.core:jackson-databind:2.20.0 (13 constraints: 430d54c2)
+com.fasterxml.jackson.core:jackson-databind:2.20.0 (13 constraints: 2f0da4b8)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.20.0 (1 constraints: 841cada4)
 
@@ -34,7 +34,7 @@ com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 c
 
 com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
-com.palantir.conjure.java:conjure-lib:8.58.0 (2 constraints: c621e778)
+com.palantir.conjure.java:conjure-lib:8.59.0 (2 constraints: c621e778)
 
 com.palantir.conjure.java.api:errors:2.65.0 (1 constraints: 2510ada9)
 
@@ -60,7 +60,7 @@ com.palantir.safe-logging:safe-logging:3.9.0 (9 constraints: 2e9b0f4c)
 
 com.palantir.sls.versions:sls-versions:1.8.0 (1 constraints: 0b050836)
 
-com.palantir.tokens:auth-tokens:3.19.0 (1 constraints: 2510aba9)
+com.palantir.tokens:auth-tokens:3.20.0 (1 constraints: 1d1094a9)
 
 com.palantir.tritium:tritium-ids:0.111.0 (1 constraints: f80f86a6)
 
