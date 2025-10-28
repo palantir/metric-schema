@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.metric.schema;
+package com.palantir.metric.schema.gradle;
 
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;

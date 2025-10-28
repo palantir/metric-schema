@@ -17,7 +17,6 @@
 package com.palantir.metric.schema.gradle;
 
 import com.google.common.collect.Multimap;
-import com.palantir.metric.schema.DependencyRequirements;
 import com.palantir.sls.versions.OrderableSlsVersion;
 import com.palantir.sls.versions.SlsVersion;
 import com.palantir.sls.versions.SlsVersionType;
