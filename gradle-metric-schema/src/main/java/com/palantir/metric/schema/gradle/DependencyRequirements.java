@@ -24,14 +24,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
+import javax.annotation.Nonnull;
 
 public final class DependencyRequirements {
 
-    public static Multimap<String, String> getDependencies(Collection<File> metricSchemaFiles) {
-        if (metricSchemaFiles == null || metricSchemaFiles.isEmpty()) {
-            return ImmutableSetMultimap.of();
-        }
-
+    public static Multimap<String, String> getDependencies(@Nonnull Collection<File> metricSchemaFiles) {
         Collection<LangMetricSchema> rawSchemas = metricSchemaFiles.stream()
                 .<Optional<LangMetricSchema>>map(schemaFile -> {
                     try {
@@ -44,8 +41,7 @@ public final class DependencyRequirements {
                 .<LangMetricSchema>mapMulti(Optional::ifPresent)
                 .toList();
 
-        if (rawSchemas.isEmpty()
-                || rawSchemas.stream().allMatch(schema -> schema.namespaces().isEmpty())) {
+        if (rawSchemas.stream().allMatch(schema -> schema.namespaces().isEmpty())) {
             // There isn't anything to generate, so no dependencies are required.
             return ImmutableSetMultimap.of();
         }
