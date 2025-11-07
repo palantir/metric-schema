@@ -34,7 +34,7 @@ com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 c
 
 com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
-com.palantir.conjure.java:conjure-lib:8.60.0 (2 constraints: c621e778)
+com.palantir.conjure.java:conjure-lib:8.61.0 (2 constraints: c621e778)
 
 com.palantir.conjure.java.api:errors:2.65.0 (1 constraints: 2510ada9)
 
@@ -62,9 +62,9 @@ com.palantir.sls.versions:sls-versions:1.8.0 (1 constraints: 0b050836)
 
 com.palantir.tokens:auth-tokens:3.20.0 (1 constraints: 1d1094a9)
 
-com.palantir.tritium:tritium-ids:0.111.0 (1 constraints: f80f86a6)
+com.palantir.tritium:tritium-ids:0.112.0 (1 constraints: f80f86a6)
 
-com.palantir.tritium:tritium-registry:0.111.0 (2 constraints: 1422d1ab)
+com.palantir.tritium:tritium-registry:0.112.0 (2 constraints: 152223ac)
 
 com.squareup:javapoet:1.13.0 (2 constraints: 2b113eee)
 
