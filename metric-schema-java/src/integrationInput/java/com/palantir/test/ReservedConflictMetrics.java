@@ -9,6 +9,7 @@ import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /** Tests that reserved words are escaped. */
 public final class ReservedConflictMetrics {
@@ -95,6 +96,9 @@ public final class ReservedConflictMetrics {
         Histogram build();
 
         @CheckReturnValue
+        Histogram build(Supplier<Histogram> histogramSupplier);
+
+        @CheckReturnValue
         MetricName buildMetricName();
     }
 
@@ -145,6 +149,11 @@ public final class ReservedConflictMetrics {
         @Override
         public Histogram build() {
             return registry.histogram(buildMetricName());
+        }
+
+        @Override
+        public Histogram build(Supplier<Histogram> histogramSupplier) {
+            return registry.histogram(buildMetricName(), histogramSupplier);
         }
 
         @Override

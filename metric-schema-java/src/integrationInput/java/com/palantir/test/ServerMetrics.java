@@ -8,6 +8,7 @@ import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /** General web server metrics. */
 public final class ServerMetrics {
@@ -60,6 +61,9 @@ public final class ServerMetrics {
         Histogram build();
 
         @CheckReturnValue
+        Histogram build(Supplier<Histogram> histogramSupplier);
+
+        @CheckReturnValue
         MetricName buildMetricName();
     }
 
@@ -96,6 +100,11 @@ public final class ServerMetrics {
         @Override
         public Histogram build() {
             return registry.histogram(buildMetricName());
+        }
+
+        @Override
+        public Histogram build(Supplier<Histogram> histogramSupplier) {
+            return registry.histogram(buildMetricName(), histogramSupplier);
         }
 
         @Override

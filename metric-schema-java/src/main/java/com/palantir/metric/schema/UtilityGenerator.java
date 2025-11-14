@@ -17,6 +17,7 @@
 package com.palantir.metric.schema;
 
 import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
@@ -41,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
@@ -535,6 +537,7 @@ final class UtilityGenerator {
     }
 
     /** Produce a private staged builder, which implements public interfaces. */
+    @SuppressWarnings("checkstyle:MethodLength")
     private static void generateMetricFactoryBuilder(
             TypeSpec.Builder outerBuilder,
             String namespaceName,
@@ -544,6 +547,10 @@ final class UtilityGenerator {
             MetricNamespace metricNamespace,
             ImplementationVisibility visibility) {
         boolean isGauge = MetricType.GAUGE.equals(definition.getType());
+        boolean isHistogram = MetricType.HISTOGRAM.equals(definition.getType());
+
+        TypeSpec.Builder buildStageInterfaceBuilder =
+                TypeSpec.interfaceBuilder(buildStage(metricName)).addModifiers(visibility.apply());
 
         MethodSpec.Builder abstractBuildMethodBuilder = MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -555,18 +562,26 @@ final class UtilityGenerator {
         } else {
             abstractBuildMethodBuilder.addAnnotation(CheckReturnValue.class);
         }
-        MethodSpec abstractBuildMethod = abstractBuildMethodBuilder.build();
-        MethodSpec abstractBuildMetricName = MethodSpec.methodBuilder("buildMetricName")
+        buildStageInterfaceBuilder.addMethod(abstractBuildMethodBuilder.build());
+
+        if (isHistogram) {
+            buildStageInterfaceBuilder.addMethod(MethodSpec.methodBuilder("build")
+                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                    .addAnnotation(CheckReturnValue.class)
+                    .addParameter(
+                            ParameterizedTypeName.get(Supplier.class, Histogram.class),
+                            ReservedNames.HISTOGRAM_SUPPLIER_NAME)
+                    .returns(MetricTypes.type(definition.getType()))
+                    .build());
+        }
+
+        buildStageInterfaceBuilder.addMethod(MethodSpec.methodBuilder("buildMetricName")
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addAnnotation(CheckReturnValue.class)
                 .returns(MetricName.class)
-                .build();
-
-        outerBuilder.addType(TypeSpec.interfaceBuilder(buildStage(metricName))
-                .addModifiers(visibility.apply())
-                .addMethod(abstractBuildMethod)
-                .addMethod(abstractBuildMetricName)
                 .build());
+
+        outerBuilder.addType(buildStageInterfaceBuilder.build());
         ImmutableList<TagDefinition> tagList = definition.getTagDefinitions().stream()
                 .filter(UtilityGenerator::tagDefinitionRequiresParam)
                 .collect(ImmutableList.toImmutableList());
@@ -594,6 +609,42 @@ final class UtilityGenerator {
                             .build())
                     .build());
         }
+
+        TypeSpec.Builder builderBuilder = TypeSpec.classBuilder(Custodian.anyToUpperCamel(metricName) + "Builder")
+                .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                .addSuperinterfaces(tagList.stream()
+                        .map(tag -> ClassName.bestGuess(stageName(metricName, tag.getName())))
+                        .collect(ImmutableList.toImmutableList()))
+                .addSuperinterface(ClassName.bestGuess(buildStage(metricName)))
+                .addFields(tagList.stream()
+                        .map(tag -> FieldSpec.builder(
+                                        tagClassName(metricName, tag),
+                                        Custodian.sanitizeName(tag.getName()),
+                                        Modifier.PRIVATE)
+                                .build())
+                        .collect(ImmutableList.toImmutableList()))
+                .addMethods(tagList.stream()
+                        .map(tag -> MethodSpec.methodBuilder(Custodian.sanitizeName(tag.getName()))
+                                .addModifiers(Modifier.PUBLIC)
+                                .addAnnotation(Override.class)
+                                .returns(ClassName.bestGuess(Custodian.anyToUpperCamel(metricName) + "Builder"))
+                                .addParameter(ParameterSpec.builder(
+                                                tagClassName(metricName, tag), Custodian.sanitizeName(tag.getName()))
+                                        .addAnnotation(Safe.class)
+                                        .build())
+                                .addStatement(
+                                        "$1T.checkState(this.$2L == null, $3S)",
+                                        Preconditions.class,
+                                        Custodian.sanitizeName(tag.getName()),
+                                        tag.getName() + " is already set")
+                                .addStatement(
+                                        "this.$1L = $2T.checkNotNull($1L, $3S)",
+                                        Custodian.sanitizeName(tag.getName()),
+                                        Preconditions.class,
+                                        tag.getName() + " is required")
+                                .addStatement("return this")
+                                .build())
+                        .collect(ImmutableList.toImmutableList()));
 
         MethodSpec buildMetricName = MethodSpec.methodBuilder("buildMetricName")
                 .addModifiers(Modifier.PUBLIC)
@@ -628,46 +679,27 @@ final class UtilityGenerator {
                     MetricTypes.registryAccessor(definition.getType()),
                     buildMetricName);
         }
-        MethodSpec buildMethod = buildMethodBuilder.build();
+        builderBuilder.addMethod(buildMethodBuilder.build());
 
-        outerBuilder.addType(TypeSpec.classBuilder(Custodian.anyToUpperCamel(metricName) + "Builder")
-                .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                .addSuperinterfaces(tagList.stream()
-                        .map(tag -> ClassName.bestGuess(stageName(metricName, tag.getName())))
-                        .collect(ImmutableList.toImmutableList()))
-                .addSuperinterface(ClassName.bestGuess(buildStage(metricName)))
-                .addFields(tagList.stream()
-                        .map(tag -> FieldSpec.builder(
-                                        tagClassName(metricName, tag),
-                                        Custodian.sanitizeName(tag.getName()),
-                                        Modifier.PRIVATE)
-                                .build())
-                        .collect(ImmutableList.toImmutableList()))
-                .addMethods(tagList.stream()
-                        .map(tag -> MethodSpec.methodBuilder(Custodian.sanitizeName(tag.getName()))
-                                .addModifiers(Modifier.PUBLIC)
-                                .addAnnotation(Override.class)
-                                .returns(ClassName.bestGuess(Custodian.anyToUpperCamel(metricName) + "Builder"))
-                                .addParameter(ParameterSpec.builder(
-                                                tagClassName(metricName, tag), Custodian.sanitizeName(tag.getName()))
-                                        .addAnnotation(Safe.class)
-                                        .build())
-                                .addStatement(
-                                        "$1T.checkState(this.$2L == null, $3S)",
-                                        Preconditions.class,
-                                        Custodian.sanitizeName(tag.getName()),
-                                        tag.getName() + " is already set")
-                                .addStatement(
-                                        "this.$1L = $2T.checkNotNull($1L, $3S)",
-                                        Custodian.sanitizeName(tag.getName()),
-                                        Preconditions.class,
-                                        tag.getName() + " is required")
-                                .addStatement("return this")
-                                .build())
-                        .collect(ImmutableList.toImmutableList()))
-                .addMethod(buildMethod)
-                .addMethod(buildMetricName)
-                .build());
+        if (isHistogram) {
+            builderBuilder.addMethod(MethodSpec.methodBuilder("build")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class)
+                    .addParameter(
+                            ParameterizedTypeName.get(Supplier.class, Histogram.class),
+                            ReservedNames.HISTOGRAM_SUPPLIER_NAME)
+                    .returns(MetricTypes.type(definition.getType()))
+                    .addStatement(
+                            "return $L.$L($N(), $L)",
+                            ReservedNames.REGISTRY_NAME,
+                            MetricTypes.registryAccessor(definition.getType()),
+                            buildMetricName,
+                            ReservedNames.HISTOGRAM_SUPPLIER_NAME)
+                    .build());
+        }
+
+        builderBuilder.addMethod(buildMetricName);
+        outerBuilder.addType(builderBuilder.build());
         outerBuilder.addMethod(MethodSpec.methodBuilder(Custodian.sanitizeName(metricName))
                 .addModifiers(visibility.apply())
                 .returns(
