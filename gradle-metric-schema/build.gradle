@@ -69,4 +69,5 @@ project.ext.'gradle.publish.secret' = System.env["GRADLE_SECRET"]
 
 gradleTestUtils {
     gradleVersions = ['8.14.3']
+    configurationCacheEnabled = true
 }
