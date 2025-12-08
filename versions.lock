@@ -62,9 +62,9 @@ com.palantir.sls.versions:sls-versions:1.8.0 (1 constraints: 0b050836)
 
 com.palantir.tokens:auth-tokens:3.20.0 (1 constraints: 1d1094a9)
 
-com.palantir.tritium:tritium-ids:0.120.0 (1 constraints: f80f86a6)
+com.palantir.tritium:tritium-ids:0.121.0 (1 constraints: f80f86a6)
 
-com.palantir.tritium:tritium-registry:0.120.0 (2 constraints: 1322d0ab)
+com.palantir.tritium:tritium-registry:0.121.0 (2 constraints: 142222ac)
 
 com.squareup:javapoet:1.13.0 (2 constraints: 2b113eee)
 
@@ -78,7 +78,7 @@ org.eclipse.collections:eclipse-collections:13.0.0 (1 constraints: 1c1091a9)
 
 org.eclipse.collections:eclipse-collections-api:13.0.0 (2 constraints: fa22df26)
 
-org.immutables:value:2.11.7 (2 constraints: 0615a6c2)
+org.immutables:value:2.12.0 (2 constraints: 00158ec1)
 
 org.jetbrains:annotations:26.0.2 (4 constraints: 1040723e)
 
