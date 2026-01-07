@@ -2,29 +2,29 @@
 
 com.atlassian.commonmark:commonmark:0.12.1 (1 constraints: 36052a3b)
 
-com.fasterxml.jackson.core:jackson-annotations:2.20 (9 constraints: fd96af9e)
+com.fasterxml.jackson.core:jackson-annotations:2.20 (9 constraints: 9596417c)
 
-com.fasterxml.jackson.core:jackson-core:2.20.1 (10 constraints: fcdf768e)
+com.fasterxml.jackson.core:jackson-core:2.20.1 (10 constraints: fddf778e)
 
-com.fasterxml.jackson.core:jackson-databind:2.20.1 (13 constraints: 1a0d67bb)
+com.fasterxml.jackson.core:jackson-databind:2.20.1 (13 constraints: 1c0d09bc)
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.20.1 (1 constraints: 7a1c94a4)
+com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.20.1 (1 constraints: 7b1c95a4)
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.20.1 (1 constraints: 7a1c94a4)
+com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.20.1 (1 constraints: 7b1c95a4)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.20.1 (1 constraints: 3705343b)
 
-com.fasterxml.jackson.datatype:jackson-datatype-guava:2.20.1 (1 constraints: 7a1c94a4)
+com.fasterxml.jackson.datatype:jackson-datatype-guava:2.20.1 (1 constraints: 7b1c95a4)
 
-com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.20.1 (1 constraints: 7a1c94a4)
+com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.20.1 (1 constraints: 7b1c95a4)
 
-com.fasterxml.jackson.datatype:jackson-datatype-joda:2.20.1 (1 constraints: 7a1c94a4)
+com.fasterxml.jackson.datatype:jackson-datatype-joda:2.20.1 (1 constraints: 7b1c95a4)
 
-com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.20.1 (1 constraints: 7a1c94a4)
+com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.20.1 (1 constraints: 7b1c95a4)
 
 com.google.code.findbugs:jsr305:3.0.2 (3 constraints: e830a05a)
 
-com.google.errorprone:error_prone_annotations:2.41.0 (10 constraints: cb9bfbda)
+com.google.errorprone:error_prone_annotations:2.41.0 (10 constraints: 989b8846)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
@@ -34,17 +34,17 @@ com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 c
 
 com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
-com.palantir.conjure.java:conjure-lib:8.67.0 (2 constraints: c621e878)
+com.palantir.conjure.java:conjure-lib:8.67.0 (2 constraints: c821ee78)
 
 com.palantir.conjure.java.api:errors:2.67.0 (1 constraints: 2710b3a9)
 
-com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.28.0 (1 constraints: 881cd0a4)
+com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.29.0 (1 constraints: 891cd3a4)
 
-com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.28.0 (1 constraints: 44056f3b)
+com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.29.0 (1 constraints: 4505723b)
 
-com.palantir.goethe:goethe:0.17.0 (1 constraints: 3a05383b)
+com.palantir.goethe:goethe:0.18.0 (1 constraints: 3b053b3b)
 
-com.palantir.javapoet:javapoet:0.7.0 (1 constraints: c70b75eb)
+com.palantir.javapoet:javapoet:0.9.0 (1 constraints: c90b7beb)
 
 com.palantir.ri:resource-identifier:2.11.0 (1 constraints: 1c108da9)
 
@@ -54,17 +54,17 @@ com.palantir.safe-logging:logger-slf4j:3.9.0 (1 constraints: 070e6e42)
 
 com.palantir.safe-logging:logger-spi:3.9.0 (2 constraints: 1d1e0c7c)
 
-com.palantir.safe-logging:preconditions:3.9.0 (9 constraints: e58d1433)
+com.palantir.safe-logging:preconditions:3.10.0 (9 constraints: 0d8e8474)
 
-com.palantir.safe-logging:safe-logging:3.9.0 (9 constraints: 2e9b0f4c)
+com.palantir.safe-logging:safe-logging:3.10.0 (9 constraints: 569b7ed4)
 
-com.palantir.sls.versions:sls-versions:1.8.0 (1 constraints: 0b050836)
+com.palantir.sls.versions:sls-versions:1.9.0 (1 constraints: 0c050b36)
 
 com.palantir.tokens:auth-tokens:3.20.0 (1 constraints: 1d1094a9)
 
 com.palantir.tritium:tritium-ids:0.122.0 (1 constraints: fc0f93a6)
 
-com.palantir.tritium:tritium-registry:0.122.0 (2 constraints: 152274ac)
+com.palantir.tritium:tritium-registry:0.122.0 (2 constraints: 112269ac)
 
 com.squareup:javapoet:1.13.0 (2 constraints: 2b113eee)
 
