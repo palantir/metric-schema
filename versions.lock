@@ -2,11 +2,11 @@
 
 com.atlassian.commonmark:commonmark:0.12.1 (1 constraints: 36052a3b)
 
-com.fasterxml.jackson.core:jackson-annotations:2.21 (9 constraints: 3596a26f)
+com.fasterxml.jackson.core:jackson-annotations:2.21 (9 constraints: 38967a70)
 
-com.fasterxml.jackson.core:jackson-core:2.21.0 (10 constraints: fddf898e)
+com.fasterxml.jackson.core:jackson-core:2.21.0 (10 constraints: fddf8b8e)
 
-com.fasterxml.jackson.core:jackson-databind:2.21.0 (13 constraints: 1e0de4bc)
+com.fasterxml.jackson.core:jackson-databind:2.21.0 (13 constraints: 1e0deabc)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.21.0 (1 constraints: 7b1c97a4)
 
@@ -34,9 +34,9 @@ com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 c
 
 com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
-com.palantir.conjure.java:conjure-lib:8.69.0 (2 constraints: ca21f478)
+com.palantir.conjure.java:conjure-lib:8.70.0 (2 constraints: ca21f478)
 
-com.palantir.conjure.java.api:errors:2.68.0 (1 constraints: 2810b6a9)
+com.palantir.conjure.java.api:errors:2.69.0 (1 constraints: 2910b9a9)
 
 com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.31.0 (1 constraints: 821cbfa4)
 
@@ -46,23 +46,23 @@ com.palantir.goethe:goethe:0.19.0 (1 constraints: 3c053e3b)
 
 com.palantir.javapoet:javapoet:0.10.0 (1 constraints: f10b56f7)
 
-com.palantir.ri:resource-identifier:2.12.0 (1 constraints: 1d1090a9)
+com.palantir.ri:resource-identifier:2.13.0 (1 constraints: 1e1093a9)
 
-com.palantir.safe-logging:logger:3.11.0 (4 constraints: c7497222)
+com.palantir.safe-logging:logger:3.11.0 (4 constraints: f0498364)
 
 com.palantir.safe-logging:logger-slf4j:3.11.0 (1 constraints: 300e8a50)
 
 com.palantir.safe-logging:logger-spi:3.11.0 (2 constraints: 6f1e0ab0)
 
-com.palantir.safe-logging:preconditions:3.11.0 (9 constraints: da8eefae)
+com.palantir.safe-logging:preconditions:3.11.0 (9 constraints: 568feaf0)
 
-com.palantir.safe-logging:safe-logging:3.11.0 (9 constraints: 4c9c24b1)
+com.palantir.safe-logging:safe-logging:3.11.0 (9 constraints: 9f9c487c)
 
 com.palantir.sls.versions:sls-versions:1.10.0 (1 constraints: 3405293b)
 
-com.palantir.tokens:auth-tokens:3.21.0 (1 constraints: 1e1097a9)
+com.palantir.tokens:auth-tokens:3.22.0 (1 constraints: 1f109aa9)
 
-com.palantir.tritium:tritium-ids:0.124.0 (1 constraints: f80f88a6)
+com.palantir.tritium:tritium-ids:0.124.0 (1 constraints: fa0f8ea6)
 
 com.palantir.tritium:tritium-registry:0.124.0 (2 constraints: 152213ad)
 
