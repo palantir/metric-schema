@@ -1,8 +1,8 @@
 com.fasterxml.jackson.*:* = 2.21.0
 com.fasterxml.jackson.core:jackson-annotations = 2.21
-org.junit.jupiter:* = 6.0.2
-org.junit.platform:* = 6.0.2
-org.junit.vintage:* = 6.0.2
+org.junit.jupiter:* = 6.0.3
+org.junit.platform:* = 6.0.3
+org.junit.vintage:* = 6.0.3
 com.google.guava:guava = 33.5.0-jre
 junit:junit = 4.13.2
 org.assertj:assertj-core = 3.27.7
