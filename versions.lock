@@ -4,23 +4,23 @@ com.atlassian.commonmark:commonmark:0.12.1 (1 constraints: 36052a3b)
 
 com.fasterxml.jackson.core:jackson-annotations:2.21 (9 constraints: 38967a70)
 
-com.fasterxml.jackson.core:jackson-core:2.21.0 (10 constraints: fddf8b8e)
+com.fasterxml.jackson.core:jackson-core:2.21.1 (10 constraints: 05e06f99)
 
-com.fasterxml.jackson.core:jackson-databind:2.21.0 (13 constraints: 1e0deabc)
+com.fasterxml.jackson.core:jackson-databind:2.21.1 (13 constraints: 260df6cc)
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.21.0 (1 constraints: 7b1c97a4)
+com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.21.1 (1 constraints: 7b1c97a4)
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.21.0 (1 constraints: 7b1c97a4)
+com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.21.1 (1 constraints: 7b1c97a4)
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.21.0 (1 constraints: 3705363b)
+com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.21.1 (1 constraints: 3805373b)
 
-com.fasterxml.jackson.datatype:jackson-datatype-guava:2.21.0 (1 constraints: 7b1c97a4)
+com.fasterxml.jackson.datatype:jackson-datatype-guava:2.21.1 (1 constraints: 7b1c97a4)
 
-com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.21.0 (1 constraints: 7b1c97a4)
+com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.21.1 (1 constraints: 7b1c97a4)
 
-com.fasterxml.jackson.datatype:jackson-datatype-joda:2.21.0 (1 constraints: 7b1c97a4)
+com.fasterxml.jackson.datatype:jackson-datatype-joda:2.21.1 (1 constraints: 7b1c97a4)
 
-com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.0 (1 constraints: 7b1c97a4)
+com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.1 (1 constraints: 7b1c97a4)
 
 com.google.code.findbugs:jsr305:3.0.2 (3 constraints: e830a05a)
 
@@ -86,7 +86,7 @@ org.jspecify:jspecify:1.0.0 (10 constraints: aea088ea)
 
 org.slf4j:slf4j-api:2.0.17 (5 constraints: 9d437d5b)
 
-org.yaml:snakeyaml:2.4 (1 constraints: 3e178d10)
+org.yaml:snakeyaml:2.5 (1 constraints: 3f178e10)
 
 
 
