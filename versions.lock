@@ -24,7 +24,7 @@ com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.1 (1 constraints: 7b
 
 com.google.code.findbugs:jsr305:3.0.2 (3 constraints: e830a05a)
 
-com.google.errorprone:error_prone_annotations:2.41.0 (10 constraints: ff9a59b4)
+com.google.errorprone:error_prone_annotations:2.47.0 (10 constraints: 089b95c3)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
