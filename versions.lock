@@ -80,7 +80,7 @@ org.eclipse.collections:eclipse-collections-api:13.0.0 (2 constraints: fa22df26)
 
 org.immutables:value:2.12.1 (2 constraints: 0015bec1)
 
-org.jetbrains:annotations:26.1.0 (4 constraints: 0f40733e)
+org.jetbrains:annotations:26.1.0 (4 constraints: 0e40433e)
 
 org.jspecify:jspecify:1.0.0 (10 constraints: aea088ea)
 
@@ -96,13 +96,13 @@ cglib:cglib-nodep:3.2.2 (1 constraints: 490ded24)
 
 com.netflix.nebula:nebula-test:10.6.2 (2 constraints: d61de72d)
 
-com.palantir.gradle.plugintesting:configuration-cache-spec:0.59.0 (1 constraints: 40054e3b)
+com.palantir.gradle.plugintesting:configuration-cache-spec:0.60.0 (1 constraints: 3805373b)
 
-com.palantir.gradle.plugintesting:discover-tests-cli:0.59.0 (1 constraints: 40054e3b)
+com.palantir.gradle.plugintesting:discover-tests-cli:0.60.0 (1 constraints: 3805373b)
 
-com.palantir.gradle.plugintesting:gradle-plugin-testing-junit:0.59.0 (1 constraints: 40054e3b)
+com.palantir.gradle.plugintesting:gradle-plugin-testing-junit:0.60.0 (1 constraints: 3805373b)
 
-com.palantir.gradle.plugintesting:plugin-testing-core:0.59.0 (1 constraints: 40054e3b)
+com.palantir.gradle.plugintesting:plugin-testing-core:0.60.0 (1 constraints: 3805373b)
 
 commons-io:commons-io:2.21.0 (2 constraints: 111f5a8c)
 
