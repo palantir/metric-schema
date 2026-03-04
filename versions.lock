@@ -42,23 +42,23 @@ com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.32.0 (1 c
 
 com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.32.0 (1 constraints: 3f05613b)
 
-com.palantir.goethe:goethe:0.19.0 (1 constraints: 3c053e3b)
+com.palantir.goethe:goethe:0.20.0 (1 constraints: 3405273b)
 
-com.palantir.javapoet:javapoet:0.10.0 (1 constraints: f10b56f7)
+com.palantir.javapoet:javapoet:0.11.0 (1 constraints: f20b59f7)
 
 com.palantir.ri:resource-identifier:2.13.0 (1 constraints: 1e1093a9)
 
-com.palantir.safe-logging:logger:3.12.0 (4 constraints: f2490c65)
+com.palantir.safe-logging:logger:3.12.0 (4 constraints: f3496265)
 
 com.palantir.safe-logging:logger-slf4j:3.12.0 (1 constraints: 310e8d50)
 
 com.palantir.safe-logging:logger-spi:3.12.0 (2 constraints: 711e40b0)
 
-com.palantir.safe-logging:preconditions:3.12.0 (9 constraints: 5a8f8ef3)
+com.palantir.safe-logging:preconditions:3.12.0 (9 constraints: 5b8f13f4)
 
-com.palantir.safe-logging:safe-logging:3.12.0 (9 constraints: a49c197f)
+com.palantir.safe-logging:safe-logging:3.12.0 (9 constraints: a59c4b7f)
 
-com.palantir.sls.versions:sls-versions:1.10.0 (1 constraints: 3405293b)
+com.palantir.sls.versions:sls-versions:1.11.0 (1 constraints: 35052c3b)
 
 com.palantir.tokens:auth-tokens:3.22.0 (1 constraints: 1f109aa9)
 
