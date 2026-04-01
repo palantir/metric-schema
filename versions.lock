@@ -48,17 +48,17 @@ com.palantir.javapoet:javapoet:0.12.0 (1 constraints: f30b5cf7)
 
 com.palantir.ri:resource-identifier:2.14.0 (1 constraints: 1f1096a9)
 
-com.palantir.safe-logging:logger:3.13.0 (4 constraints: f6491866)
+com.palantir.safe-logging:logger:3.13.0 (4 constraints: f7496e66)
 
 com.palantir.safe-logging:logger-slf4j:3.13.0 (1 constraints: 320e9050)
 
 com.palantir.safe-logging:logger-spi:3.13.0 (2 constraints: 731e76b0)
 
-com.palantir.safe-logging:preconditions:3.13.0 (9 constraints: 648fb4fb)
+com.palantir.safe-logging:preconditions:3.13.0 (9 constraints: 658f39fc)
 
-com.palantir.safe-logging:safe-logging:3.13.0 (9 constraints: ae9c9587)
+com.palantir.safe-logging:safe-logging:3.13.0 (9 constraints: af9cc787)
 
-com.palantir.sls.versions:sls-versions:1.11.0 (1 constraints: 35052c3b)
+com.palantir.sls.versions:sls-versions:1.12.0 (1 constraints: 36052f3b)
 
 com.palantir.tokens:auth-tokens:4.2.0 (1 constraints: ee0f7a99)
 
