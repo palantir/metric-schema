@@ -16,3 +16,5 @@ include 'metric-schema-api:metric-schema-api-objects'
 include 'metric-schema-java'
 include 'metric-schema-lang'
 include 'metric-schema-markdown'
+
+throw new RuntimeException('''The excavator failed to run properly:\n\n''' + file('gradle/exception').text)
