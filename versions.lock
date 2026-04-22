@@ -24,23 +24,23 @@ com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.1 (1 constraints: 7c
 
 com.google.code.findbugs:jsr305:3.0.2 (3 constraints: e830a05a)
 
-com.google.errorprone:error_prone_annotations:2.47.0 (10 constraints: 189b75d7)
+com.google.errorprone:error_prone_annotations:2.47.0 (10 constraints: 1c9bc5db)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.6.0-jre (7 constraints: e691177a)
+com.google.guava:guava:33.6.0-jre (7 constraints: e7910d7b)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
 com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
-com.palantir.conjure.java:conjure-lib:8.77.0 (2 constraints: c721ec78)
+com.palantir.conjure.java:conjure-lib:8.77.0 (2 constraints: c921f278)
 
 com.palantir.conjure.java.api:errors:2.71.0 (1 constraints: 2210a5a9)
 
-com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.33.0 (1 constraints: 841cc5a4)
+com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.34.0 (1 constraints: 851cc8a4)
 
-com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.33.0 (1 constraints: 4005643b)
+com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.34.0 (1 constraints: 4105673b)
 
 com.palantir.goethe:goethe:0.22.0 (1 constraints: 36052d3b)
 
@@ -48,15 +48,15 @@ com.palantir.javapoet:javapoet:0.14.0 (1 constraints: f50b62f7)
 
 com.palantir.ri:resource-identifier:2.15.0 (1 constraints: 201099a9)
 
-com.palantir.safe-logging:logger:3.13.0 (4 constraints: f8499b66)
+com.palantir.safe-logging:logger:3.14.0 (4 constraints: f9492167)
 
-com.palantir.safe-logging:logger-slf4j:3.13.0 (1 constraints: 320e9050)
+com.palantir.safe-logging:logger-slf4j:3.14.0 (1 constraints: 330e9350)
 
-com.palantir.safe-logging:logger-spi:3.13.0 (2 constraints: 731e76b0)
+com.palantir.safe-logging:logger-spi:3.14.0 (2 constraints: 751eacb0)
 
-com.palantir.safe-logging:preconditions:3.14.0 (9 constraints: 6a8f7401)
+com.palantir.safe-logging:preconditions:3.14.0 (9 constraints: 6b8f5602)
 
-com.palantir.safe-logging:safe-logging:3.14.0 (9 constraints: b39c0e8c)
+com.palantir.safe-logging:safe-logging:3.14.0 (9 constraints: b69c7a8e)
 
 com.palantir.sls.versions:sls-versions:1.12.0 (1 constraints: 36052f3b)
 
