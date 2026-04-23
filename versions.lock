@@ -104,7 +104,7 @@ com.palantir.gradle.plugintesting:gradle-plugin-testing-junit:0.69.0 (1 constrai
 
 com.palantir.gradle.plugintesting:plugin-testing-core:0.69.0 (2 constraints: 1e1f448f)
 
-commons-io:commons-io:2.21.0 (2 constraints: 0a1f468c)
+commons-io:commons-io:2.22.0 (2 constraints: 0b1f908c)
 
 info.picocli:picocli:4.7.7 (1 constraints: 2816dcdd)
 
