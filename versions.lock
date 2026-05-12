@@ -24,7 +24,7 @@ com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.1 (1 constraints: 7c
 
 com.google.code.findbugs:jsr305:3.0.2 (3 constraints: e830a05a)
 
-com.google.errorprone:error_prone_annotations:2.47.0 (10 constraints: 209bd1db)
+com.google.errorprone:error_prone_annotations:2.49.0 (10 constraints: 229bd7db)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
@@ -62,9 +62,9 @@ com.palantir.sls.versions:sls-versions:1.13.0 (1 constraints: 3705323b)
 
 com.palantir.tokens:auth-tokens:4.3.0 (1 constraints: ef0f7d99)
 
-com.palantir.tritium:tritium-ids:0.128.0 (1 constraints: fc0f94a6)
+com.palantir.tritium:tritium-ids:0.129.0 (1 constraints: fc0f94a6)
 
-com.palantir.tritium:tritium-registry:0.128.0 (2 constraints: 1b2261ae)
+com.palantir.tritium:tritium-registry:0.129.0 (2 constraints: 1c22b3ae)
 
 com.squareup:javapoet:1.13.0 (2 constraints: 2b113eee)
 
