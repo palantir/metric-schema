@@ -19,11 +19,11 @@ public final class ReservedConflictMetrics {
     private static final String LIBRARY_VERSION = Objects.requireNonNullElse(
             ReservedConflictMetrics.class.getPackage().getImplementationVersion(), "unknown");
 
-    private static final MetricName floatMetricName = MetricName.builder()
+    private static final MetricName floatMetricName = MetricName.builderWithExpectedTags(3)
             .safeName("reserved.conflict.float")
+            .putSafeTags("javaVersion", JAVA_VERSION)
             .putSafeTags("libraryName", LIBRARY_NAME)
             .putSafeTags("libraryVersion", LIBRARY_VERSION)
-            .putSafeTags("javaVersion", JAVA_VERSION)
             .build();
 
     private final TaggedMetricRegistry registry;
@@ -49,12 +49,12 @@ public final class ReservedConflictMetrics {
     }
 
     public static MetricName longMetricName(@Safe String int_) {
-        return MetricName.builder()
+        return MetricName.builderWithExpectedTags(4)
                 .safeName("reserved.conflict.long")
                 .putSafeTags("int", int_)
+                .putSafeTags("javaVersion", JAVA_VERSION)
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                .putSafeTags("javaVersion", JAVA_VERSION)
                 .build();
     }
 
@@ -149,14 +149,14 @@ public final class ReservedConflictMetrics {
 
         @Override
         public MetricName buildMetricName() {
-            return MetricName.builder()
+            return MetricName.builderWithExpectedTags(6)
                     .safeName("reserved.conflict.int")
                     .putSafeTags("int", int_)
-                    .putSafeTags("registry", registry_)
-                    .putSafeTags("long", long_)
+                    .putSafeTags("javaVersion", JAVA_VERSION)
                     .putSafeTags("libraryName", LIBRARY_NAME)
                     .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                    .putSafeTags("javaVersion", JAVA_VERSION)
+                    .putSafeTags("long", long_)
+                    .putSafeTags("registry", registry_)
                     .build();
         }
     }
@@ -190,12 +190,12 @@ public final class ReservedConflictMetrics {
 
         @Override
         public MetricName buildMetricName() {
-            return MetricName.builder()
+            return MetricName.builderWithExpectedTags(4)
                     .safeName("reserved.conflict.double")
                     .putSafeTags("int", int_)
+                    .putSafeTags("javaVersion", JAVA_VERSION)
                     .putSafeTags("libraryName", LIBRARY_NAME)
                     .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                    .putSafeTags("javaVersion", JAVA_VERSION)
                     .build();
         }
     }
@@ -262,7 +262,7 @@ public final class ReservedConflictMetrics {
 
         @Override
         public MetricName buildMetricName() {
-            return MetricName.builder()
+            return MetricName.builderWithExpectedTags(3)
                     .safeName("reserved.conflict.includes.default.tags")
                     .putSafeTags("javaVersion", javaVersion)
                     .putSafeTags("libraryName", libraryName)
@@ -333,7 +333,7 @@ public final class ReservedConflictMetrics {
 
         @Override
         public MetricName buildMetricName() {
-            return MetricName.builder()
+            return MetricName.builderWithExpectedTags(3)
                     .safeName("reserved.conflict.includes.default.tags.different.case")
                     .putSafeTags("javaversion", javaversion)
                     .putSafeTags("libraryname", libraryname)

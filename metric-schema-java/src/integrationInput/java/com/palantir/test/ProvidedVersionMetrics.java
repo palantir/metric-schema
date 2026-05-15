@@ -13,11 +13,11 @@ public final class ProvidedVersionMetrics {
 
     private static final String LIBRARY_VERSION = "1.0.0";
 
-    private static final MetricName utilizationMetricName = MetricName.builder()
+    private static final MetricName utilizationMetricName = MetricName.builderWithExpectedTags(3)
             .safeName("provided.version.utilization")
+            .putSafeTags("javaVersion", JAVA_VERSION)
             .putSafeTags("libraryName", LIBRARY_NAME)
             .putSafeTags("libraryVersion", LIBRARY_VERSION)
-            .putSafeTags("javaVersion", JAVA_VERSION)
             .build();
 
     private final TaggedMetricRegistry registry;
