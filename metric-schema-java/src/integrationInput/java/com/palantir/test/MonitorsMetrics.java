@@ -40,13 +40,13 @@ public final class MonitorsMetrics {
     }
 
     public static MetricName moreMetricName(@Safe String type) {
-        return MetricName.builder()
+        return MetricName.builderWithExpectedTags(5)
                 .safeName("monitors.more")
-                .putSafeTags("type", type)
-                .putSafeTags("locator", "package:identifier")
+                .putSafeTags("javaVersion", JAVA_VERSION)
                 .putSafeTags("libraryName", LIBRARY_NAME)
                 .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                .putSafeTags("javaVersion", JAVA_VERSION)
+                .putSafeTags("locator", "package:identifier")
+                .putSafeTags("type", type)
                 .build();
     }
 
@@ -151,15 +151,15 @@ public final class MonitorsMetrics {
 
         @Override
         public MetricName buildMetricName() {
-            return MetricName.builder()
+            return MetricName.builderWithExpectedTags(7)
                     .safeName("monitors.processing")
-                    .putSafeTags("result", result.getValue())
-                    .putSafeTags("type", type)
-                    .putSafeTags("locator", "package:identifier")
-                    .putSafeTags("otherLocator", otherLocator.getValue())
+                    .putSafeTags("javaVersion", JAVA_VERSION)
                     .putSafeTags("libraryName", LIBRARY_NAME)
                     .putSafeTags("libraryVersion", LIBRARY_VERSION)
-                    .putSafeTags("javaVersion", JAVA_VERSION)
+                    .putSafeTags("locator", "package:identifier")
+                    .putSafeTags("otherLocator", otherLocator.getValue())
+                    .putSafeTags("result", result.getValue())
+                    .putSafeTags("type", type)
                     .build();
         }
     }

@@ -380,6 +380,8 @@ final class UtilityGenerator {
         return Custodian.anyToUpperCamel(namespace) + "Metrics";
     }
 
+    private record TagEntry(String key, CodeBlock codeBlock) {}
+
     private static CodeBlock metricName(
             String namespace,
             String metricName,
@@ -387,45 +389,68 @@ final class UtilityGenerator {
             MetricDefinition definition,
             MetricNamespace metricNamespace) {
         String safeName = namespace + '.' + metricName;
-        CodeBlock.Builder builder = CodeBlock.builder().add("$T.builder().safeName($S)", MetricName.class, safeName);
+        List<TagEntry> tags = new ArrayList<>();
+
         metricNamespace.getTags().forEach(tagDef -> {
             if (tagDef.getValues().size() != 1) {
-                builder.add(".putSafeTags($S, $L)", tagDef.getName(), tagValueField(tagDef.getName()));
-            } else {
-                builder.add(
-                        ".putSafeTags($S, $S)",
+                tags.add(new TagEntry(
                         tagDef.getName(),
-                        Iterables.getOnlyElement(tagDef.getValues()).getValue());
+                        CodeBlock.of(".putSafeTags($S, $L)", tagDef.getName(), tagValueField(tagDef.getName()))));
+            } else {
+                tags.add(new TagEntry(
+                        tagDef.getName(),
+                        CodeBlock.of(
+                                ".putSafeTags($S, $S)",
+                                tagDef.getName(),
+                                Iterables.getOnlyElement(tagDef.getValues()).getValue())));
             }
         });
 
-        definition.getTagDefinitions().forEach(tagDef -> putSafeTags(tagDef, builder));
+        definition.getTagDefinitions().forEach(tagDef -> tags.add(new TagEntry(tagDef.getName(), safeTags(tagDef))));
         ImmutableSortedSet<String> insensitiveTags = insensitiveTags(definition);
         if (libraryName.isPresent()) {
             if (!insensitiveTags.contains(ReservedNames.LIBRARY_NAME_TAG)) {
-                builder.add(".putSafeTags($S, $L)", ReservedNames.LIBRARY_NAME_TAG, ReservedNames.LIBRARY_NAME_FIELD);
+                tags.add(new TagEntry(
+                        ReservedNames.LIBRARY_NAME_TAG,
+                        CodeBlock.of(
+                                ".putSafeTags($S, $L)",
+                                ReservedNames.LIBRARY_NAME_TAG,
+                                ReservedNames.LIBRARY_NAME_FIELD)));
             }
             if (!insensitiveTags.contains(ReservedNames.LIBRARY_VERSION_TAG)) {
-                builder.add(
-                        ".putSafeTags($S, $L)", ReservedNames.LIBRARY_VERSION_TAG, ReservedNames.LIBRARY_VERSION_FIELD);
+                tags.add(new TagEntry(
+                        ReservedNames.LIBRARY_VERSION_TAG,
+                        CodeBlock.of(
+                                ".putSafeTags($S, $L)",
+                                ReservedNames.LIBRARY_VERSION_TAG,
+                                ReservedNames.LIBRARY_VERSION_FIELD)));
             }
         }
         if (!insensitiveTags.contains(ReservedNames.JAVA_VERSION_TAG)) {
-            builder.add(".putSafeTags($S, $L)", ReservedNames.JAVA_VERSION_TAG, ReservedNames.JAVA_VERSION_FIELD);
+            tags.add(new TagEntry(
+                    ReservedNames.JAVA_VERSION_TAG,
+                    CodeBlock.of(
+                            ".putSafeTags($S, $L)", ReservedNames.JAVA_VERSION_TAG, ReservedNames.JAVA_VERSION_FIELD)));
         }
+
+        tags.sort(java.util.Comparator.comparing(TagEntry::key));
+        CodeBlock.Builder builder = CodeBlock.builder()
+                .add("$T.builderWithExpectedTags($L).safeName($S)", MetricName.class, tags.size(), safeName);
+        tags.forEach(entry -> builder.add(entry.codeBlock()));
         return builder.add(".build()").build();
     }
 
-    private static void putSafeTags(TagDefinition tagDef, CodeBlock.Builder builder) {
+    private static CodeBlock safeTags(TagDefinition tagDef) {
         if (tagDef.getValues().isEmpty()) {
-            builder.add(".putSafeTags($S, $L)", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
+            return CodeBlock.of(".putSafeTags($S, $L)", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
         } else if (tagDef.getValues().size() == 1) {
-            builder.add(
+            return CodeBlock.of(
                     ".putSafeTags($S, $S)",
                     tagDef.getName(),
                     Iterables.getOnlyElement(tagDef.getValues()).getValue());
         } else {
-            builder.add(".putSafeTags($S, $L.getValue())", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
+            return CodeBlock.of(
+                    ".putSafeTags($S, $L.getValue())", tagDef.getName(), Custodian.sanitizeName(tagDef.getName()));
         }
     }
 
