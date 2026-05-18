@@ -47,7 +47,8 @@ public final class DependencyRequirements {
         }
 
         ImmutableSetMultimap.Builder<String, String> dependencies = ImmutableSetMultimap.<String, String>builder()
-                .put("api", "com.palantir.tritium:tritium-registry")
+                // 0.130.0 has a new builder constructor that we depend on
+                .put("api", "com.palantir.tritium:tritium-registry:0.130.0")
                 .put("api", "com.palantir.safe-logging:preconditions")
                 .put("api", "com.google.errorprone:error_prone_annotations")
                 // Metric types like Gauge are part of the generated code's public API
