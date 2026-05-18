@@ -42,9 +42,9 @@ com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.34.0 (1 c
 
 com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.34.0 (1 constraints: 4105673b)
 
-com.palantir.goethe:goethe:0.22.0 (1 constraints: 36052d3b)
+com.palantir.goethe:goethe:0.23.0 (1 constraints: 3705303b)
 
-com.palantir.javapoet:javapoet:0.14.0 (1 constraints: f50b62f7)
+com.palantir.javapoet:javapoet:0.15.0 (1 constraints: f60b65f7)
 
 com.palantir.ri:resource-identifier:2.15.0 (1 constraints: 201099a9)
 
