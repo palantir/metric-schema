@@ -2,7 +2,7 @@
 
 com.atlassian.commonmark:commonmark:0.12.1 (1 constraints: 36052a3b)
 
-com.fasterxml.jackson.core:jackson-annotations:2.21 (9 constraints: 38967a70)
+com.fasterxml.jackson.core:jackson-annotations:2.21 (10 constraints: 54b2550b)
 
 com.fasterxml.jackson.core:jackson-core:2.21.4 (10 constraints: 25e05bbb)
 
@@ -38,9 +38,9 @@ com.palantir.conjure.java:conjure-lib:8.80.0 (2 constraints: c321e178)
 
 com.palantir.conjure.java.api:errors:2.73.0 (1 constraints: 2410aba9)
 
-com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.37.0 (1 constraints: 881cd1a4)
+com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.38.0 (1 constraints: 891cd4a4)
 
-com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.37.0 (1 constraints: 4405703b)
+com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.38.0 (1 constraints: 4505733b)
 
 com.palantir.goethe:goethe:0.24.0 (1 constraints: 3805333b)
 
