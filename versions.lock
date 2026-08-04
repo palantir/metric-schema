@@ -2,25 +2,25 @@
 
 com.atlassian.commonmark:commonmark:0.12.1 (1 constraints: 36052a3b)
 
-com.fasterxml.jackson.core:jackson-annotations:2.21 (10 constraints: 54b2550b)
+com.fasterxml.jackson.core:jackson-annotations:2.22 (10 constraints: 59b27911)
 
-com.fasterxml.jackson.core:jackson-core:2.21.4 (10 constraints: 25e05bbb)
+com.fasterxml.jackson.core:jackson-core:2.22.1 (10 constraints: 13e007a5)
 
-com.fasterxml.jackson.core:jackson-databind:2.21.4 (13 constraints: 520d9d06)
+com.fasterxml.jackson.core:jackson-databind:2.22.1 (13 constraints: 420d68ea)
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.21.4 (1 constraints: 7f1c9ba4)
+com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.22.1 (1 constraints: 7f1c9ba4)
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.21.4 (1 constraints: 7f1c9ba4)
+com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.22.1 (1 constraints: 7f1c9ba4)
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.21.4 (1 constraints: 3b053a3b)
+com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.22.1 (1 constraints: 3b053a3b)
 
-com.fasterxml.jackson.datatype:jackson-datatype-guava:2.21.4 (1 constraints: 7f1c9ba4)
+com.fasterxml.jackson.datatype:jackson-datatype-guava:2.22.1 (1 constraints: 7f1c9ba4)
 
-com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.21.4 (1 constraints: 7f1c9ba4)
+com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.22.1 (1 constraints: 7f1c9ba4)
 
-com.fasterxml.jackson.datatype:jackson-datatype-joda:2.21.4 (1 constraints: 7f1c9ba4)
+com.fasterxml.jackson.datatype:jackson-datatype-joda:2.22.1 (1 constraints: 7f1c9ba4)
 
-com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.4 (1 constraints: 7f1c9ba4)
+com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.1 (1 constraints: 7f1c9ba4)
 
 com.google.code.findbugs:jsr305:3.0.2 (3 constraints: e830a05a)
 
@@ -34,7 +34,7 @@ com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 c
 
 com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
-com.palantir.conjure.java:conjure-lib:8.83.0 (2 constraints: c521e778)
+com.palantir.conjure.java:conjure-lib:8.84.0 (2 constraints: c521e778)
 
 com.palantir.conjure.java.api:errors:2.76.0 (1 constraints: 2710b4a9)
 
