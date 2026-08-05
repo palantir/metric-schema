@@ -62,9 +62,9 @@ com.palantir.sls.versions:sls-versions:1.16.0 (1 constraints: 3a053b3b)
 
 com.palantir.tokens:auth-tokens:4.7.0 (1 constraints: f30f8999)
 
-com.palantir.tritium:tritium-ids:0.135.0 (1 constraints: fe0f9aa6)
+com.palantir.tritium:tritium-ids:0.136.0 (1 constraints: fe0f9aa6)
 
-com.palantir.tritium:tritium-registry:0.135.0 (2 constraints: 1922bfad)
+com.palantir.tritium:tritium-registry:0.136.0 (2 constraints: 1a2211ae)
 
 com.squareup:javapoet:1.13.0 (2 constraints: 2b113eee)
 
