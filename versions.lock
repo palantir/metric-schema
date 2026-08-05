@@ -2,17 +2,17 @@
 
 com.atlassian.commonmark:commonmark:0.12.1 (1 constraints: 36052a3b)
 
-com.fasterxml.jackson.core:jackson-annotations:2.22 (10 constraints: 5ab2fa11)
+com.fasterxml.jackson.core:jackson-annotations:2.22 (10 constraints: 5bb2de13)
 
 com.fasterxml.jackson.core:jackson-core:2.22.1 (10 constraints: 11e007a5)
 
-com.fasterxml.jackson.core:jackson-databind:2.22.1 (13 constraints: 3e0d28e9)
+com.fasterxml.jackson.core:jackson-databind:2.22.1 (13 constraints: 3c0d60e3)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.22.1 (1 constraints: 7d1c9ba4)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.22.1 (1 constraints: 7d1c9ba4)
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.22.1 (1 constraints: 3b053a3b)
+com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.22.1 (1 constraints: 39053a3b)
 
 com.fasterxml.jackson.datatype:jackson-datatype-guava:2.22.1 (1 constraints: 7d1c9ba4)
 
