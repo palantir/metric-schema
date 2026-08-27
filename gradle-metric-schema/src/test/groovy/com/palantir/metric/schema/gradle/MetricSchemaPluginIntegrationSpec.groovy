@@ -76,7 +76,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
             }
 
             dependencies {
-                classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:2.32.0'
+                classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:3.18.0'
                 classpath 'com.palantir.baseline:gradle-baseline-java:6.25.0'
             }
         }
