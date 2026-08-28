@@ -27,6 +27,9 @@ dependencies {
     testRuntimeOnly 'io.dropwizard.metrics:metrics-core'
 
     compileOnly 'org.immutables:value::annotations'
+    testImplementation 'org.spockframework:spock-core'
+    testCompileOnly 'junit:junit'
+    testRuntimeOnly 'org.spockframework:spock-junit4'
 }
 
 
