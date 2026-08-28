@@ -22,8 +22,8 @@ import com.palantir.gradle.plugintesting.TestContentHelpers
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import nebula.test.IntegrationSpec
-import nebula.test.dependencies.DependencyGraph
-import nebula.test.dependencies.GradleDependencyGenerator
+import nebula.test.dependencies.maven.Pom
+import nebula.test.dependencies.repositories.MavenRepo
 import nebula.test.functional.ExecutionResult
 import org.apache.commons.io.FileUtils
 
@@ -76,8 +76,8 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
             }
 
             dependencies {
-                classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:2.32.0'
-                classpath 'com.palantir.baseline:gradle-baseline-java:6.25.0'
+                classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:3.18.0'
+                classpath 'com.palantir.baseline:gradle-baseline-java:7.8.0'
             }
         }
 
@@ -132,7 +132,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
     def 'build cache works'() {
         when:
-        file("gradle.properties") << "org.gradle.caching=true"
+        buildCacheEnabled = true
         file('src/main/metrics/metrics.yml') << METRICS
 
         runTasksSuccessfully('generateMetrics')
@@ -197,15 +197,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
     def "createManifest discovers metric schema"() {
         when:
-        def dependencyGraph = new DependencyGraph('a:a:1.0')
-        GradleDependencyGenerator generator = new GradleDependencyGenerator(
-                dependencyGraph, new File(projectDir, "build/testrepogen").toString())
-        def mavenRepo = generator.generateTestMavenRepo()
-
-        Files.copy(
-                MetricSchemaPluginIntegrationSpec.getResourceAsStream("/a-1.0.jar"),
-                new File(mavenRepo, "a/a/1.0/a-1.0.jar").toPath(),
-                StandardCopyOption.REPLACE_EXISTING)
+        File mavenRepo = createMavenRepo()
 
         buildFile << """
         group 'com.palantir.test'
@@ -290,15 +282,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
     def 'createManifest discovers transitive external metric schema'() {
         when:
-        def dependencyGraph = new DependencyGraph('a:a:1.0')
-        GradleDependencyGenerator generator = new GradleDependencyGenerator(
-                dependencyGraph, new File(projectDir, "build/testrepogen").toString())
-        def mavenRepo = generator.generateTestMavenRepo()
-
-        Files.copy(
-                MetricSchemaPluginIntegrationSpec.getResourceAsStream("/a-1.0.jar"),
-                new File(mavenRepo, "a/a/1.0/a-1.0.jar").toPath(),
-                StandardCopyOption.REPLACE_EXISTING)
+        File mavenRepo = createMavenRepo()
 
         addSubproject("foo-lib", """
         repositories {
@@ -351,7 +335,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
     def 'declare exact dependencies'() {
         setup:
         buildFile << """
-        apply plugin: 'com.palantir.baseline'
+        apply plugin: 'com.palantir.baseline-exact-dependencies'
         """.stripIndent(true)
         file('src/main/metrics/metrics.yml') << METRICS
 
@@ -371,7 +355,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
     def 'declare exact dependencies even without generated metrics'() {
         setup:
         buildFile << """
-        apply plugin: 'com.palantir.baseline'
+        apply plugin: 'com.palantir.baseline-exact-dependencies'
         """.stripIndent(true)
 
         when:
@@ -390,7 +374,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
     def 'declare exact dependencies even with metrics without safety-annotated tags'() {
         setup:
         buildFile << """
-        apply plugin: 'com.palantir.baseline'
+        apply plugin: 'com.palantir.baseline-exact-dependencies'
         """.stripIndent(true)
         file('src/main/metrics/metrics.yml') << METRICS_NO_TAGS
 
@@ -405,5 +389,16 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         !result.wasSkipped(":checkImplicitDependenciesMain")
         result.wasExecuted(":checkUnusedDependenciesMain")
         !result.wasSkipped(":checkUnusedDependenciesMain")
+    }
+
+    private File createMavenRepo() {
+        MavenRepo mavenRepo = new MavenRepo(root: new File(projectDir, "build/testrepogen/mavenrepo"))
+        mavenRepo.poms.add(new Pom('a', 'a', '1.0'))
+        mavenRepo.generate()
+        Files.copy(
+                MetricSchemaPluginIntegrationSpec.getResourceAsStream("/a-1.0.jar"),
+                new File(mavenRepo.root, "a/a/1.0/a-1.0.jar").toPath(),
+                StandardCopyOption.REPLACE_EXISTING)
+        return mavenRepo.root
     }
 }
