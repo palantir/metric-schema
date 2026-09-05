@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
 
 class MarkdownRendererTest {
 
-    @SuppressWarnings("for-rollout:StringConcatToTextBlock")
     @Test
     void testSimple() {
         MetricSchema firstSchema = MetricSchema.builder()
@@ -101,7 +100,6 @@ class MarkdownRendererTest {
                 .isEqualTo(secondMarkdown);
     }
 
-    @SuppressWarnings("for-rollout:StringConcatToTextBlock")
     @Test
     void testMultipleNamespacesWithSameName() {
         MetricSchema firstSchema = MetricSchema.builder()
@@ -156,7 +154,6 @@ class MarkdownRendererTest {
                 .isEqualTo(secondMarkdown);
     }
 
-    @SuppressWarnings("for-rollout:StringConcatToTextBlock")
     @Test
     void testTagged() {
         String markdown = MarkdownRenderer.render(
@@ -190,7 +187,6 @@ class MarkdownRendererTest {
                         + "- `namespace.metric` tagged `service`, `endpoint` (meter): metric docs");
     }
 
-    @SuppressWarnings("for-rollout:StringConcatToTextBlock")
     @Test
     void testComplexTagged() {
         MetricSchema schema = MetricSchema.builder()
@@ -250,7 +246,6 @@ class MarkdownRendererTest {
                         + "  - `processing` values (`foo`,`bar`)");
     }
 
-    @SuppressWarnings("for-rollout:StringConcatToTextBlock")
     @Test
     void testTaggedWithDocsOnlyOnTag() {
         MetricSchema schema = MetricSchema.builder()
@@ -282,7 +277,6 @@ class MarkdownRendererTest {
                         + "  - `result`: This is a result tag");
     }
 
-    @SuppressWarnings("for-rollout:StringConcatToTextBlock")
     @Test
     void testEmptyNamespacesExcluded() {
         String markdown = MarkdownRenderer.render(
