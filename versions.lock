@@ -28,19 +28,19 @@ com.google.errorprone:error_prone_annotations:2.50.0 (10 constraints: 089b99c3)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.7.1-jre (7 constraints: f091d27f)
+com.google.guava:guava:33.7.1-jre (7 constraints: f191c680)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
 com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
-com.palantir.conjure.java:conjure-lib:8.86.0 (2 constraints: c721ed78)
+com.palantir.conjure.java:conjure-lib:8.86.0 (2 constraints: c921f378)
 
 com.palantir.conjure.java.api:errors:2.78.0 (1 constraints: 2910baa9)
 
-com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.41.0 (1 constraints: 831cc3a4)
+com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.42.0 (1 constraints: 841cc6a4)
 
-com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.41.0 (1 constraints: 3f05623b)
+com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.42.0 (1 constraints: 4005653b)
 
 com.palantir.goethe:goethe:0.28.0 (1 constraints: 3c053f3b)
 
@@ -48,15 +48,15 @@ com.palantir.javapoet:javapoet:0.18.0 (1 constraints: f90b6ef7)
 
 com.palantir.ri:resource-identifier:2.22.0 (1 constraints: 1e1094a9)
 
-com.palantir.safe-logging:logger:3.18.0 (4 constraints: 0c4ad76b)
+com.palantir.safe-logging:logger:3.19.0 (4 constraints: 0d4a5d6c)
 
-com.palantir.safe-logging:logger-slf4j:3.18.0 (1 constraints: 370e9f50)
+com.palantir.safe-logging:logger-slf4j:3.19.0 (1 constraints: 380ea250)
 
-com.palantir.safe-logging:logger-spi:3.18.0 (2 constraints: 7d1e84b1)
+com.palantir.safe-logging:logger-spi:3.19.0 (2 constraints: 7f1ebab1)
 
-com.palantir.safe-logging:preconditions:3.19.0 (9 constraints: 978f5c23)
+com.palantir.safe-logging:preconditions:3.19.0 (9 constraints: 988f3e24)
 
-com.palantir.safe-logging:safe-logging:3.19.0 (9 constraints: e09c96ae)
+com.palantir.safe-logging:safe-logging:3.19.0 (9 constraints: e39c02b1)
 
 com.palantir.sls.versions:sls-versions:1.18.0 (1 constraints: 3c05413b)
 
@@ -64,11 +64,11 @@ com.palantir.tokens:auth-tokens:4.9.0 (1 constraints: f50f8f99)
 
 com.palantir.tritium:tritium-ids:0.137.0 (1 constraints: fe0f9aa6)
 
-com.palantir.tritium:tritium-registry:0.137.0 (2 constraints: 1c2266ae)
+com.palantir.tritium:tritium-registry:0.137.0 (2 constraints: 1d2269ae)
 
 com.squareup:javapoet:1.13.0 (2 constraints: 2b113eee)
 
-io.dropwizard.metrics:metrics-core:4.2.39 (2 constraints: 532d2998)
+io.dropwizard.metrics:metrics-core:4.2.40 (2 constraints: 4b2daa96)
 
 joda-time:joda-time:2.12.7 (1 constraints: 2f16b1f1)
 
