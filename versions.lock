@@ -48,27 +48,27 @@ com.palantir.javapoet:javapoet:0.19.0 (1 constraints: fa0b71f7)
 
 com.palantir.ri:resource-identifier:2.22.0 (1 constraints: 1e1094a9)
 
-com.palantir.safe-logging:logger:3.19.0 (4 constraints: 0d4a5d6c)
+com.palantir.safe-logging:logger:3.19.0 (4 constraints: 0e4a606c)
 
 com.palantir.safe-logging:logger-slf4j:3.19.0 (1 constraints: 380ea250)
 
 com.palantir.safe-logging:logger-spi:3.19.0 (2 constraints: 7f1ebab1)
 
-com.palantir.safe-logging:preconditions:3.19.0 (9 constraints: 998f6e25)
+com.palantir.safe-logging:preconditions:3.19.0 (9 constraints: 9b8fa325)
 
-com.palantir.safe-logging:safe-logging:3.19.0 (9 constraints: e49c68b2)
+com.palantir.safe-logging:safe-logging:3.19.0 (9 constraints: e59c6bb2)
 
 com.palantir.sls.versions:sls-versions:1.18.0 (1 constraints: 3c05413b)
 
 com.palantir.tokens:auth-tokens:4.9.0 (1 constraints: f50f8f99)
 
-com.palantir.tritium:tritium-ids:0.137.0 (1 constraints: fe0f9aa6)
+com.palantir.tritium:tritium-ids:0.138.0 (1 constraints: fe0f9aa6)
 
-com.palantir.tritium:tritium-registry:0.137.0 (2 constraints: 1d2269ae)
+com.palantir.tritium:tritium-registry:0.138.0 (2 constraints: 1e22bbae)
 
 com.squareup:javapoet:1.13.0 (2 constraints: 2b113eee)
 
-io.dropwizard.metrics:metrics-core:4.2.40 (2 constraints: 4b2daa96)
+io.dropwizard.metrics:metrics-core:4.2.40 (2 constraints: 432da396)
 
 joda-time:joda-time:2.12.7 (1 constraints: 2f16b1f1)
 
@@ -82,7 +82,7 @@ org.immutables:value:2.12.2 (1 constraints: 3905373b)
 
 org.jetbrains:annotations:26.1.0 (4 constraints: 0d40cc3d)
 
-org.jspecify:jspecify:1.0.1 (12 constraints: c2bb5072)
+org.jspecify:jspecify:1.0.1 (13 constraints: 14cad677)
 
 org.slf4j:slf4j-api:2.0.17 (5 constraints: 9d437d5b)
 
