@@ -144,6 +144,7 @@ public final class MarkdownRenderer {
         });
     }
 
+    @SuppressWarnings("for-rollout:BoxingComparator")
     private static ImmutableList<Section> namespaces(String localCoordinate, Map<String, List<MetricSchema>> schemas) {
         return schemas.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(new CoordinateComparator(localCoordinate)))
