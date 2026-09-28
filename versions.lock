@@ -54,9 +54,9 @@ com.palantir.safe-logging:logger-slf4j:3.19.0 (1 constraints: 380ea250)
 
 com.palantir.safe-logging:logger-spi:3.19.0 (2 constraints: 7f1ebab1)
 
-com.palantir.safe-logging:preconditions:3.19.0 (9 constraints: 9c8f2826)
+com.palantir.safe-logging:preconditions:3.20.0 (9 constraints: 948fc119)
 
-com.palantir.safe-logging:safe-logging:3.19.0 (9 constraints: e69c9db2)
+com.palantir.safe-logging:safe-logging:3.20.0 (9 constraints: de9c8eaf)
 
 com.palantir.sls.versions:sls-versions:1.19.0 (1 constraints: 3d05443b)
 
