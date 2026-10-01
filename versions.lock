@@ -4,9 +4,9 @@ com.atlassian.commonmark:commonmark:0.12.1 (1 constraints: 36052a3b)
 
 com.fasterxml.jackson.core:jackson-annotations:2.22 (10 constraints: 5eb25d14)
 
-com.fasterxml.jackson.core:jackson-core:2.22.3 (10 constraints: 21e0cfba)
+com.fasterxml.jackson.core:jackson-core:2.22.3 (10 constraints: 23e06dbb)
 
-com.fasterxml.jackson.core:jackson-databind:2.22.3 (13 constraints: 480dfd01)
+com.fasterxml.jackson.core:jackson-databind:2.22.3 (13 constraints: 4a0de503)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.22.3 (1 constraints: 7d1c9ba4)
 
@@ -34,7 +34,7 @@ com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 c
 
 com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
-com.palantir.conjure.java:conjure-lib:8.90.0 (2 constraints: c921f378)
+com.palantir.conjure.java:conjure-lib:8.91.0 (2 constraints: c921f378)
 
 com.palantir.conjure.java.api:errors:2.80.0 (1 constraints: 2210a6a9)
 
