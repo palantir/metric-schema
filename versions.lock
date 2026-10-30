@@ -6,7 +6,7 @@ com.fasterxml.jackson.core:jackson-annotations:2.22 (10 constraints: 5eb25d14)
 
 com.fasterxml.jackson.core:jackson-core:2.22.4 (10 constraints: 2fe0a3c6)
 
-com.fasterxml.jackson.core:jackson-databind:2.22.4 (13 constraints: 5d0d5918)
+com.fasterxml.jackson.core:jackson-databind:2.22.4 (13 constraints: 5f0d2019)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.22.4 (1 constraints: 801c9ea4)
 
@@ -34,9 +34,9 @@ com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 c
 
 com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
-com.palantir.conjure.java:conjure-lib:8.98.0 (2 constraints: cb21fa78)
+com.palantir.conjure.java:conjure-lib:8.99.0 (2 constraints: cb21fa78)
 
-com.palantir.conjure.java.api:errors:2.81.0 (1 constraints: 2310a9a9)
+com.palantir.conjure.java.api:errors:2.82.0 (1 constraints: 2410aca9)
 
 com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.46.0 (1 constraints: 881cd2a4)
 
@@ -46,21 +46,21 @@ com.palantir.goethe:goethe:0.31.0 (1 constraints: 36052e3b)
 
 com.palantir.javapoet:javapoet:0.22.0 (1 constraints: f40b60f7)
 
-com.palantir.ri:resource-identifier:2.25.0 (1 constraints: 21109da9)
+com.palantir.ri:resource-identifier:2.26.0 (1 constraints: 2210a0a9)
 
-com.palantir.safe-logging:logger:3.21.0 (4 constraints: f2496365)
+com.palantir.safe-logging:logger:3.21.0 (4 constraints: f3499065)
 
 com.palantir.safe-logging:logger-slf4j:3.21.0 (1 constraints: 310e8e50)
 
 com.palantir.safe-logging:logger-spi:3.21.0 (2 constraints: 711e42b0)
 
-com.palantir.safe-logging:preconditions:3.21.0 (9 constraints: 5a8f45f5)
+com.palantir.safe-logging:preconditions:3.21.0 (9 constraints: 5c8fd1f6)
 
-com.palantir.safe-logging:safe-logging:3.21.0 (9 constraints: a59ce580)
+com.palantir.safe-logging:safe-logging:3.21.0 (9 constraints: a69c4b82)
 
 com.palantir.sls.versions:sls-versions:1.21.0 (1 constraints: 3605303b)
 
-com.palantir.tokens:auth-tokens:4.12.0 (1 constraints: 1f109ca9)
+com.palantir.tokens:auth-tokens:4.13.0 (1 constraints: 20109fa9)
 
 com.palantir.tritium:tritium-ids:0.139.0 (1 constraints: fe0f9aa6)
 
