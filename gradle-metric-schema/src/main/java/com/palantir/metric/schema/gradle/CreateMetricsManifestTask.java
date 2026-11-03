@@ -52,8 +52,12 @@ import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.OutputFile;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.work.DisableCachingByDefault;
 
+@DisableCachingByDefault(because = "Not opting into build caching; explicit opt-out is required by Gradle 9.7")
 public abstract class CreateMetricsManifestTask extends DefaultTask {
     private static final Logger log = Logging.getLogger(CreateMetricsManifestTask.class);
 
@@ -72,11 +76,13 @@ public abstract class CreateMetricsManifestTask extends DefaultTask {
     @SuppressWarnings("for-rollout:GradleTypesAsFields")
     private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
 
+    @PathSensitive(PathSensitivity.ABSOLUTE)
     @InputFiles
     public final Provider<FileCollection> getProjectDependencyMetrics() {
         return projectDependencyMetrics;
     }
 
+    @PathSensitive(PathSensitivity.ABSOLUTE)
     @InputFile
     public final RegularFileProperty getMetricsFile() {
         return metricsFile;
