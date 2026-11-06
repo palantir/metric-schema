@@ -49,7 +49,6 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
-import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.PathSensitive;
@@ -62,12 +61,6 @@ public abstract class CreateMetricsManifestTask extends DefaultTask {
     private static final Logger log = Logging.getLogger(CreateMetricsManifestTask.class);
 
     static final String NAME = "createMetricsManifest";
-
-    @PathSensitive(PathSensitivity.ABSOLUTE)
-    @InputFiles
-    public final Provider<FileCollection> getProjectDependencyMetrics() {
-        return otherProjectMetricSchemaTasks();
-    }
 
     @PathSensitive(PathSensitivity.ABSOLUTE)
     @InputFile
@@ -89,7 +82,12 @@ public abstract class CreateMetricsManifestTask extends DefaultTask {
     public abstract RegularFileProperty getOutputFile();
 
     public CreateMetricsManifestTask() {
-        dependsOn(getProjectDependencyMetrics());
+        Provider<FileCollection> projectDependencyMetrics = otherProjectMetricSchemaTasks();
+        getInputs()
+                .files(projectDependencyMetrics)
+                .withPropertyName("projectDependencyMetrics")
+                .withPathSensitivity(PathSensitivity.ABSOLUTE);
+        dependsOn(projectDependencyMetrics);
     }
 
     /**
