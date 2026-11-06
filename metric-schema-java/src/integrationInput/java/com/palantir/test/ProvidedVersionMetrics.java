@@ -6,8 +6,10 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Properties;
 
 /** Test data metric. */
 public final class ProvidedVersionMetrics {
@@ -32,10 +34,12 @@ public final class ProvidedVersionMetrics {
 
     private static String loadLibraryVersion() {
         try (InputStream stream =
-                ProvidedVersionMetrics.class.getResourceAsStream("ProvidedVersionMetrics.libraryVersion")) {
+                ProvidedVersionMetrics.class.getResourceAsStream("ProvidedVersionMetrics.properties")) {
             if (stream != null) {
-                String version = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-                if (!version.isEmpty()) {
+                Properties properties = new Properties();
+                properties.load(new InputStreamReader(stream, StandardCharsets.UTF_8));
+                String version = properties.getProperty("libraryVersion");
+                if (version != null) {
                     return version;
                 }
             }

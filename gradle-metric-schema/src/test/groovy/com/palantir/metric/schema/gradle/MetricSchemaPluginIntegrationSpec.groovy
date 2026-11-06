@@ -182,7 +182,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
         then:
         runTasksSuccessfully(':unJar')
-        file('unjar/com/palantir/test/ServerMetrics.libraryVersion').text == '1.2.3'
+        file('unjar/com/palantir/test/ServerMetrics.properties').text == 'libraryVersion=1.2.3\n'
     }
 
     def 'does not embed snapshot library version into jar'() {
@@ -199,7 +199,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         then:
         runTasksSuccessfully(':unJar')
         fileExists('unjar/com/palantir/test/ServerMetrics.class')
-        !fileExists('unjar/com/palantir/test/ServerMetrics.libraryVersion')
+        !fileExists('unjar/com/palantir/test/ServerMetrics.properties')
     }
 
     def 'invalid schema results in task failure'() {

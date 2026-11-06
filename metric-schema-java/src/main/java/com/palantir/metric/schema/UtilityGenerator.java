@@ -39,15 +39,19 @@ import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 final class UtilityGenerator {
+
+    static final String LIBRARY_VERSION_PROPERTY = "libraryVersion";
 
     static JavaFile generateUtilityClass(
             String namespace,
@@ -372,12 +376,13 @@ final class UtilityGenerator {
     }
 
     /**
-     * Name of the classpath resource, relative to the generated class, which holds the library version. Keeping the
-     * version out of the generated source keeps compilation cacheable across release and snapshot builds, and keeping
-     * the resource beside the class means shading relocates it along with the class.
+     * Name of the classpath resource, relative to the generated class, which holds {@link java.util.Properties} with
+     * metadata such as the library version. Keeping the version out of the generated source keeps compilation
+     * cacheable across release and snapshot builds, and keeping the resource beside the class means shading relocates
+     * it along with the class.
      */
-    static String libraryVersionResourceName(ClassName className) {
-        return className.simpleName() + ".libraryVersion";
+    static String metadataResourceName(ClassName className) {
+        return className.simpleName() + ".properties";
     }
 
     private static MethodSpec generateLoadLibraryVersion(ClassName className) {
@@ -388,14 +393,13 @@ final class UtilityGenerator {
                         "try ($T stream = $T.class.getResourceAsStream($S))",
                         InputStream.class,
                         className,
-                        libraryVersionResourceName(className))
+                        metadataResourceName(className))
                 .beginControlFlow("if (stream != null)")
+                .addStatement("$T properties = new $T()", Properties.class, Properties.class)
                 .addStatement(
-                        "$T version = new $T(stream.readAllBytes(), $T.UTF_8)",
-                        String.class,
-                        String.class,
-                        StandardCharsets.class)
-                .beginControlFlow("if (!version.isEmpty())")
+                        "properties.load(new $T(stream, $T.UTF_8))", InputStreamReader.class, StandardCharsets.class)
+                .addStatement("$T version = properties.getProperty($S)", String.class, LIBRARY_VERSION_PROPERTY)
+                .beginControlFlow("if (version != null)")
                 .addStatement("return version")
                 .endControlFlow()
                 .endControlFlow()

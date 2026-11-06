@@ -87,8 +87,8 @@ public class JavaGeneratorTest {
                 .forEach(relativePath ->
                         assertThatFilesAreTheSame(outputDir.resolve(relativePath), REFERENCE_FILES_FOLDER));
 
-        assertThat(resourcesDir.resolve("com/palantir/test/ProvidedVersionMetrics.libraryVersion"))
-                .hasContent("1.0.0");
+        assertThat(resourcesDir.resolve("com/palantir/test/ProvidedVersionMetrics.properties"))
+                .hasContent("libraryVersion=1.0.0\n");
     }
 
     @Test

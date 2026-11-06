@@ -9,8 +9,10 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Properties;
 
 /** Tests we respect javaVisibility */
 final class VisibilityMetrics {
@@ -34,10 +36,12 @@ final class VisibilityMetrics {
     }
 
     private static String loadLibraryVersion() {
-        try (InputStream stream = VisibilityMetrics.class.getResourceAsStream("VisibilityMetrics.libraryVersion")) {
+        try (InputStream stream = VisibilityMetrics.class.getResourceAsStream("VisibilityMetrics.properties")) {
             if (stream != null) {
-                String version = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-                if (!version.isEmpty()) {
+                Properties properties = new Properties();
+                properties.load(new InputStreamReader(stream, StandardCharsets.UTF_8));
+                String version = properties.getProperty("libraryVersion");
+                if (version != null) {
                     return version;
                 }
             }

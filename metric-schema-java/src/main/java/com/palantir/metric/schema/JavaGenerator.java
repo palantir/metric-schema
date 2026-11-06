@@ -26,11 +26,14 @@ import com.palantir.metric.schema.model.ImplementationVisibility;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
+import java.util.stream.Collectors;
 
 public final class JavaGenerator {
     // TODO(forozco): consider splitting this out into an API package
@@ -71,10 +74,19 @@ public final class JavaGenerator {
         for (String component : Splitter.on('.').omitEmptyStrings().split(javaFile.packageName)) {
             packageDir = packageDir.resolve(component);
         }
-        Path resource = packageDir.resolve(UtilityGenerator.libraryVersionResourceName(className));
+        Path resource = packageDir.resolve(UtilityGenerator.metadataResourceName(className));
+        Properties properties = new Properties();
+        properties.setProperty(UtilityGenerator.LIBRARY_VERSION_PROPERTY, version);
         try {
+            StringWriter writer = new StringWriter();
+            properties.store(writer, /* comments= */ null);
+            // Properties.store always writes a timestamp comment, which would change the resource on every build
+            String contents = writer.toString()
+                    .lines()
+                    .filter(line -> !line.startsWith("#"))
+                    .collect(Collectors.joining("\n", "", "\n"));
             Files.createDirectories(packageDir);
-            Files.writeString(resource, version, StandardCharsets.UTF_8);
+            Files.writeString(resource, contents, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new SafeUncheckedIoException(
                     "Failed to write library version resource", e, SafeArg.of("resource", resource));
