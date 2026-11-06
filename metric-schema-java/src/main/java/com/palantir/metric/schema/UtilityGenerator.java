@@ -391,7 +391,7 @@ final class UtilityGenerator {
                         libraryVersionResourceName(className))
                 .beginControlFlow("if (stream != null)")
                 .addStatement(
-                        "$T version = new $T(stream.readAllBytes(), $T.UTF_8).trim()",
+                        "$T version = new $T(stream.readAllBytes(), $T.UTF_8)",
                         String.class,
                         String.class,
                         StandardCharsets.class)

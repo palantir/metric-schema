@@ -28,7 +28,7 @@ public final class MonitorsMetrics {
     private static String loadLibraryVersion() {
         try (InputStream stream = MonitorsMetrics.class.getResourceAsStream("MonitorsMetrics.libraryVersion")) {
             if (stream != null) {
-                String version = new String(stream.readAllBytes(), StandardCharsets.UTF_8).trim();
+                String version = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
                 if (!version.isEmpty()) {
                     return version;
                 }

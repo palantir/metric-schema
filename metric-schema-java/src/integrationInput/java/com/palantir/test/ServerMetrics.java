@@ -36,7 +36,7 @@ public final class ServerMetrics {
     private static String loadLibraryVersion() {
         try (InputStream stream = ServerMetrics.class.getResourceAsStream("ServerMetrics.libraryVersion")) {
             if (stream != null) {
-                String version = new String(stream.readAllBytes(), StandardCharsets.UTF_8).trim();
+                String version = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
                 if (!version.isEmpty()) {
                     return version;
                 }
