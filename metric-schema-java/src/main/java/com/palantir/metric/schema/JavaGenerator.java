@@ -71,7 +71,7 @@ public final class JavaGenerator {
     private static void writeLibraryVersionResource(Path resourcesOutput, JavaFile javaFile, String version) {
         ClassName className = ClassName.get(javaFile.packageName, javaFile.typeSpec.name);
         Path packageDir = resourcesOutput;
-        for (String component : Splitter.on('.').omitEmptyStrings().split(javaFile.packageName)) {
+        for (String component : Splitter.on('.').split(javaFile.packageName)) {
             packageDir = packageDir.resolve(component);
         }
         Path resource = packageDir.resolve(UtilityGenerator.metadataResourceName(className));
