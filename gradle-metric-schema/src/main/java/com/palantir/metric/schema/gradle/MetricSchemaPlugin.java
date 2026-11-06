@@ -150,9 +150,10 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         // Gradle returns 'unspecified' when there is no version information, which is not orderable.
         String version = Objects.toString(project.getRootProject().getVersion());
         return OrderableSlsVersion.safeValueOf(version)
-                // Only provide version data for releases and release candidates, not snapshots. The version is
-                // emitted as a resource rather than java source, so it never affects compileJava, but a per-commit
-                // resource would still change the jar and invalidate downstream test tasks on each commit.
+                // We only provide version data for releases and release candidates, not snapshots. This way we
+                // don't invalidate build caches on each commit.
+                // We provide version data in a resource rather than in the Java source so we don't invalidate build
+                // caches for compilation tasks.
                 // We prefer passing along version information at this level because the resource sits beside the
                 // generated class and is relocated with it by shading, where the fallback based on
                 // 'package.getImplementationVersion()' will reflect the shadow jar version.
