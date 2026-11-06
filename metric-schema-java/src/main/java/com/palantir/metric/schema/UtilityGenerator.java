@@ -40,6 +40,7 @@ import com.squareup.javapoet.WildcardTypeName;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -394,23 +395,25 @@ final class UtilityGenerator {
                         InputStream.class,
                         className,
                         metadataResourceName(className))
-                .beginControlFlow("if (stream != null)")
-                .addStatement("$T properties = new $T()", Properties.class, Properties.class)
-                .addStatement(
-                        "properties.load(new $T(stream, $T.UTF_8))", InputStreamReader.class, StandardCharsets.class)
-                .addStatement("$T version = properties.getProperty($S)", String.class, LIBRARY_VERSION_PROPERTY)
-                .beginControlFlow("if (version != null)")
-                .addStatement("return version")
-                .endControlFlow()
-                .endControlFlow()
-                .nextControlFlow("catch ($T | $T e)", IOException.class, RuntimeException.class)
-                .addComment("Fall back to the package version")
-                .endControlFlow()
+                .beginControlFlow("if (stream == null)")
+                .addComment("Only written when a release version is known at build time")
                 .addStatement(
                         "return $T.requireNonNullElse($T.class.getPackage().getImplementationVersion(), $S)",
                         Objects.class,
                         className,
                         "unknown")
+                .endControlFlow()
+                .addStatement("$T properties = new $T()", Properties.class, Properties.class)
+                .addStatement(
+                        "properties.load(new $T(stream, $T.UTF_8))", InputStreamReader.class, StandardCharsets.class)
+                .addStatement(
+                        "return $T.checkNotNull(properties.getProperty($S), $S)",
+                        Preconditions.class,
+                        LIBRARY_VERSION_PROPERTY,
+                        "Library version resource is missing " + LIBRARY_VERSION_PROPERTY)
+                .nextControlFlow("catch ($T e)", IOException.class)
+                .addStatement("throw new $T(e)", UncheckedIOException.class)
+                .endControlFlow()
                 .build();
     }
 

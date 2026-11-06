@@ -7,6 +7,7 @@ import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Properties;
@@ -35,19 +36,18 @@ public final class ProvidedVersionMetrics {
     private static String loadLibraryVersion() {
         try (InputStream stream =
                 ProvidedVersionMetrics.class.getResourceAsStream("ProvidedVersionMetrics.properties")) {
-            if (stream != null) {
-                Properties properties = new Properties();
-                properties.load(new InputStreamReader(stream, StandardCharsets.UTF_8));
-                String version = properties.getProperty("libraryVersion");
-                if (version != null) {
-                    return version;
-                }
+            if (stream == null) {
+                // Only written when a release version is known at build time
+                return Objects.requireNonNullElse(
+                        ProvidedVersionMetrics.class.getPackage().getImplementationVersion(), "unknown");
             }
-        } catch (IOException | RuntimeException e) {
-            // Fall back to the package version
+            Properties properties = new Properties();
+            properties.load(new InputStreamReader(stream, StandardCharsets.UTF_8));
+            return Preconditions.checkNotNull(
+                    properties.getProperty("libraryVersion"), "Library version resource is missing libraryVersion");
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
-        return Objects.requireNonNullElse(
-                ProvidedVersionMetrics.class.getPackage().getImplementationVersion(), "unknown");
     }
 
     public static ProvidedVersionMetrics of(TaggedMetricRegistry registry) {
