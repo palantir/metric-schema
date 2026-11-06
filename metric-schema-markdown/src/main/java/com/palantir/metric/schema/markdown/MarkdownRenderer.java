@@ -70,7 +70,7 @@ public final class MarkdownRenderer {
         output.append("\n### ")
                 .append(namespace.name())
                 .append('\n')
-                .append(namespace.definition().getDocs().get())
+                .append(namespace.definition().getDocs().get().trim())
                 .append('\n');
         metrics.forEach((metricName, metric) ->
                 renderLine(namespace.name(), metricName, namespace.definition(), metric, output));
@@ -103,7 +103,7 @@ public final class MarkdownRenderer {
         output.append(" (")
                 .append(metric.getType().toString().toLowerCase(Locale.ENGLISH))
                 .append("): ")
-                .append(metric.getDocs().get())
+                .append(metric.getDocs().get().trim())
                 .append('\n');
         if (hasComplexTags) {
             renderComplexTags(allTags, output);
@@ -130,14 +130,16 @@ public final class MarkdownRenderer {
             }
 
             tagDefinition.getDocs().ifPresent(docs -> {
-                output.append(": ").append(docs);
+                output.append(": ").append(docs.get().trim());
             });
             output.append("\n");
 
             if (hasEnumValueDocs) {
                 tagDefinition.getValues().forEach(value -> {
                     output.append(String.format("    - `%s`", value.getValue()));
-                    value.getDocs().ifPresent(docs -> output.append(String.format(": %s", docs)));
+                    value.getDocs()
+                            .ifPresent(docs -> output.append(
+                                    String.format(": %s", docs.get().trim())));
                     output.append("\n");
                 });
             }

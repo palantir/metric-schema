@@ -320,6 +320,48 @@ class MarkdownRendererTest {
     }
 
     @Test
+    void testTrailingNewlineInDocs() {
+        MetricSchema schema = MetricSchema.builder()
+                .namespaces(
+                        "namespace",
+                        MetricNamespace.builder()
+                                .docs(Documentation.of("namespace docs\n"))
+                                .metrics(
+                                        "metric",
+                                        MetricDefinition.builder()
+                                                .type(MetricType.METER)
+                                                .tagDefinitions(TagDefinition.builder()
+                                                        .name("endpoint")
+                                                        .docs(Documentation.of("tag docs\n"))
+                                                        .build())
+                                                .tagDefinitions(TagDefinition.builder()
+                                                        .name("result")
+                                                        .values(TagValue.of(
+                                                                "success", Documentation.of("value docs\n")))
+                                                        .build())
+                                                .docs(Documentation.of("metric docs\n"))
+                                                .build())
+                                .build())
+                .build();
+        String markdown = MarkdownRenderer.render(
+                "com.palantir:test", ImmutableMap.of("com.palantir:test:1.0.0", ImmutableList.of(schema)));
+        assertThat(markdown).isEqualTo("""
+            # Metrics
+
+            ## Test
+
+            `com.palantir:test`
+
+            ### namespace
+            namespace docs
+            - `namespace.metric` (meter): metric docs
+              - `endpoint`: tag docs
+              - `result`
+                - `success`: value docs\
+            """);
+    }
+
+    @Test
     void testGetName() {
         assertThat(MarkdownRenderer.getName("com.palantir.foo:bar-baz:123.4.5")).isEqualTo("bar-baz");
         assertThat(MarkdownRenderer.getName("com.palantir.foo:bar-baz:$projectVersion"))
