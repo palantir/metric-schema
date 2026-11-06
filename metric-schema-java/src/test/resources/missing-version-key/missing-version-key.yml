@@ -1,0 +1,7 @@
+namespaces:
+  missing.version.key:
+    docs: Test data metric.
+    metrics:
+      utilization:
+        type: gauge
+        docs: Test data.

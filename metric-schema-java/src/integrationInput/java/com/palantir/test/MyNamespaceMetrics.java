@@ -7,7 +7,13 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Properties;
 
 /** General web server metrics. */
 public final class MyNamespaceMetrics {
@@ -15,8 +21,7 @@ public final class MyNamespaceMetrics {
 
     private static final String LIBRARY_NAME = "witchcraft";
 
-    private static final String LIBRARY_VERSION =
-            Objects.requireNonNullElse(MyNamespaceMetrics.class.getPackage().getImplementationVersion(), "unknown");
+    private static final String LIBRARY_VERSION = loadLibraryVersion();
 
     private static final MetricName workerUtilizationMetricName = MetricName.builderWithExpectedTags(3)
             .safeName("com.palantir.very.long.namespace.worker.utilization")
@@ -29,6 +34,22 @@ public final class MyNamespaceMetrics {
 
     private MyNamespaceMetrics(TaggedMetricRegistry registry) {
         this.registry = registry;
+    }
+
+    private static String loadLibraryVersion() {
+        try (InputStream stream = MyNamespaceMetrics.class.getResourceAsStream("MyNamespaceMetrics.properties")) {
+            if (stream == null) {
+                // Only written when a release version is known at build time
+                return Objects.requireNonNullElse(
+                        MyNamespaceMetrics.class.getPackage().getImplementationVersion(), "unknown");
+            }
+            Properties properties = new Properties();
+            properties.load(new InputStreamReader(stream, StandardCharsets.UTF_8));
+            return Preconditions.checkNotNull(
+                    properties.getProperty("libraryVersion"), "Library version resource is missing libraryVersion");
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     public static MyNamespaceMetrics of(TaggedMetricRegistry registry) {

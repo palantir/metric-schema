@@ -152,6 +152,90 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         result.standardOutput.contains("> Task :generateMetrics FROM-CACHE")
     }
 
+    def 'compileJava is cacheable across snapshot and release versions'() {
+        when:
+        buildCacheEnabled = true
+        buildFile << """
+        version = project.findProperty('testVersion')
+        """.stripIndent()
+        file('src/main/metrics/metrics.yml') << METRICS
+
+        runTasksSuccessfully('compileJava', '-PtestVersion=1.2.3-4-gabcdef1')
+        runTasksSuccessfully('clean')
+
+        then:
+        ExecutionResult result = runTasksSuccessfully('compileJava', '-PtestVersion=1.2.3')
+        result.wasExecuted(':generateMetrics')
+        result.standardOutput.contains('> Task :compileJava FROM-CACHE')
+    }
+
+    def 'embeds release library version into jar beside generated class'() {
+        when:
+        buildFile << """
+        version = '1.2.3'
+        task unJar(type: Sync, dependsOn: jar) {
+            from { zipTree(tasks.jar.archiveFile) }
+            into file("unjar")
+        }
+        """.stripIndent()
+        file('src/main/metrics/metrics.yml') << METRICS
+
+        then:
+        runTasksSuccessfully(':unJar')
+        file('unjar/com/palantir/test/ServerMetrics.properties').text == 'libraryVersion=1.2.3\n'
+    }
+
+    def 'does not embed snapshot library version into jar'() {
+        when:
+        buildFile << """
+        version = '1.2.3-4-gabcdef1'
+        task unJar(type: Sync, dependsOn: jar) {
+            from { zipTree(tasks.jar.archiveFile) }
+            into file("unjar")
+        }
+        """.stripIndent()
+        file('src/main/metrics/metrics.yml') << METRICS
+
+        then:
+        runTasksSuccessfully(':unJar')
+        fileExists('unjar/com/palantir/test/ServerMetrics.class')
+        !fileExists('unjar/com/palantir/test/ServerMetrics.properties')
+    }
+
+    def 'generates metrics in the default package when project has no group'() {
+        when:
+        buildFile << """
+        group = ''
+        version = '1.2.3'
+        task unJar(type: Sync, dependsOn: jar) {
+            from { zipTree(tasks.jar.archiveFile) }
+            into file("unjar")
+        }
+        task printTags(type: JavaExec) {
+            classpath = files(tasks.jar) + configurations.runtimeClasspath
+            mainClass = 'PrintTags'
+        }
+        """.stripIndent()
+        file('src/main/metrics/metrics.yml') << METRICS
+        file('src/main/java/PrintTags.java') << """
+        import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+
+        public final class PrintTags {
+            public static void main(String[] args) {
+                DefaultTaggedMetricRegistry registry = new DefaultTaggedMetricRegistry();
+                ServerMetrics.of(registry).workerUtilization(() -> 1);
+                registry.getMetrics().keySet().forEach(name -> System.out.println("tags=" + name.safeTags()));
+            }
+        }
+        """.stripIndent()
+
+        then:
+        runTasksSuccessfully(':unJar')
+        fileExists('unjar/ServerMetrics.class')
+        file('unjar/ServerMetrics.properties').text == 'libraryVersion=1.2.3\n'
+        runTasksSuccessfully(':printTags').standardOutput.contains('libraryVersion=1.2.3')
+    }
+
     def 'invalid schema results in task failure'() {
         when:
         file('src/main/metrics/metrics.yml') << METRICS_INVALID

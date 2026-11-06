@@ -10,7 +10,13 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Properties;
 
 /** General web server metrics. */
 public final class NamespaceTagsMetrics {
@@ -18,8 +24,7 @@ public final class NamespaceTagsMetrics {
 
     private static final String LIBRARY_NAME = "witchcraft";
 
-    private static final String LIBRARY_VERSION =
-            Objects.requireNonNullElse(NamespaceTagsMetrics.class.getPackage().getImplementationVersion(), "unknown");
+    private static final String LIBRARY_VERSION = loadLibraryVersion();
 
     private final TaggedMetricRegistry registry;
 
@@ -67,6 +72,22 @@ public final class NamespaceTagsMetrics {
                 .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValuesValue)
                 .putSafeTags("noValueTag", noValueTagValue)
                 .build();
+    }
+
+    private static String loadLibraryVersion() {
+        try (InputStream stream = NamespaceTagsMetrics.class.getResourceAsStream("NamespaceTagsMetrics.properties")) {
+            if (stream == null) {
+                // Only written when a release version is known at build time
+                return Objects.requireNonNullElse(
+                        NamespaceTagsMetrics.class.getPackage().getImplementationVersion(), "unknown");
+            }
+            Properties properties = new Properties();
+            properties.load(new InputStreamReader(stream, StandardCharsets.UTF_8));
+            return Preconditions.checkNotNull(
+                    properties.getProperty("libraryVersion"), "Library version resource is missing libraryVersion");
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @CheckReturnValue

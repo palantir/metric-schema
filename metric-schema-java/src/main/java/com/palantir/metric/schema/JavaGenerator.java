@@ -16,13 +16,24 @@
 
 package com.palantir.metric.schema;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.goethe.Goethe;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import com.palantir.metric.schema.model.ImplementationVisibility;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.JavaFile;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
+import java.util.stream.Collectors;
 
 public final class JavaGenerator {
     // TODO(forozco): consider splitting this out into an API package
@@ -40,16 +51,46 @@ public final class JavaGenerator {
     public static List<Path> generate(JavaGeneratorArgs args) {
         return SchemaParser.get().parseFile(args.input()).stream()
                 .flatMap(schema -> schema.getNamespaces().entrySet().stream().map(entry -> {
-                    return UtilityGenerator.generateUtilityClass(
+                    JavaFile javaFile = UtilityGenerator.generateUtilityClass(
                             entry.getKey(),
                             entry.getValue(),
                             args.libraryName(),
-                            args.libraryVersion(),
                             getPackage(args, schema),
                             getVisibility(schema));
+                    if (args.libraryName().isPresent()) {
+                        args.libraryVersion()
+                                .ifPresent(version ->
+                                        writeLibraryVersionResource(args.resourcesOutput(), javaFile, version));
+                    }
+                    return javaFile;
                 }))
-                .map(javaFile -> Goethe.formatAndEmit(javaFile, args.output()))
+                .map(javaFile -> Goethe.formatAndEmit(javaFile, args.javaOutput()))
                 .collect(ImmutableList.toImmutableList());
+    }
+
+    private static void writeLibraryVersionResource(Path resourcesOutput, JavaFile javaFile, String version) {
+        ClassName className = ClassName.get(javaFile.packageName, javaFile.typeSpec.name);
+        Path packageDir = resourcesOutput;
+        for (String component : Splitter.on('.').split(javaFile.packageName)) {
+            packageDir = packageDir.resolve(component);
+        }
+        Path resource = packageDir.resolve(UtilityGenerator.metadataResourceName(className));
+        Properties properties = new Properties();
+        properties.setProperty(UtilityGenerator.LIBRARY_VERSION_PROPERTY, version);
+        try {
+            StringWriter writer = new StringWriter();
+            properties.store(writer, /* comments= */ null);
+            // Properties.store always writes a timestamp comment, which would change the resource on every build
+            String contents = writer.toString()
+                    .lines()
+                    .filter(line -> !line.startsWith("#"))
+                    .collect(Collectors.joining("\n", "", "\n"));
+            Files.createDirectories(packageDir);
+            Files.writeString(resource, contents, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new SafeUncheckedIoException(
+                    "Failed to write library version resource", e, SafeArg.of("resource", resource));
+        }
     }
 
     private static String getPackage(JavaGeneratorArgs args, MetricSchema schema) {

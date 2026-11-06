@@ -37,20 +37,27 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 final class UtilityGenerator {
 
+    static final String LIBRARY_VERSION_PROPERTY = "libraryVersion";
+
     static JavaFile generateUtilityClass(
             String namespace,
             MetricNamespace metrics,
             Optional<String> libraryName,
-            Optional<String> libraryVersion,
             String packageName,
             ImplementationVisibility visibility) {
         String name = metrics.getShortName().orElse(namespace);
@@ -83,16 +90,9 @@ final class UtilityGenerator {
                             Modifier.PRIVATE,
                             Modifier.STATIC,
                             Modifier.FINAL)
-                    .initializer(libraryVersion
-                            // When a libraryVersion value is provided, use the string constant:
-                            .map(version -> CodeBlock.of("$S", version))
-                            // Otherwise fall back to package.getImplementationVersion()
-                            .orElseGet(() -> CodeBlock.of(
-                                    "$T.requireNonNullElse($T.class.getPackage().getImplementationVersion(), $S)",
-                                    Objects.class,
-                                    className,
-                                    "unknown")))
+                    .initializer("$N()", ReservedNames.LOAD_LIBRARY_VERSION_METHOD)
                     .build());
+            builder.addMethod(generateLoadLibraryVersion(className));
         }
 
         metrics.getTags().forEach(tagDef -> {
@@ -374,6 +374,47 @@ final class UtilityGenerator {
                         .addStatement("return value")
                         .build())
                 .build());
+    }
+
+    /**
+     * Name of the classpath resource, relative to the generated class, which holds {@link java.util.Properties} with
+     * metadata such as the library version. Keeping the version out of the generated source keeps compilation
+     * cacheable across release and snapshot builds, and keeping the resource beside the class means shading relocates
+     * it along with the class.
+     */
+    static String metadataResourceName(ClassName className) {
+        return className.simpleName() + ".properties";
+    }
+
+    private static MethodSpec generateLoadLibraryVersion(ClassName className) {
+        return MethodSpec.methodBuilder(ReservedNames.LOAD_LIBRARY_VERSION_METHOD)
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                .returns(String.class)
+                .beginControlFlow(
+                        "try ($T stream = $T.class.getResourceAsStream($S))",
+                        InputStream.class,
+                        className,
+                        metadataResourceName(className))
+                .beginControlFlow("if (stream == null)")
+                .addComment("Only written when a release version is known at build time")
+                .addStatement(
+                        "return $T.requireNonNullElse($T.class.getPackage().getImplementationVersion(), $S)",
+                        Objects.class,
+                        className,
+                        "unknown")
+                .endControlFlow()
+                .addStatement("$T properties = new $T()", Properties.class, Properties.class)
+                .addStatement(
+                        "properties.load(new $T(stream, $T.UTF_8))", InputStreamReader.class, StandardCharsets.class)
+                .addStatement(
+                        "return $T.checkNotNull(properties.getProperty($S), $S)",
+                        Preconditions.class,
+                        LIBRARY_VERSION_PROPERTY,
+                        "Library version resource is missing " + LIBRARY_VERSION_PROPERTY)
+                .nextControlFlow("catch ($T e)", IOException.class)
+                .addStatement("throw new $T(e)", UncheckedIOException.class)
+                .endControlFlow()
+                .build();
     }
 
     private static String className(String namespace) {
