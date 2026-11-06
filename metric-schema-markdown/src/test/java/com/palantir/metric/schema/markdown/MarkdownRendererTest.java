@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
 
 class MarkdownRendererTest {
 
-    @SuppressWarnings("for-rollout:StringConcatToTextBlock")
     @Test
     void testSimple() {
         MetricSchema firstSchema = MetricSchema.builder()
@@ -80,28 +79,27 @@ class MarkdownRendererTest {
                         "com.palantir:test:1.0.0",
                         // reverse order should produce the same results
                         ImmutableList.of(secondSchema, firstSchema)));
-        assertThat(firstMarkdown)
-                .isEqualTo("# Metrics\n"
-                        + "\n"
-                        + "## Test\n"
-                        + "\n"
-                        + "`com.palantir:test`\n"
-                        + "\n"
-                        + "### anamespace\n"
-                        + "namespace docs\n"
-                        + "- `anamespace.metric` (meter): metric docs\n"
-                        + "\n"
-                        + "### namespace\n"
-                        + "namespace docs\n"
-                        + "- `namespace.metric` (meter): metric docs\n"
-                        + "\n"
-                        + "### secondSchema\n"
-                        + "namespace docs\n"
-                        + "- `secondSchema.metric` (meter): metric docs")
-                .isEqualTo(secondMarkdown);
+        assertThat(firstMarkdown).isEqualTo("""
+            # Metrics
+
+            ## Test
+
+            `com.palantir:test`
+
+            ### anamespace
+            namespace docs
+            - `anamespace.metric` (meter): metric docs
+
+            ### namespace
+            namespace docs
+            - `namespace.metric` (meter): metric docs
+
+            ### secondSchema
+            namespace docs
+            - `secondSchema.metric` (meter): metric docs\
+            """).isEqualTo(secondMarkdown);
     }
 
-    @SuppressWarnings("for-rollout:StringConcatToTextBlock")
     @Test
     void testMultipleNamespacesWithSameName() {
         MetricSchema firstSchema = MetricSchema.builder()
@@ -139,24 +137,23 @@ class MarkdownRendererTest {
                         "com.palantir:test:1.0.0",
                         // reverse order should produce the same results
                         ImmutableList.of(secondSchema, firstSchema)));
-        assertThat(firstMarkdown)
-                .isEqualTo("# Metrics\n"
-                        + "\n"
-                        + "## Test\n"
-                        + "\n"
-                        + "`com.palantir:test`\n"
-                        + "\n"
-                        + "### namespace\n"
-                        + "namespace docs\n"
-                        + "- `namespace.metric1` (meter): metric docs 1\n"
-                        + "\n"
-                        + "### namespace\n"
-                        + "namespace docs\n"
-                        + "- `namespace.metric2` (meter): metric docs 2")
-                .isEqualTo(secondMarkdown);
+        assertThat(firstMarkdown).isEqualTo("""
+            # Metrics
+
+            ## Test
+
+            `com.palantir:test`
+
+            ### namespace
+            namespace docs
+            - `namespace.metric1` (meter): metric docs 1
+
+            ### namespace
+            namespace docs
+            - `namespace.metric2` (meter): metric docs 2\
+            """).isEqualTo(secondMarkdown);
     }
 
-    @SuppressWarnings("for-rollout:StringConcatToTextBlock")
     @Test
     void testTagged() {
         String markdown = MarkdownRenderer.render(
@@ -178,19 +175,19 @@ class MarkdownRendererTest {
                                                                 .build())
                                                 .build())
                                 .build())));
-        assertThat(markdown)
-                .isEqualTo("# Metrics\n"
-                        + "\n"
-                        + "## Test\n"
-                        + "\n"
-                        + "`com.palantir:test`\n"
-                        + "\n"
-                        + "### namespace\n"
-                        + "namespace docs\n"
-                        + "- `namespace.metric` tagged `service`, `endpoint` (meter): metric docs");
+        assertThat(markdown).isEqualTo("""
+            # Metrics
+
+            ## Test
+
+            `com.palantir:test`
+
+            ### namespace
+            namespace docs
+            - `namespace.metric` tagged `service`, `endpoint` (meter): metric docs\
+            """);
     }
 
-    @SuppressWarnings("for-rollout:StringConcatToTextBlock")
     @Test
     void testComplexTagged() {
         MetricSchema schema = MetricSchema.builder()
@@ -232,25 +229,25 @@ class MarkdownRendererTest {
                 .build();
         String markdown = MarkdownRenderer.render(
                 "com.palantir:test", ImmutableMap.of("com.palantir:test:1.0.0", ImmutableList.of(schema)));
-        assertThat(markdown)
-                .isEqualTo("# Metrics\n"
-                        + "\n"
-                        + "## Test\n"
-                        + "\n"
-                        + "`com.palantir:test`\n"
-                        + "\n"
-                        + "### namespace\n"
-                        + "namespace docs\n"
-                        + "- `namespace.metric` (meter): metric docs\n"
-                        + "  - `namespaceTag`\n"
-                        + "  - `result`\n"
-                        + "    - `success`: This is a success enum\n"
-                        + "    - `failure`\n"
-                        + "  - `endpoint`: Some docs\n"
-                        + "  - `processing` values (`foo`,`bar`)");
+        assertThat(markdown).isEqualTo("""
+            # Metrics
+
+            ## Test
+
+            `com.palantir:test`
+
+            ### namespace
+            namespace docs
+            - `namespace.metric` (meter): metric docs
+              - `namespaceTag`
+              - `result`
+                - `success`: This is a success enum
+                - `failure`
+              - `endpoint`: Some docs
+              - `processing` values (`foo`,`bar`)\
+            """);
     }
 
-    @SuppressWarnings("for-rollout:StringConcatToTextBlock")
     @Test
     void testTaggedWithDocsOnlyOnTag() {
         MetricSchema schema = MetricSchema.builder()
@@ -272,17 +269,20 @@ class MarkdownRendererTest {
                 .build();
         String markdown = MarkdownRenderer.render(
                 "com.palantir:test", ImmutableMap.of("com.palantir:test:1.0.0", ImmutableList.of(schema)));
-        assertThat(markdown)
-                .isEqualTo("# Metrics\n\n"
-                        + "## Test\n\n"
-                        + "`com.palantir:test`\n\n"
-                        + "### namespace\n"
-                        + "namespace docs\n"
-                        + "- `namespace.metric` (meter): metric docs\n"
-                        + "  - `result`: This is a result tag");
+        assertThat(markdown).isEqualTo("""
+            # Metrics
+
+            ## Test
+
+            `com.palantir:test`
+
+            ### namespace
+            namespace docs
+            - `namespace.metric` (meter): metric docs
+              - `result`: This is a result tag\
+            """);
     }
 
-    @SuppressWarnings("for-rollout:StringConcatToTextBlock")
     @Test
     void testEmptyNamespacesExcluded() {
         String markdown = MarkdownRenderer.render(
@@ -307,16 +307,17 @@ class MarkdownRendererTest {
                                                 .docs(Documentation.of("empty namespace docs"))
                                                 .build())
                                 .build())));
-        assertThat(markdown)
-                .isEqualTo("# Metrics\n"
-                        + "\n"
-                        + "## Test\n"
-                        + "\n"
-                        + "`com.palantir:test`\n"
-                        + "\n"
-                        + "### com.foo.namespace\n"
-                        + "Foo namespace docs\n"
-                        + "- `com.foo.namespace.metric` (meter): metric docs");
+        assertThat(markdown).isEqualTo("""
+            # Metrics
+
+            ## Test
+
+            `com.palantir:test`
+
+            ### com.foo.namespace
+            Foo namespace docs
+            - `com.foo.namespace.metric` (meter): metric docs\
+            """);
     }
 
     @Test
