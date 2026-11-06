@@ -48,14 +48,29 @@ public abstract class JavaGeneratorArgs {
     /** Used to add the libraryName tag to all metrics. */
     abstract Optional<String> libraryName();
 
-    /** Used to add the libraryVersion tag to all metrics. */
+    /**
+     * Used to add the libraryVersion tag to all metrics. The version is written to {@link #resourcesOutput()} rather
+     * than into generated java code, so generated sources are identical regardless of version. When absent, generated
+     * code falls back to the package implementation version.
+     */
     abstract Optional<String> libraryVersion();
+
+    /**
+     * Output directory for generated resources. Required when both {@link #libraryName()} and
+     * {@link #libraryVersion()} are present, since only then is a version resource written.
+     */
+    abstract Optional<Path> resourcesOutput();
 
     /** The default Java package name for generated classes. */
     abstract String defaultPackageName();
 
     @Value.Check
     final void check() {
+        Preconditions.checkArgument(
+                libraryName().isEmpty()
+                        || libraryVersion().isEmpty()
+                        || resourcesOutput().isPresent(),
+                "resourcesOutput is required when libraryName and libraryVersion are provided");
         libraryName().ifPresent(value -> {
             Preconditions.checkArgument(
                     value.length() < 128,

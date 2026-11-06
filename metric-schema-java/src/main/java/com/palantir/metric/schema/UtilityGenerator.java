@@ -37,6 +37,9 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -50,7 +53,6 @@ final class UtilityGenerator {
             String namespace,
             MetricNamespace metrics,
             Optional<String> libraryName,
-            Optional<String> libraryVersion,
             String packageName,
             ImplementationVisibility visibility) {
         String name = metrics.getShortName().orElse(namespace);
@@ -83,16 +85,9 @@ final class UtilityGenerator {
                             Modifier.PRIVATE,
                             Modifier.STATIC,
                             Modifier.FINAL)
-                    .initializer(libraryVersion
-                            // When a libraryVersion value is provided, use the string constant:
-                            .map(version -> CodeBlock.of("$S", version))
-                            // Otherwise fall back to package.getImplementationVersion()
-                            .orElseGet(() -> CodeBlock.of(
-                                    "$T.requireNonNullElse($T.class.getPackage().getImplementationVersion(), $S)",
-                                    Objects.class,
-                                    className,
-                                    "unknown")))
+                    .initializer("$N()", ReservedNames.LOAD_LIBRARY_VERSION_METHOD)
                     .build());
+            builder.addMethod(generateLoadLibraryVersion(className));
         }
 
         metrics.getTags().forEach(tagDef -> {
@@ -374,6 +369,45 @@ final class UtilityGenerator {
                         .addStatement("return value")
                         .build())
                 .build());
+    }
+
+    /**
+     * Name of the classpath resource, relative to the generated class, which holds the library version. Keeping the
+     * version out of the generated source keeps compilation cacheable across release and snapshot builds, and keeping
+     * the resource beside the class means shading relocates it along with the class.
+     */
+    static String libraryVersionResourceName(ClassName className) {
+        return className.simpleName() + ".libraryVersion";
+    }
+
+    private static MethodSpec generateLoadLibraryVersion(ClassName className) {
+        return MethodSpec.methodBuilder(ReservedNames.LOAD_LIBRARY_VERSION_METHOD)
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                .returns(String.class)
+                .beginControlFlow(
+                        "try ($T stream = $T.class.getResourceAsStream($S))",
+                        InputStream.class,
+                        className,
+                        libraryVersionResourceName(className))
+                .beginControlFlow("if (stream != null)")
+                .addStatement(
+                        "$T version = new $T(stream.readAllBytes(), $T.UTF_8).trim()",
+                        String.class,
+                        String.class,
+                        StandardCharsets.class)
+                .beginControlFlow("if (!version.isEmpty())")
+                .addStatement("return version")
+                .endControlFlow()
+                .endControlFlow()
+                .nextControlFlow("catch ($T | $T e)", IOException.class, RuntimeException.class)
+                .addComment("Fall back to the package version")
+                .endControlFlow()
+                .addStatement(
+                        "return $T.requireNonNullElse($T.class.getPackage().getImplementationVersion(), $S)",
+                        Objects.class,
+                        className,
+                        "unknown")
+                .build();
     }
 
     private static String className(String namespace) {

@@ -7,6 +7,9 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /** General web server metrics. */
@@ -15,8 +18,7 @@ public final class ServerMetrics {
 
     private static final String LIBRARY_NAME = "witchcraft";
 
-    private static final String LIBRARY_VERSION =
-            Objects.requireNonNullElse(ServerMetrics.class.getPackage().getImplementationVersion(), "unknown");
+    private static final String LIBRARY_VERSION = loadLibraryVersion();
 
     private static final MetricName workerUtilizationMetricName = MetricName.builderWithExpectedTags(3)
             .safeName("server.worker.utilization")
@@ -29,6 +31,20 @@ public final class ServerMetrics {
 
     private ServerMetrics(TaggedMetricRegistry registry) {
         this.registry = registry;
+    }
+
+    private static String loadLibraryVersion() {
+        try (InputStream stream = ServerMetrics.class.getResourceAsStream("ServerMetrics.libraryVersion")) {
+            if (stream != null) {
+                String version = new String(stream.readAllBytes(), StandardCharsets.UTF_8).trim();
+                if (!version.isEmpty()) {
+                    return version;
+                }
+            }
+        } catch (IOException | RuntimeException e) {
+            // Fall back to the package version
+        }
+        return Objects.requireNonNullElse(ServerMetrics.class.getPackage().getImplementationVersion(), "unknown");
     }
 
     public static ServerMetrics of(TaggedMetricRegistry registry) {

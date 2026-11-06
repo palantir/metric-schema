@@ -7,6 +7,9 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /** Tests we respect javaVisibility */
@@ -15,8 +18,7 @@ final class VisibilityMetrics {
 
     private static final String LIBRARY_NAME = "witchcraft";
 
-    private static final String LIBRARY_VERSION =
-            Objects.requireNonNullElse(VisibilityMetrics.class.getPackage().getImplementationVersion(), "unknown");
+    private static final String LIBRARY_VERSION = loadLibraryVersion();
 
     private static final MetricName testMetricName = MetricName.builderWithExpectedTags(3)
             .safeName("visibility.test")
@@ -29,6 +31,20 @@ final class VisibilityMetrics {
 
     private VisibilityMetrics(TaggedMetricRegistry registry) {
         this.registry = registry;
+    }
+
+    private static String loadLibraryVersion() {
+        try (InputStream stream = VisibilityMetrics.class.getResourceAsStream("VisibilityMetrics.libraryVersion")) {
+            if (stream != null) {
+                String version = new String(stream.readAllBytes(), StandardCharsets.UTF_8).trim();
+                if (!version.isEmpty()) {
+                    return version;
+                }
+            }
+        } catch (IOException | RuntimeException e) {
+            // Fall back to the package version
+        }
+        return Objects.requireNonNullElse(VisibilityMetrics.class.getPackage().getImplementationVersion(), "unknown");
     }
 
     static VisibilityMetrics of(TaggedMetricRegistry registry) {

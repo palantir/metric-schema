@@ -4,6 +4,10 @@ import com.codahale.metrics.Gauge;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 /** Test data metric. */
 public final class ProvidedVersionMetrics {
@@ -11,7 +15,7 @@ public final class ProvidedVersionMetrics {
 
     private static final String LIBRARY_NAME = "specific_libraryVersion";
 
-    private static final String LIBRARY_VERSION = "1.0.0";
+    private static final String LIBRARY_VERSION = loadLibraryVersion();
 
     private static final MetricName utilizationMetricName = MetricName.builderWithExpectedTags(3)
             .safeName("provided.version.utilization")
@@ -24,6 +28,22 @@ public final class ProvidedVersionMetrics {
 
     private ProvidedVersionMetrics(TaggedMetricRegistry registry) {
         this.registry = registry;
+    }
+
+    private static String loadLibraryVersion() {
+        try (InputStream stream =
+                ProvidedVersionMetrics.class.getResourceAsStream("ProvidedVersionMetrics.libraryVersion")) {
+            if (stream != null) {
+                String version = new String(stream.readAllBytes(), StandardCharsets.UTF_8).trim();
+                if (!version.isEmpty()) {
+                    return version;
+                }
+            }
+        } catch (IOException | RuntimeException e) {
+            // Fall back to the package version
+        }
+        return Objects.requireNonNullElse(
+                ProvidedVersionMetrics.class.getPackage().getImplementationVersion(), "unknown");
     }
 
     public static ProvidedVersionMetrics of(TaggedMetricRegistry registry) {

@@ -8,6 +8,9 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /** Tests that reserved words are escaped. */
@@ -16,8 +19,7 @@ public final class ReservedConflictMetrics {
 
     private static final String LIBRARY_NAME = "witchcraft";
 
-    private static final String LIBRARY_VERSION = Objects.requireNonNullElse(
-            ReservedConflictMetrics.class.getPackage().getImplementationVersion(), "unknown");
+    private static final String LIBRARY_VERSION = loadLibraryVersion();
 
     private static final MetricName floatMetricName = MetricName.builderWithExpectedTags(3)
             .safeName("reserved.conflict.float")
@@ -30,6 +32,22 @@ public final class ReservedConflictMetrics {
 
     private ReservedConflictMetrics(TaggedMetricRegistry registry) {
         this.registry = registry;
+    }
+
+    private static String loadLibraryVersion() {
+        try (InputStream stream =
+                ReservedConflictMetrics.class.getResourceAsStream("ReservedConflictMetrics.libraryVersion")) {
+            if (stream != null) {
+                String version = new String(stream.readAllBytes(), StandardCharsets.UTF_8).trim();
+                if (!version.isEmpty()) {
+                    return version;
+                }
+            }
+        } catch (IOException | RuntimeException e) {
+            // Fall back to the package version
+        }
+        return Objects.requireNonNullElse(
+                ReservedConflictMetrics.class.getPackage().getImplementationVersion(), "unknown");
     }
 
     public static ReservedConflictMetrics of(TaggedMetricRegistry registry) {

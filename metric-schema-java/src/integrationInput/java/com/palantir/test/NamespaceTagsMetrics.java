@@ -10,6 +10,9 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /** General web server metrics. */
@@ -18,8 +21,7 @@ public final class NamespaceTagsMetrics {
 
     private static final String LIBRARY_NAME = "witchcraft";
 
-    private static final String LIBRARY_VERSION =
-            Objects.requireNonNullElse(NamespaceTagsMetrics.class.getPackage().getImplementationVersion(), "unknown");
+    private static final String LIBRARY_VERSION = loadLibraryVersion();
 
     private final TaggedMetricRegistry registry;
 
@@ -67,6 +69,22 @@ public final class NamespaceTagsMetrics {
                 .putSafeTags("locatorWithMultipleValues", locatorWithMultipleValuesValue)
                 .putSafeTags("noValueTag", noValueTagValue)
                 .build();
+    }
+
+    private static String loadLibraryVersion() {
+        try (InputStream stream =
+                NamespaceTagsMetrics.class.getResourceAsStream("NamespaceTagsMetrics.libraryVersion")) {
+            if (stream != null) {
+                String version = new String(stream.readAllBytes(), StandardCharsets.UTF_8).trim();
+                if (!version.isEmpty()) {
+                    return version;
+                }
+            }
+        } catch (IOException | RuntimeException e) {
+            // Fall back to the package version
+        }
+        return Objects.requireNonNullElse(
+                NamespaceTagsMetrics.class.getPackage().getImplementationVersion(), "unknown");
     }
 
     @CheckReturnValue

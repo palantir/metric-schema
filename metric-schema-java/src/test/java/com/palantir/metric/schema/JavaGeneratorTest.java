@@ -17,6 +17,7 @@
 package com.palantir.metric.schema;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
@@ -28,6 +29,7 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import com.palantir.metric.schema.lang.MetricSchemaCompiler;
 import com.palantir.test.MonitorsMetrics;
+import com.palantir.test.ProvidedVersionMetrics;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
 import java.io.IOException;
@@ -50,6 +52,9 @@ public class JavaGeneratorTest {
     @TempDir
     public Path inputDir;
 
+    @TempDir
+    public Path resourcesDir;
+
     @Test
     void generates_code() {
         JavaGenerator.generate(JavaGeneratorArgs.builder()
@@ -69,6 +74,7 @@ public class JavaGeneratorTest {
     void specific_libraryVersion() {
         JavaGenerator.generate(JavaGeneratorArgs.builder()
                         .output(outputDir)
+                        .resourcesOutput(resourcesDir)
                         .input(compileAndEmit(ImmutableList.of(
                                 Paths.get("src/test/resources/provided-version/provided-version.yml"))))
                         .defaultPackageName("com.palantir.test")
@@ -80,6 +86,64 @@ public class JavaGeneratorTest {
                 .map(Path::toString)
                 .forEach(relativePath ->
                         assertThatFilesAreTheSame(outputDir.resolve(relativePath), REFERENCE_FILES_FOLDER));
+
+        assertThat(resourcesDir.resolve("com/palantir/test/ProvidedVersionMetrics.libraryVersion"))
+                .hasContent("1.0.0");
+    }
+
+    @Test
+    void libraryVersionWithoutLibraryName_doesNotRequireResourcesOutput() {
+        Path schema =
+                compileAndEmit(ImmutableList.of(Paths.get("src/test/resources/provided-version/provided-version.yml")));
+
+        assertThat(JavaGenerator.generate(JavaGeneratorArgs.builder()
+                        .output(outputDir)
+                        .input(schema)
+                        .defaultPackageName("com.palantir.test")
+                        .libraryVersion("1.0.0")
+                        .build()))
+                .isNotEmpty();
+    }
+
+    @Test
+    void libraryNameAndVersionWithoutResourcesOutput_isRejected() {
+        assertThatCode(() -> JavaGeneratorArgs.builder()
+                        .output(outputDir)
+                        .input(inputDir.resolve("metrics.json"))
+                        .defaultPackageName("com.palantir.test")
+                        .libraryName("witchcraft")
+                        .libraryVersion("1.0.0")
+                        .build())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("resourcesOutput is required");
+    }
+
+    @Test
+    void libraryVersion_doesNotChangeGeneratedSources() throws IOException {
+        Path schema =
+                compileAndEmit(ImmutableList.of(Paths.get("src/test/resources/provided-version/provided-version.yml")));
+        Path unversionedOutput = Files.createDirectory(outputDir.resolve("unversioned"));
+        Path versionedOutput = Files.createDirectory(outputDir.resolve("versioned"));
+
+        List<Path> unversioned = JavaGenerator.generate(JavaGeneratorArgs.builder()
+                .output(unversionedOutput)
+                .input(schema)
+                .defaultPackageName("com.palantir.test")
+                .libraryName("specific_libraryVersion")
+                .build());
+        JavaGenerator.generate(JavaGeneratorArgs.builder()
+                .output(versionedOutput)
+                .resourcesOutput(resourcesDir)
+                .input(schema)
+                .defaultPackageName("com.palantir.test")
+                .libraryName("specific_libraryVersion")
+                .libraryVersion("1.0.0")
+                .build());
+
+        assertThat(unversioned)
+                .isNotEmpty()
+                .allSatisfy(file -> assertThat(file)
+                        .hasSameTextualContentAs(versionedOutput.resolve(unversionedOutput.relativize(file))));
     }
 
     @Test
@@ -88,6 +152,23 @@ public class JavaGeneratorTest {
         MonitorsMetrics.of(registry).more("value").mark();
         MetricName key = Iterables.getOnlyElement(registry.getMetrics().keySet());
         assertThat(key.safeTags().get("javaVersion")).matches("\\d+\\.\\d+(\\.\\d+)+");
+    }
+
+    @Test
+    void libraryVersionTag_readFromResourceBesideClass() {
+        DefaultTaggedMetricRegistry registry = new DefaultTaggedMetricRegistry();
+        ProvidedVersionMetrics.of(registry).utilization(() -> 1);
+        MetricName key = Iterables.getOnlyElement(registry.getMetrics().keySet());
+        assertThat(key.safeTags()).containsEntry("libraryVersion", "1.0.0");
+    }
+
+    @Test
+    void libraryVersionTag_fallsBackWithoutResource() {
+        DefaultTaggedMetricRegistry registry = new DefaultTaggedMetricRegistry();
+        MonitorsMetrics.of(registry).more("value").mark();
+        MetricName key = Iterables.getOnlyElement(registry.getMetrics().keySet());
+        // Classes run from a directory, so there is no manifest Implementation-Version either
+        assertThat(key.safeTags()).containsEntry("libraryVersion", "unknown");
     }
 
     private void assertThatFilesAreTheSame(Path outputFile, String referenceFilesFolder) {
