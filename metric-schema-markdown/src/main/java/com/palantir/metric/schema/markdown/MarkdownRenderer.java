@@ -144,7 +144,6 @@ public final class MarkdownRenderer {
         });
     }
 
-    @SuppressWarnings("for-rollout:BoxingComparator")
     private static ImmutableList<Section> namespaces(String localCoordinate, Map<String, List<MetricSchema>> schemas) {
         return schemas.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(new CoordinateComparator(localCoordinate)))
@@ -157,10 +156,10 @@ public final class MarkdownRenderer {
                                 .sorted(Map.Entry.<String, MetricNamespace>comparingByKey()
                                         .thenComparing(Map.Entry.comparingByValue(Comparator.comparing(
                                                 namespace -> namespace.getDocs().get())))
-                                        .thenComparing(Map.Entry.comparingByValue(Comparator.comparing(namespace ->
+                                        .thenComparing(Map.Entry.comparingByValue(Comparator.comparingInt(namespace ->
                                                 namespace.getMetrics().size())))
                                         .thenComparing(Map.Entry.comparingByValue(
-                                                Comparator.comparing(MetricNamespace::hashCode))))
+                                                Comparator.comparingInt(MetricNamespace::hashCode))))
                                 .map(schemaEntry -> Namespace.builder()
                                         .name(schemaEntry.getKey())
                                         .definition(schemaEntry.getValue())
