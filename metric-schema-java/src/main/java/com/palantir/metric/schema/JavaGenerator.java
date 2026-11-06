@@ -59,12 +59,12 @@ public final class JavaGenerator {
                             getVisibility(schema));
                     if (args.libraryName().isPresent()) {
                         args.libraryVersion()
-                                .ifPresent(version -> writeLibraryVersionResource(
-                                        args.resourcesOutput().orElseThrow(), javaFile, version));
+                                .ifPresent(version ->
+                                        writeLibraryVersionResource(args.resourcesOutput(), javaFile, version));
                     }
                     return javaFile;
                 }))
-                .map(javaFile -> Goethe.formatAndEmit(javaFile, args.output()))
+                .map(javaFile -> Goethe.formatAndEmit(javaFile, args.javaOutput()))
                 .collect(ImmutableList.toImmutableList());
     }
 

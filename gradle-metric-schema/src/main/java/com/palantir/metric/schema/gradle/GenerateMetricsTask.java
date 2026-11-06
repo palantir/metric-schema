@@ -66,21 +66,18 @@ public abstract class GenerateMetricsTask extends DefaultTask {
      * those sources identical across versions lets compileJava hit the build cache on release builds.
      */
     @OutputDirectory
-    @org.gradle.api.tasks.Optional
     public abstract DirectoryProperty getResourcesOutputDir();
 
     @TaskAction
     public final void generate() {
         File output = getOutputDir().getAsFile().get();
         clearOutput(output.toPath());
-        Optional<Path> resourcesOutput = Optional.ofNullable(
-                        getResourcesOutputDir().getAsFile().getOrNull())
-                .map(File::toPath);
-        resourcesOutput.ifPresent(GenerateMetricsTask::clearOutput);
+        Path resourcesOutput = getResourcesOutputDir().getAsFile().get().toPath();
+        clearOutput(resourcesOutput);
 
         JavaGenerator.generate(JavaGeneratorArgs.builder()
                 .input(getInputFile().getAsFile().get().toPath())
-                .output(output.toPath())
+                .javaOutput(output.toPath())
                 .resourcesOutput(resourcesOutput)
                 .libraryName(Optional.ofNullable(getLibraryName().getOrNull()))
                 .libraryVersion(Optional.ofNullable(getLibraryVersion().getOrNull()))
