@@ -202,6 +202,40 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         !fileExists('unjar/com/palantir/test/ServerMetrics.properties')
     }
 
+    def 'generates metrics in the default package when project has no group'() {
+        when:
+        buildFile << """
+        group = ''
+        version = '1.2.3'
+        task unJar(type: Sync, dependsOn: jar) {
+            from { zipTree(tasks.jar.archiveFile) }
+            into file("unjar")
+        }
+        task printTags(type: JavaExec) {
+            classpath = files(tasks.jar) + configurations.runtimeClasspath
+            mainClass = 'PrintTags'
+        }
+        """.stripIndent()
+        file('src/main/metrics/metrics.yml') << METRICS
+        file('src/main/java/PrintTags.java') << """
+        import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+
+        public final class PrintTags {
+            public static void main(String[] args) {
+                DefaultTaggedMetricRegistry registry = new DefaultTaggedMetricRegistry();
+                ServerMetrics.of(registry).workerUtilization(() -> 1);
+                registry.getMetrics().keySet().forEach(name -> System.out.println("tags=" + name.safeTags()));
+            }
+        }
+        """.stripIndent()
+
+        then:
+        runTasksSuccessfully(':unJar')
+        fileExists('unjar/ServerMetrics.class')
+        file('unjar/ServerMetrics.properties').text == 'libraryVersion=1.2.3\n'
+        runTasksSuccessfully(':printTags').standardOutput.contains('libraryVersion=1.2.3')
+    }
+
     def 'invalid schema results in task failure'() {
         when:
         file('src/main/metrics/metrics.yml') << METRICS_INVALID
