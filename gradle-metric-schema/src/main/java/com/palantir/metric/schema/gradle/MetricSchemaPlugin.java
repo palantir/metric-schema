@@ -124,6 +124,8 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                 .map(artifact -> artifact.getId().getComponentIdentifier())
                 .filter(ProjectComponentIdentifier.class::isInstance)
                 .map(ProjectComponentIdentifier.class::cast)
+                // Depend on the ConfigureProductDependenciesTask, if it exists, which will wire up the jar
+                // manifest with recommended product dependencies.
                 .forEach(id -> files.from(project.getRootProject()
                         .project(id.getProjectPath())
                         .getTasks()
