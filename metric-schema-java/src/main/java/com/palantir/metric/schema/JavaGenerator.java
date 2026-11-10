@@ -25,8 +25,8 @@ import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import com.palantir.metric.schema.model.ImplementationVisibility;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -78,15 +78,15 @@ public final class JavaGenerator {
         Properties properties = new Properties();
         properties.setProperty(UtilityGenerator.LIBRARY_VERSION_PROPERTY, version);
         try {
-            StringWriter writer = new StringWriter();
-            properties.store(writer, /* comments= */ null);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            properties.store(out, /* comments= */ null);
             // Properties.store always writes a timestamp comment, which would change the resource on every build
-            String contents = writer.toString()
+            String contents = out.toString(StandardCharsets.ISO_8859_1)
                     .lines()
                     .filter(line -> !line.startsWith("#"))
                     .collect(Collectors.joining("\n", "", "\n"));
             Files.createDirectories(packageDir);
-            Files.writeString(resource, contents, StandardCharsets.UTF_8);
+            Files.writeString(resource, contents, StandardCharsets.ISO_8859_1);
         } catch (IOException e) {
             throw new SafeUncheckedIoException(
                     "Failed to write library version resource", e, SafeArg.of("resource", resource));
