@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.gradle.api.DefaultTask;
@@ -41,14 +40,13 @@ import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
 import org.gradle.api.artifacts.result.ComponentResult;
 import org.gradle.api.file.ConfigurableFileCollection;
-import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.provider.Property;
-import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.PathSensitive;
@@ -61,6 +59,10 @@ public abstract class CreateMetricsManifestTask extends DefaultTask {
     private static final Logger log = Logging.getLogger(CreateMetricsManifestTask.class);
 
     static final String NAME = "createMetricsManifest";
+
+    @PathSensitive(PathSensitivity.ABSOLUTE)
+    @InputFiles
+    public abstract ConfigurableFileCollection getProjectDependencyMetrics();
 
     @PathSensitive(PathSensitivity.ABSOLUTE)
     @InputFile
@@ -80,45 +82,6 @@ public abstract class CreateMetricsManifestTask extends DefaultTask {
 
     @OutputFile
     public abstract RegularFileProperty getOutputFile();
-
-    public CreateMetricsManifestTask() {
-        Provider<FileCollection> projectDependencyMetrics = otherProjectMetricSchemaTasks();
-        getInputs()
-                .files(projectDependencyMetrics)
-                .withPropertyName("projectDependencyMetrics")
-                .withPathSensitivity(PathSensitivity.ABSOLUTE);
-        dependsOn(projectDependencyMetrics);
-    }
-
-    /**
-     * A lazy collection of tasks that ensure the {@link CompileMetricSchemaTask} task of any project dependencies from
-     * {@link #getConfiguration()} are executed.
-     */
-    private Provider<FileCollection> otherProjectMetricSchemaTasks() {
-        return getConfiguration().map(productDeps -> {
-            // Using a ConfigurableFileCollection simply because it implements Buildable and provides a convenient API
-            // to wire up task dependencies to it in a lazy way.
-            ConfigurableFileCollection emptyFileCollection = getProject().files();
-            productDeps.getIncoming().getArtifacts().getArtifacts().stream()
-                    .flatMap(artifact -> {
-                        ComponentIdentifier id = artifact.getId().getComponentIdentifier();
-
-                        // Depend on the ConfigureProductDependenciesTask, if it exists, which will wire up the jar
-                        // manifest with recommended product dependencies.
-                        if (id instanceof ProjectComponentIdentifier projectComponentIdentifier) {
-                            Project dependencyProject =
-                                    getProject().getRootProject().project(projectComponentIdentifier.getProjectPath());
-                            return Stream.of(dependencyProject.getTasks().withType(CompileMetricSchemaTask.class));
-                        }
-                        return Stream.empty();
-                    })
-                    .forEach(tasks -> {
-                        emptyFileCollection.from(tasks);
-                        emptyFileCollection.builtBy(tasks);
-                    });
-            return emptyFileCollection;
-        });
-    }
 
     @TaskAction
     public final void createManifest() throws IOException {
