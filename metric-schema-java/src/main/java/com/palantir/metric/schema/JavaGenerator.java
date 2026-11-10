@@ -23,7 +23,6 @@ import com.palantir.goethe.Goethe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import com.palantir.metric.schema.model.ImplementationVisibility;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -49,32 +48,34 @@ public final class JavaGenerator {
 
     @CanIgnoreReturnValue
     public static List<Path> generate(JavaGeneratorArgs args) {
-        return SchemaParser.get().parseFile(args.input()).stream()
-                .flatMap(schema -> schema.getNamespaces().entrySet().stream().map(entry -> {
-                    JavaFile javaFile = UtilityGenerator.generateUtilityClass(
-                            entry.getKey(),
-                            entry.getValue(),
-                            args.libraryName(),
-                            getPackage(args, schema),
-                            getVisibility(schema));
-                    if (args.libraryName().isPresent()) {
-                        args.libraryVersion()
-                                .ifPresent(version ->
-                                        writeLibraryVersionResource(args.resourcesOutput(), javaFile, version));
-                    }
-                    return javaFile;
-                }))
+        List<JavaFile> javaFiles = SchemaParser.get().parseFile(args.input()).stream()
+                .flatMap(schema -> schema.getNamespaces().entrySet().stream()
+                        .map(entry -> UtilityGenerator.generateUtilityClass(
+                                entry.getKey(),
+                                entry.getValue(),
+                                args.libraryName(),
+                                getPackage(args, schema),
+                                getVisibility(schema))))
+                .collect(ImmutableList.toImmutableList());
+        if (args.libraryName().isPresent()) {
+            args.libraryVersion()
+                    .ifPresent(version -> javaFiles.stream()
+                            .map(javaFile -> javaFile.packageName)
+                            .distinct()
+                            .forEach(packageName ->
+                                    writeLibraryVersionResource(args.resourcesOutput(), packageName, version)));
+        }
+        return javaFiles.stream()
                 .map(javaFile -> Goethe.formatAndEmit(javaFile, args.javaOutput()))
                 .collect(ImmutableList.toImmutableList());
     }
 
-    private static void writeLibraryVersionResource(Path resourcesOutput, JavaFile javaFile, String version) {
-        ClassName className = ClassName.get(javaFile.packageName, javaFile.typeSpec.name);
+    private static void writeLibraryVersionResource(Path resourcesOutput, String packageName, String version) {
         Path packageDir = resourcesOutput;
-        for (String component : Splitter.on('.').split(javaFile.packageName)) {
+        for (String component : Splitter.on('.').split(packageName)) {
             packageDir = packageDir.resolve(component);
         }
-        Path resource = packageDir.resolve(UtilityGenerator.metadataResourceName(className));
+        Path resource = packageDir.resolve(UtilityGenerator.METADATA_RESOURCE_NAME);
         Properties properties = new Properties();
         properties.setProperty(UtilityGenerator.LIBRARY_VERSION_PROPERTY, version);
         try {

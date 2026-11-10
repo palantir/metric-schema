@@ -1,3 +1,5 @@
+options:
+  javaPackage: com.palantir.test.missingversionkey
 namespaces:
   missing.version.key:
     docs: Test data metric.

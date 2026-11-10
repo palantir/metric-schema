@@ -1,4 +1,4 @@
-package com.palantir.test;
+package com.palantir.test.missingversionkey;
 
 import com.codahale.metrics.Gauge;
 import com.palantir.logsafe.Preconditions;
@@ -32,8 +32,7 @@ public final class MissingVersionKeyMetrics {
     }
 
     private static String loadLibraryVersion() {
-        try (InputStream stream =
-                MissingVersionKeyMetrics.class.getResourceAsStream("MissingVersionKeyMetrics.properties")) {
+        try (InputStream stream = MissingVersionKeyMetrics.class.getResourceAsStream("metric-schema.properties")) {
             if (stream == null) {
                 // Only written when a release version is known at build time
                 return Objects.requireNonNullElse(

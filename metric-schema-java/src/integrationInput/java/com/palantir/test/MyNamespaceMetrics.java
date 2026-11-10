@@ -35,7 +35,7 @@ public final class MyNamespaceMetrics {
     }
 
     private static String loadLibraryVersion() {
-        try (InputStream stream = MyNamespaceMetrics.class.getResourceAsStream("MyNamespaceMetrics.properties")) {
+        try (InputStream stream = MyNamespaceMetrics.class.getResourceAsStream("metric-schema.properties")) {
             if (stream == null) {
                 // Only written when a release version is known at build time
                 return Objects.requireNonNullElse(

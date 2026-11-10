@@ -73,7 +73,7 @@ public final class NamespaceTagsMetrics {
     }
 
     private static String loadLibraryVersion() {
-        try (InputStream stream = NamespaceTagsMetrics.class.getResourceAsStream("NamespaceTagsMetrics.properties")) {
+        try (InputStream stream = NamespaceTagsMetrics.class.getResourceAsStream("metric-schema.properties")) {
             if (stream == null) {
                 // Only written when a release version is known at build time
                 return Objects.requireNonNullElse(

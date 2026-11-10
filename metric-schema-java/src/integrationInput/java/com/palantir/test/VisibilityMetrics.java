@@ -35,7 +35,7 @@ final class VisibilityMetrics {
     }
 
     private static String loadLibraryVersion() {
-        try (InputStream stream = VisibilityMetrics.class.getResourceAsStream("VisibilityMetrics.properties")) {
+        try (InputStream stream = VisibilityMetrics.class.getResourceAsStream("metric-schema.properties")) {
             if (stream == null) {
                 // Only written when a release version is known at build time
                 return Objects.requireNonNullElse(

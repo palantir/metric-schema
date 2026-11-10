@@ -1,4 +1,4 @@
-package com.palantir.test;
+package com.palantir.test.providedversion;
 
 import com.codahale.metrics.Gauge;
 import com.palantir.logsafe.Preconditions;
@@ -32,8 +32,7 @@ public final class ProvidedVersionMetrics {
     }
 
     private static String loadLibraryVersion() {
-        try (InputStream stream =
-                ProvidedVersionMetrics.class.getResourceAsStream("ProvidedVersionMetrics.properties")) {
+        try (InputStream stream = ProvidedVersionMetrics.class.getResourceAsStream("metric-schema.properties")) {
             if (stream == null) {
                 // Only written when a release version is known at build time
                 return Objects.requireNonNullElse(

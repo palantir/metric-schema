@@ -154,8 +154,8 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                 // don't invalidate build caches on each commit.
                 // We provide version data in a resource rather than in the Java source so we don't invalidate build
                 // caches for compilation tasks.
-                // We prefer passing along version information at this level because the resource sits beside the
-                // generated class and is relocated with it by shading, where the fallback based on
+                // We prefer passing along version information at this level because the resource sits in the
+                // generated classes' package and is relocated with them by shading, where the fallback based on
                 // 'package.getImplementationVersion()' will reflect the shadow jar version.
                 .filter(ver ->
                         ver.getType() == SlsVersionType.RELEASE || ver.getType() == SlsVersionType.RELEASE_CANDIDATE)

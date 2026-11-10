@@ -52,6 +52,14 @@ final class UtilityGenerator {
 
     static final String LIBRARY_VERSION_PROPERTY = "libraryVersion";
 
+    /**
+     * Name of the classpath resource, relative to the generated classes' package, which holds
+     * {@link java.util.Properties} with metadata such as the library version. One resource is shared by all generated
+     * classes in a package. Keeping the version out of the generated source keeps compilation cacheable across release
+     * and snapshot builds, and keeping the resource in the classes' package means shading relocates it along with them.
+     */
+    static final String METADATA_RESOURCE_NAME = "metric-schema.properties";
+
     static JavaFile generateUtilityClass(
             String namespace,
             MetricNamespace metrics,
@@ -374,16 +382,6 @@ final class UtilityGenerator {
                 .build());
     }
 
-    /**
-     * Name of the classpath resource, relative to the generated class, which holds {@link java.util.Properties} with
-     * metadata such as the library version. Keeping the version out of the generated source keeps compilation
-     * cacheable across release and snapshot builds, and keeping the resource beside the class means shading relocates
-     * it along with the class.
-     */
-    static String metadataResourceName(ClassName className) {
-        return className.simpleName() + ".properties";
-    }
-
     private static MethodSpec generateLoadLibraryVersion(ClassName className) {
         return MethodSpec.methodBuilder(ReservedNames.LOAD_LIBRARY_VERSION_METHOD)
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
@@ -392,7 +390,7 @@ final class UtilityGenerator {
                         "try ($T stream = $T.class.getResourceAsStream($S))",
                         InputStream.class,
                         className,
-                        metadataResourceName(className))
+                        METADATA_RESOURCE_NAME)
                 .beginControlFlow("if (stream == null)")
                 .addComment("Only written when a release version is known at build time")
                 .addStatement(

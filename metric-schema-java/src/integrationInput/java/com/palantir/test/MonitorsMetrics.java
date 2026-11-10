@@ -27,7 +27,7 @@ public final class MonitorsMetrics {
     }
 
     private static String loadLibraryVersion() {
-        try (InputStream stream = MonitorsMetrics.class.getResourceAsStream("MonitorsMetrics.properties")) {
+        try (InputStream stream = MonitorsMetrics.class.getResourceAsStream("metric-schema.properties")) {
             if (stream == null) {
                 // Only written when a release version is known at build time
                 return Objects.requireNonNullElse(

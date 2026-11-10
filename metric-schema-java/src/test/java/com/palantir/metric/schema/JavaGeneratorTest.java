@@ -29,9 +29,9 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
 import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import com.palantir.metric.schema.lang.MetricSchemaCompiler;
-import com.palantir.test.MissingVersionKeyMetrics;
 import com.palantir.test.MonitorsMetrics;
-import com.palantir.test.ProvidedVersionMetrics;
+import com.palantir.test.missingversionkey.MissingVersionKeyMetrics;
+import com.palantir.test.providedversion.ProvidedVersionMetrics;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
 import java.io.IOException;
@@ -91,8 +91,26 @@ public class JavaGeneratorTest {
                 .forEach(relativePath ->
                         assertThatFilesAreTheSame(outputDir.resolve(relativePath), REFERENCE_FILES_FOLDER));
 
-        assertThat(resourcesDir.resolve("com/palantir/test/ProvidedVersionMetrics.properties"))
+        assertThat(resourcesDir.resolve("com/palantir/test/providedversion/metric-schema.properties"))
                 .hasContent("libraryVersion=1.0.0\n");
+    }
+
+    @Test
+    void libraryVersion_writesOneResourcePerPackage() throws IOException {
+        List<Path> generated = JavaGenerator.generate(JavaGeneratorArgs.builder()
+                .javaOutput(outputDir)
+                .resourcesOutput(resourcesDir)
+                .input(compileAndEmit(listFiles(Paths.get("src/test/resources"))))
+                .defaultPackageName("com.palantir.test")
+                .libraryName("witchcraft")
+                .libraryVersion("1.0.0")
+                .build());
+
+        assertThat(generated).hasSizeGreaterThan(1);
+        try (Stream<Path> files = Files.walk(resourcesDir)) {
+            assertThat(files.filter(Files::isRegularFile).map(resourcesDir::relativize))
+                    .containsExactly(Paths.get("com/palantir/test/metric-schema.properties"));
+        }
     }
 
     @Test
