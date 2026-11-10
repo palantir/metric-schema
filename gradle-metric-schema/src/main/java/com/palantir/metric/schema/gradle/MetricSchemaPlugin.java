@@ -51,8 +51,8 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                 project.getLayout().getBuildDirectory().dir("generated/sources/metricSchema/java/main");
         Provider<Directory> generatedResourcesDir =
                 project.getLayout().getBuildDirectory().dir("generated/sources/metricSchema/resources/main");
-        Provider<Directory> generatedVersionResourcesDir =
-                project.getLayout().getBuildDirectory().dir("generated/sources/metricSchema/versionResources/main");
+        Provider<Directory> generatedPropertiesResourcesDir =
+                project.getLayout().getBuildDirectory().dir("generated/sources/metricSchemaProperties/resources/main");
         Provider<Directory> metricSchemaDir =
                 project.getLayout().getBuildDirectory().dir("metricSchema");
 
@@ -79,7 +79,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                     task.getLibraryName().convention(defaultLibraryName(project));
                     task.getLibraryVersion().convention(defaultLibraryVersion(project));
                     task.getOutputDir().set(generatedJavaDir);
-                    task.getResourcesOutputDir().set(generatedVersionResourcesDir);
+                    task.getResourcesOutputDir().set(generatedPropertiesResourcesDir);
                     task.getPackageName().set(project.getGroup().toString());
                 });
 
