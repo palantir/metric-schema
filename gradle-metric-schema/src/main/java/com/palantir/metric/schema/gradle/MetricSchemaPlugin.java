@@ -23,6 +23,7 @@ import com.palantir.sls.versions.SlsVersionType;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
+import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
@@ -85,14 +86,15 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                 });
 
         project.getTasks().register(CreateMetricsManifestTask.NAME, CreateMetricsManifestTask.class, task -> {
+            NamedDomainObjectProvider<Configuration> runtimeClasspath =
+                    project.getConfigurations().named(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME);
             task.setGroup(TASK_GROUP);
             task.getMetricsFile().set(metricsFiles);
             task.getOutputFile().set(metricSchemaDir.map(dir -> dir.file("manifest.json")));
-            task.getConfiguration()
-                    .set(project.getConfigurations().getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME));
+            task.getConfiguration().set(runtimeClasspath);
             task.getProjectDependencyMetrics()
-                    .from(task.getConfiguration()
-                            .map(configuration -> projectDependencyMetricSchemaTasks(project, configuration)));
+                    .from(runtimeClasspath.map(
+                            configuration -> projectDependencyMetricSchemaTasks(project, configuration)));
         });
 
         JavaPluginExtension javaPluginExtension = project.getExtensions().getByType(JavaPluginExtension.class);
