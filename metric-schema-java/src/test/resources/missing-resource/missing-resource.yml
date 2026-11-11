@@ -1,7 +1,7 @@
 options:
-  javaPackage: com.palantir.test.missingversionkey
+  javaPackage: com.palantir.test.missingresource
 namespaces:
-  missing.version.key:
+  missing.resource:
     docs: Test data metric.
     metrics:
       utilization:

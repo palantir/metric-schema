@@ -30,7 +30,7 @@ import com.palantir.logsafe.exceptions.SafeNullPointerException;
 import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import com.palantir.metric.schema.lang.MetricSchemaCompiler;
 import com.palantir.test.MonitorsMetrics;
-import com.palantir.test.missingversionkey.MissingVersionKeyMetrics;
+import com.palantir.test.missingresource.MissingResourceMetrics;
 import com.palantir.test.providedversion.ProvidedVersionMetrics;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
@@ -80,7 +80,7 @@ public class JavaGeneratorTest {
                         .resourcesOutput(resourcesDir)
                         .input(compileAndEmit(ImmutableList.of(
                                 Paths.get("src/test/resources/provided-version/provided-version.yml"),
-                                Paths.get("src/test/resources/missing-version-key/missing-version-key.yml"))))
+                                Paths.get("src/test/resources/missing-resource/missing-resource.yml"))))
                         .defaultPackageName("com.palantir.test")
                         .libraryName("specific_libraryVersion")
                         .libraryVersion("1.0.0")
@@ -93,6 +93,21 @@ public class JavaGeneratorTest {
 
         assertThat(resourcesDir.resolve("com/palantir/test/providedversion/metric-schema.properties"))
                 .hasContent("libraryVersion=1.0.0\n");
+    }
+
+    @Test
+    void noLibraryVersion_writesEmptyResource() {
+        JavaGenerator.generate(JavaGeneratorArgs.builder()
+                .javaOutput(outputDir)
+                .resourcesOutput(resourcesDir)
+                .input(compileAndEmit(
+                        ImmutableList.of(Paths.get("src/test/resources/provided-version/provided-version.yml"))))
+                .defaultPackageName("com.palantir.test")
+                .libraryName("specific_libraryVersion")
+                .build());
+
+        assertThat(resourcesDir.resolve("com/palantir/test/providedversion/metric-schema.properties"))
+                .isEmptyFile();
     }
 
     @Test
@@ -159,17 +174,17 @@ public class JavaGeneratorTest {
     }
 
     @Test
-    void libraryVersionTag_resourceWithoutVersionFailsClassInitialization() {
+    void libraryVersionTag_missingResourceFailsClassInitialization() {
         DefaultTaggedMetricRegistry registry = new DefaultTaggedMetricRegistry();
-        assertThatThrownBy(() -> MissingVersionKeyMetrics.of(registry))
+        assertThatThrownBy(() -> MissingResourceMetrics.of(registry))
                 .isInstanceOf(ExceptionInInitializerError.class)
                 .cause()
                 .isInstanceOf(SafeNullPointerException.class)
-                .hasMessageContaining("Library version resource is missing libraryVersion");
+                .hasMessageContaining("Missing generated resource metric-schema.properties");
     }
 
     @Test
-    void libraryVersionTag_fallsBackWithoutResource() {
+    void libraryVersionTag_fallsBackWhenResourceHasNoVersion() {
         DefaultTaggedMetricRegistry registry = new DefaultTaggedMetricRegistry();
         MonitorsMetrics.of(registry).more("value").mark();
         MetricName key = Iterables.getOnlyElement(registry.getMetrics().keySet());

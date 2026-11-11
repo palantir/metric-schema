@@ -57,40 +57,38 @@ public final class JavaGenerator {
                                 getPackage(args, schema),
                                 getVisibility(schema))))
                 .collect(ImmutableList.toImmutableList());
-        if (args.libraryName().isPresent()) {
-            args.libraryVersion()
-                    .ifPresent(version -> javaFiles.stream()
-                            .map(javaFile -> javaFile.packageName)
-                            .distinct()
-                            .forEach(packageName ->
-                                    writeLibraryVersionResource(args.resourcesOutput(), packageName, version)));
-        }
+        Properties metadata = new Properties();
+        args.libraryVersion()
+                .ifPresent(version -> metadata.setProperty(UtilityGenerator.LIBRARY_VERSION_PROPERTY, version));
+        javaFiles.stream()
+                .map(javaFile -> javaFile.packageName)
+                .distinct()
+                .forEach(packageName -> writeMetadataResource(args.resourcesOutput(), packageName, metadata));
         return javaFiles.stream()
                 .map(javaFile -> Goethe.formatAndEmit(javaFile, args.javaOutput()))
                 .collect(ImmutableList.toImmutableList());
     }
 
-    private static void writeLibraryVersionResource(Path resourcesOutput, String packageName, String version) {
+    private static void writeMetadataResource(Path resourcesOutput, String packageName, Properties metadata) {
         Path packageDir = resourcesOutput;
         for (String component : Splitter.on('.').split(packageName)) {
             packageDir = packageDir.resolve(component);
         }
         Path resource = packageDir.resolve(UtilityGenerator.METADATA_RESOURCE_NAME);
-        Properties properties = new Properties();
-        properties.setProperty(UtilityGenerator.LIBRARY_VERSION_PROPERTY, version);
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            properties.store(out, /* comments= */ null);
+            metadata.store(out, /* comments= */ null);
             // Properties.store always writes a timestamp comment, which would change the resource on every build
             String contents = out.toString(StandardCharsets.ISO_8859_1)
                     .lines()
                     .filter(line -> !line.startsWith("#"))
-                    .collect(Collectors.joining("\n", "", "\n"));
+                    .map(line -> line + "\n")
+                    .collect(Collectors.joining());
             Files.createDirectories(packageDir);
             Files.writeString(resource, contents, StandardCharsets.ISO_8859_1);
         } catch (IOException e) {
             throw new SafeUncheckedIoException(
-                    "Failed to write library version resource", e, SafeArg.of("resource", resource));
+                    "Failed to write metadata resource", e, SafeArg.of("resource", resource));
         }
     }
 

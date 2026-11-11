@@ -35,16 +35,16 @@ public final class ServerMetrics {
     }
 
     private static String loadLibraryVersion() {
-        try (InputStream stream = ServerMetrics.class.getResourceAsStream("metric-schema.properties")) {
-            if (stream == null) {
-                // Only written when a release version is known at build time
-                return Objects.requireNonNullElse(
-                        ServerMetrics.class.getPackage().getImplementationVersion(), "unknown");
-            }
+        try (InputStream stream = Preconditions.checkNotNull(
+                ServerMetrics.class.getResourceAsStream("metric-schema.properties"),
+                "Missing generated resource metric-schema.properties")) {
             Properties properties = new Properties();
             properties.load(stream);
-            return Preconditions.checkNotNull(
-                    properties.getProperty("libraryVersion"), "Library version resource is missing libraryVersion");
+            // Only recorded when a release version is known at build time
+            return Objects.requireNonNullElseGet(
+                    properties.getProperty("libraryVersion"),
+                    () -> Objects.requireNonNullElse(
+                            ServerMetrics.class.getPackage().getImplementationVersion(), "unknown"));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

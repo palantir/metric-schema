@@ -199,7 +199,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         then:
         runTasksSuccessfully(':unJar')
         fileExists('unjar/com/palantir/test/ServerMetrics.class')
-        !fileExists('unjar/com/palantir/test/metric-schema.properties')
+        file('unjar/com/palantir/test/metric-schema.properties').text == ''
     }
 
     def 'generates metrics in the default package when project has no group'() {

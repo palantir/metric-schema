@@ -1,4 +1,4 @@
-package com.palantir.test.missingversionkey;
+package com.palantir.test.missingresource;
 
 import com.codahale.metrics.Gauge;
 import com.palantir.logsafe.Preconditions;
@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.Properties;
 
 /** Test data metric. */
-public final class MissingVersionKeyMetrics {
+public final class MissingResourceMetrics {
     private static final String JAVA_VERSION = System.getProperty("java.version", "unknown");
 
     private static final String LIBRARY_NAME = "specific_libraryVersion";
@@ -19,7 +19,7 @@ public final class MissingVersionKeyMetrics {
     private static final String LIBRARY_VERSION = loadLibraryVersion();
 
     private static final MetricName utilizationMetricName = MetricName.builderWithExpectedTags(3)
-            .safeName("missing.version.key.utilization")
+            .safeName("missing.resource.utilization")
             .putSafeTags("javaVersion", JAVA_VERSION)
             .putSafeTags("libraryName", LIBRARY_NAME)
             .putSafeTags("libraryVersion", LIBRARY_VERSION)
@@ -27,28 +27,28 @@ public final class MissingVersionKeyMetrics {
 
     private final TaggedMetricRegistry registry;
 
-    private MissingVersionKeyMetrics(TaggedMetricRegistry registry) {
+    private MissingResourceMetrics(TaggedMetricRegistry registry) {
         this.registry = registry;
     }
 
     private static String loadLibraryVersion() {
-        try (InputStream stream = MissingVersionKeyMetrics.class.getResourceAsStream("metric-schema.properties")) {
-            if (stream == null) {
-                // Only written when a release version is known at build time
-                return Objects.requireNonNullElse(
-                        MissingVersionKeyMetrics.class.getPackage().getImplementationVersion(), "unknown");
-            }
+        try (InputStream stream = Preconditions.checkNotNull(
+                MissingResourceMetrics.class.getResourceAsStream("metric-schema.properties"),
+                "Missing generated resource metric-schema.properties")) {
             Properties properties = new Properties();
             properties.load(stream);
-            return Preconditions.checkNotNull(
-                    properties.getProperty("libraryVersion"), "Library version resource is missing libraryVersion");
+            // Only recorded when a release version is known at build time
+            return Objects.requireNonNullElseGet(
+                    properties.getProperty("libraryVersion"),
+                    () -> Objects.requireNonNullElse(
+                            MissingResourceMetrics.class.getPackage().getImplementationVersion(), "unknown"));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    public static MissingVersionKeyMetrics of(TaggedMetricRegistry registry) {
-        return new MissingVersionKeyMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
+    public static MissingResourceMetrics of(TaggedMetricRegistry registry) {
+        return new MissingResourceMetrics(Preconditions.checkNotNull(registry, "TaggedMetricRegistry"));
     }
 
     /** Test data. */
@@ -62,6 +62,6 @@ public final class MissingVersionKeyMetrics {
 
     @Override
     public String toString() {
-        return "MissingVersionKeyMetrics{registry=" + registry + '}';
+        return "MissingResourceMetrics{registry=" + registry + '}';
     }
 }

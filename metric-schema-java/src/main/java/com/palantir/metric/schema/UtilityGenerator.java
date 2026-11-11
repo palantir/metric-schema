@@ -387,25 +387,23 @@ final class UtilityGenerator {
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
                 .returns(String.class)
                 .beginControlFlow(
-                        "try ($T stream = $T.class.getResourceAsStream($S))",
+                        "try ($T stream = $T.checkNotNull($T.class.getResourceAsStream($S), $S))",
                         InputStream.class,
+                        Preconditions.class,
                         className,
-                        METADATA_RESOURCE_NAME)
-                .beginControlFlow("if (stream == null)")
-                .addComment("Only written when a release version is known at build time")
+                        METADATA_RESOURCE_NAME,
+                        "Missing generated resource " + METADATA_RESOURCE_NAME)
+                .addStatement("$T properties = new $T()", Properties.class, Properties.class)
+                .addStatement("properties.load(stream)")
+                .addComment("Only recorded when a release version is known at build time")
                 .addStatement(
-                        "return $T.requireNonNullElse($T.class.getPackage().getImplementationVersion(), $S)",
+                        "return $T.requireNonNullElseGet(properties.getProperty($S), () -> $T.requireNonNullElse("
+                                + "$T.class.getPackage().getImplementationVersion(), $S))",
+                        Objects.class,
+                        LIBRARY_VERSION_PROPERTY,
                         Objects.class,
                         className,
                         "unknown")
-                .endControlFlow()
-                .addStatement("$T properties = new $T()", Properties.class, Properties.class)
-                .addStatement("properties.load(stream)")
-                .addStatement(
-                        "return $T.checkNotNull(properties.getProperty($S), $S)",
-                        Preconditions.class,
-                        LIBRARY_VERSION_PROPERTY,
-                        "Library version resource is missing " + LIBRARY_VERSION_PROPERTY)
                 .nextControlFlow("catch ($T e)", IOException.class)
                 .addStatement("throw new $T(e)", UncheckedIOException.class)
                 .endControlFlow()

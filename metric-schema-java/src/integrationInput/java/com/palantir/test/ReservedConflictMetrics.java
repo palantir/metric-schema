@@ -36,16 +36,16 @@ public final class ReservedConflictMetrics {
     }
 
     private static String loadLibraryVersion() {
-        try (InputStream stream = ReservedConflictMetrics.class.getResourceAsStream("metric-schema.properties")) {
-            if (stream == null) {
-                // Only written when a release version is known at build time
-                return Objects.requireNonNullElse(
-                        ReservedConflictMetrics.class.getPackage().getImplementationVersion(), "unknown");
-            }
+        try (InputStream stream = Preconditions.checkNotNull(
+                ReservedConflictMetrics.class.getResourceAsStream("metric-schema.properties"),
+                "Missing generated resource metric-schema.properties")) {
             Properties properties = new Properties();
             properties.load(stream);
-            return Preconditions.checkNotNull(
-                    properties.getProperty("libraryVersion"), "Library version resource is missing libraryVersion");
+            // Only recorded when a release version is known at build time
+            return Objects.requireNonNullElseGet(
+                    properties.getProperty("libraryVersion"),
+                    () -> Objects.requireNonNullElse(
+                            ReservedConflictMetrics.class.getPackage().getImplementationVersion(), "unknown"));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
