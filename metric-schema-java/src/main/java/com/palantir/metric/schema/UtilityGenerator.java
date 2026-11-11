@@ -39,7 +39,9 @@ import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -394,7 +396,8 @@ final class UtilityGenerator {
                         METADATA_RESOURCE_NAME,
                         "Missing generated resource " + METADATA_RESOURCE_NAME)
                 .addStatement("$T properties = new $T()", Properties.class, Properties.class)
-                .addStatement("properties.load(stream)")
+                .addStatement(
+                        "properties.load(new $T(stream, $T.UTF_8))", InputStreamReader.class, StandardCharsets.class)
                 .addComment("Only recorded when a release version is known at build time")
                 .addStatement(
                         "return $T.requireNonNullElseGet(properties.getProperty($S), () -> $T.requireNonNullElse("

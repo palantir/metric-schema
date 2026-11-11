@@ -12,7 +12,9 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -77,7 +79,7 @@ public final class NamespaceTagsMetrics {
                 NamespaceTagsMetrics.class.getResourceAsStream("metric-schema.properties"),
                 "Missing generated resource metric-schema.properties")) {
             Properties properties = new Properties();
-            properties.load(stream);
+            properties.load(new InputStreamReader(stream, StandardCharsets.UTF_8));
             // Only recorded when a release version is known at build time
             return Objects.requireNonNullElseGet(
                     properties.getProperty("libraryVersion"),

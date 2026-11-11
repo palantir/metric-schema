@@ -24,8 +24,8 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import com.palantir.metric.schema.model.ImplementationVisibility;
 import com.squareup.javapoet.JavaFile;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -76,16 +76,16 @@ public final class JavaGenerator {
         }
         Path resource = packageDir.resolve(UtilityGenerator.METADATA_RESOURCE_NAME);
         try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            metadata.store(out, /* comments= */ null);
+            StringWriter writer = new StringWriter();
+            metadata.store(writer, /* comments= */ null);
             // Properties.store always writes a timestamp comment, which would change the resource on every build
-            String contents = out.toString(StandardCharsets.ISO_8859_1)
+            String contents = writer.toString()
                     .lines()
                     .filter(line -> !line.startsWith("#"))
                     .map(line -> line + "\n")
                     .collect(Collectors.joining());
             Files.createDirectories(packageDir);
-            Files.writeString(resource, contents, StandardCharsets.ISO_8859_1);
+            Files.writeString(resource, contents, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new SafeUncheckedIoException(
                     "Failed to write metadata resource", e, SafeArg.of("resource", resource));
