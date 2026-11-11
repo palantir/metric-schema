@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.gradle.api.DefaultTask;
@@ -41,12 +40,10 @@ import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
 import org.gradle.api.artifacts.result.ComponentResult;
 import org.gradle.api.file.ConfigurableFileCollection;
-import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.provider.Property;
-import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
@@ -63,84 +60,28 @@ public abstract class CreateMetricsManifestTask extends DefaultTask {
 
     static final String NAME = "createMetricsManifest";
 
-    @SuppressWarnings("for-rollout:GradleTypesAsFields")
-    private final Provider<FileCollection> projectDependencyMetrics;
-
-    @SuppressWarnings("for-rollout:GradleTypesAsFields")
-    private final RegularFileProperty metricsFile = getProject().getObjects().fileProperty();
-
-    @SuppressWarnings("for-rollout:GradleTypesAsFields")
-    private final Property<Configuration> configuration =
-            getProject().getObjects().property(Configuration.class);
-
-    @SuppressWarnings("for-rollout:GradleTypesAsFields")
-    private final RegularFileProperty outputFile = getProject().getObjects().fileProperty();
-
     @PathSensitive(PathSensitivity.ABSOLUTE)
     @InputFiles
-    public final Provider<FileCollection> getProjectDependencyMetrics() {
-        return projectDependencyMetrics;
-    }
+    public abstract ConfigurableFileCollection getProjectDependencyMetrics();
 
     @PathSensitive(PathSensitivity.ABSOLUTE)
     @InputFile
-    public final RegularFileProperty getMetricsFile() {
-        return metricsFile;
-    }
+    public abstract RegularFileProperty getMetricsFile();
 
     @Internal
-    public final Property<Configuration> getConfiguration() {
-        return configuration;
-    }
+    public abstract Property<Configuration> getConfiguration();
 
     @Input
     final Set<String> getProductDependenciesConfig() {
         // HACKHACK serializable way of representing all dependencies
-        return configuration.get().getIncoming().getResolutionResult().getAllComponents().stream()
+        return getConfiguration().get().getIncoming().getResolutionResult().getAllComponents().stream()
                 .map(ComponentResult::getId)
                 .map(ComponentIdentifier::getDisplayName)
                 .collect(Collectors.toSet());
     }
 
     @OutputFile
-    public final RegularFileProperty getOutputFile() {
-        return outputFile;
-    }
-
-    public CreateMetricsManifestTask() {
-        this.projectDependencyMetrics = otherProjectMetricSchemaTasks();
-        dependsOn(projectDependencyMetrics);
-    }
-
-    /**
-     * A lazy collection of tasks that ensure the {@link CompileMetricSchemaTask} task of any project dependencies from
-     * {@link #configuration} are executed.
-     */
-    private Provider<FileCollection> otherProjectMetricSchemaTasks() {
-        return getConfiguration().map(productDeps -> {
-            // Using a ConfigurableFileCollection simply because it implements Buildable and provides a convenient API
-            // to wire up task dependencies to it in a lazy way.
-            ConfigurableFileCollection emptyFileCollection = getProject().files();
-            productDeps.getIncoming().getArtifacts().getArtifacts().stream()
-                    .flatMap(artifact -> {
-                        ComponentIdentifier id = artifact.getId().getComponentIdentifier();
-
-                        // Depend on the ConfigureProductDependenciesTask, if it exists, which will wire up the jar
-                        // manifest with recommended product dependencies.
-                        if (id instanceof ProjectComponentIdentifier projectComponentIdentifier) {
-                            Project dependencyProject =
-                                    getProject().getRootProject().project(projectComponentIdentifier.getProjectPath());
-                            return Stream.of(dependencyProject.getTasks().withType(CompileMetricSchemaTask.class));
-                        }
-                        return Stream.empty();
-                    })
-                    .forEach(tasks -> {
-                        emptyFileCollection.from(tasks);
-                        emptyFileCollection.builtBy(tasks);
-                    });
-            return emptyFileCollection;
-        });
-    }
+    public abstract RegularFileProperty getOutputFile();
 
     @TaskAction
     public final void createManifest() throws IOException {
@@ -165,7 +106,8 @@ public abstract class CreateMetricsManifestTask extends DefaultTask {
     private Map<String, List<MetricSchema>> getDiscoveredMetrics() {
         ImmutableMap.Builder<String, List<MetricSchema>> discoveredMetrics = ImmutableMap.builder();
 
-        configuration.get().getResolvedConfiguration().getResolvedArtifacts().forEach(artifact -> {
+        Configuration configuration = getConfiguration().get();
+        configuration.getResolvedConfiguration().getResolvedArtifacts().forEach(artifact -> {
             ComponentIdentifier id = artifact.getId().getComponentIdentifier();
 
             if (id instanceof ProjectComponentIdentifier projectComponentIdentifier) {
