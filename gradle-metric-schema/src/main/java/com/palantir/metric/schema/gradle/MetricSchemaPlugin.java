@@ -23,9 +23,14 @@ import com.palantir.sls.versions.SlsVersionType;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
+import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.Directory;
+import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileSystemLocation;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.SourceDirectorySet;
@@ -84,11 +89,15 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                 });
 
         project.getTasks().register(CreateMetricsManifestTask.NAME, CreateMetricsManifestTask.class, task -> {
+            NamedDomainObjectProvider<Configuration> runtimeClasspath =
+                    project.getConfigurations().named(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME);
             task.setGroup(TASK_GROUP);
             task.getMetricsFile().set(metricsFiles);
             task.getOutputFile().set(metricSchemaDir.map(dir -> dir.file("manifest.json")));
-            task.getConfiguration()
-                    .set(project.getConfigurations().getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME));
+            task.getConfiguration().set(runtimeClasspath);
+            task.getProjectDependencyMetrics()
+                    .from(runtimeClasspath.map(
+                            configuration -> projectDependencyMetricSchemaTasks(project, configuration)));
         });
 
         JavaPluginExtension javaPluginExtension = project.getExtensions().getByType(JavaPluginExtension.class);
@@ -111,6 +120,26 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         configureIdea(project, generatedJavaDir);
 
         configureDependencies(project, metricSchemaSourceDirectorySet);
+    }
+
+    /**
+     * A lazy collection of the {@link CompileMetricSchemaTask} tasks of any project dependencies in the given
+     * configuration, so that they are executed before the manifest is created.
+     */
+    private static FileCollection projectDependencyMetricSchemaTasks(Project project, Configuration configuration) {
+        ConfigurableFileCollection files = project.files();
+        configuration.getIncoming().getArtifacts().getArtifacts().stream()
+                .map(artifact -> artifact.getId().getComponentIdentifier())
+                .filter(ProjectComponentIdentifier.class::isInstance)
+                .map(ProjectComponentIdentifier.class::cast)
+                // Depend on the dependency project's CompileMetricSchemaTask rather than its jar, so that its
+                // metrics.json is generated without building the jar. Projects without the metric-schema plugin
+                // have no such task and contribute nothing.
+                .forEach(id -> files.from(project.getRootProject()
+                        .project(id.getProjectPath())
+                        .getTasks()
+                        .withType(CompileMetricSchemaTask.class)));
+        return files;
     }
 
     private static void configureIdea(Project project, Provider<Directory> generatedJavaDir) {
