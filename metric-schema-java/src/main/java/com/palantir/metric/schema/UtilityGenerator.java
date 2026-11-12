@@ -61,10 +61,11 @@ final class UtilityGenerator {
     /**
      * Name of the classpath resource, relative to the generated classes' package, which holds
      * {@link java.util.Properties} with metadata such as the library version. One resource is shared by all generated
-     * classes of a library in a package, and is prefixed by the library name so that libraries sharing a package don't
-     * collide on the classpath. Keeping the version out of the generated source keeps compilation cacheable across
-     * release and snapshot builds, and keeping the resource in the classes' package means shading relocates it along
-     * with them.
+     * classes of a library in a package, and is prefixed by the library name so that libraries with distinct names
+     * sharing a package don't collide on the classpath. Projects that share a library name and package, such as
+     * subprojects of one build, still share a resource. Keeping the version out of the generated source keeps
+     * compilation cacheable across release and snapshot builds, and keeping the resource in the classes' package means
+     * shading relocates it along with them.
      */
     static String metadataResourceName(String libraryName) {
         return DISALLOWED_RESOURCE_NAME_CHARS
