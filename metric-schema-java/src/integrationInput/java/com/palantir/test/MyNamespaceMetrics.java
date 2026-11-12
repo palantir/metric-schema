@@ -38,8 +38,8 @@ public final class MyNamespaceMetrics {
 
     private static String loadLibraryVersion() {
         try (InputStream stream = Preconditions.checkNotNull(
-                MyNamespaceMetrics.class.getResourceAsStream("metric-schema.properties"),
-                "Missing generated resource metric-schema.properties")) {
+                MyNamespaceMetrics.class.getResourceAsStream("witchcraft-metric-schema.properties"),
+                "Missing generated resource witchcraft-metric-schema.properties")) {
             Properties properties = new Properties();
             properties.load(new InputStreamReader(stream, StandardCharsets.UTF_8));
             // Only recorded when a release version is known at build time

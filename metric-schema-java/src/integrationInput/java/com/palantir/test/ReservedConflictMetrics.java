@@ -39,8 +39,8 @@ public final class ReservedConflictMetrics {
 
     private static String loadLibraryVersion() {
         try (InputStream stream = Preconditions.checkNotNull(
-                ReservedConflictMetrics.class.getResourceAsStream("metric-schema.properties"),
-                "Missing generated resource metric-schema.properties")) {
+                ReservedConflictMetrics.class.getResourceAsStream("witchcraft-metric-schema.properties"),
+                "Missing generated resource witchcraft-metric-schema.properties")) {
             Properties properties = new Properties();
             properties.load(new InputStreamReader(stream, StandardCharsets.UTF_8));
             // Only recorded when a release version is known at build time

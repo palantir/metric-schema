@@ -60,21 +60,28 @@ public final class JavaGenerator {
         Properties metadata = new Properties();
         args.libraryVersion()
                 .ifPresent(version -> metadata.setProperty(UtilityGenerator.LIBRARY_VERSION_PROPERTY, version));
-        javaFiles.stream()
-                .map(javaFile -> javaFile.packageName)
-                .distinct()
-                .forEach(packageName -> writeMetadataResource(args.resourcesOutput(), packageName, metadata));
+        // Generated code only reads the resource when it has a libraryName
+        args.libraryName()
+                .ifPresent(libraryName -> javaFiles.stream()
+                        .map(javaFile -> javaFile.packageName)
+                        .distinct()
+                        .forEach(packageName -> writeMetadataResource(
+                                args.resourcesOutput(),
+                                packageName,
+                                UtilityGenerator.metadataResourceName(libraryName),
+                                metadata)));
         return javaFiles.stream()
                 .map(javaFile -> Goethe.formatAndEmit(javaFile, args.javaOutput()))
                 .collect(ImmutableList.toImmutableList());
     }
 
-    private static void writeMetadataResource(Path resourcesOutput, String packageName, Properties metadata) {
+    private static void writeMetadataResource(
+            Path resourcesOutput, String packageName, String resourceName, Properties metadata) {
         Path packageDir = resourcesOutput;
         for (String component : Splitter.on('.').split(packageName)) {
             packageDir = packageDir.resolve(component);
         }
-        Path resource = packageDir.resolve(UtilityGenerator.METADATA_RESOURCE_NAME);
+        Path resource = packageDir.resolve(resourceName);
         try {
             StringWriter writer = new StringWriter();
             metadata.store(writer, /* comments= */ null);

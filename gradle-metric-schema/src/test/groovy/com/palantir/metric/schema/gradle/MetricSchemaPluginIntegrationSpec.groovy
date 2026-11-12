@@ -171,6 +171,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
     def 'embeds release library version into jar in generated class package'() {
         when:
+        settingsFile << "rootProject.name = 'my-library'\n"
         buildFile << """
         version = '1.2.3'
         task unJar(type: Sync, dependsOn: jar) {
@@ -182,11 +183,12 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
 
         then:
         runTasksSuccessfully(':unJar')
-        file('unjar/com/palantir/test/metric-schema.properties').text == 'libraryVersion=1.2.3\n'
+        file('unjar/com/palantir/test/my-library-metric-schema.properties').text == 'libraryVersion=1.2.3\n'
     }
 
     def 'does not embed snapshot library version into jar'() {
         when:
+        settingsFile << "rootProject.name = 'my-library'\n"
         buildFile << """
         version = '1.2.3-4-gabcdef1'
         task unJar(type: Sync, dependsOn: jar) {
@@ -199,11 +201,12 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         then:
         runTasksSuccessfully(':unJar')
         fileExists('unjar/com/palantir/test/ServerMetrics.class')
-        file('unjar/com/palantir/test/metric-schema.properties').text == ''
+        file('unjar/com/palantir/test/my-library-metric-schema.properties').text == ''
     }
 
     def 'generates metrics in the default package when project has no group'() {
         when:
+        settingsFile << "rootProject.name = 'my-library'\n"
         buildFile << """
         group = ''
         version = '1.2.3'
@@ -232,7 +235,7 @@ class MetricSchemaPluginIntegrationSpec extends IntegrationSpec {
         then:
         runTasksSuccessfully(':unJar')
         fileExists('unjar/ServerMetrics.class')
-        file('unjar/metric-schema.properties').text == 'libraryVersion=1.2.3\n'
+        file('unjar/my-library-metric-schema.properties').text == 'libraryVersion=1.2.3\n'
         runTasksSuccessfully(':printTags').standardOutput.contains('libraryVersion=1.2.3')
     }
 

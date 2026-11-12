@@ -91,7 +91,8 @@ public class JavaGeneratorTest {
                 .forEach(relativePath ->
                         assertThatFilesAreTheSame(outputDir.resolve(relativePath), REFERENCE_FILES_FOLDER));
 
-        assertThat(resourcesDir.resolve("com/palantir/test/providedversion/metric-schema.properties"))
+        assertThat(resourcesDir.resolve(
+                        "com/palantir/test/providedversion/specific_libraryversion-metric-schema.properties"))
                 .hasContent("libraryVersion=1.0.0\n");
     }
 
@@ -106,7 +107,8 @@ public class JavaGeneratorTest {
                 .libraryName("specific_libraryVersion")
                 .build());
 
-        assertThat(resourcesDir.resolve("com/palantir/test/providedversion/metric-schema.properties"))
+        assertThat(resourcesDir.resolve(
+                        "com/palantir/test/providedversion/specific_libraryversion-metric-schema.properties"))
                 .isEmptyFile();
     }
 
@@ -124,7 +126,50 @@ public class JavaGeneratorTest {
         assertThat(generated).hasSizeGreaterThan(1);
         try (Stream<Path> files = Files.walk(resourcesDir)) {
             assertThat(files.filter(Files::isRegularFile).map(resourcesDir::relativize))
-                    .containsExactly(Paths.get("com/palantir/test/metric-schema.properties"));
+                    .containsExactly(Paths.get("com/palantir/test/witchcraft-metric-schema.properties"));
+        }
+    }
+
+    @Test
+    void librariesSharingPackage_keepSeparateVersions() {
+        Path schema =
+                compileAndEmit(ImmutableList.of(Paths.get("src/test/resources/provided-version/provided-version.yml")));
+        JavaGenerator.generate(JavaGeneratorArgs.builder()
+                .javaOutput(outputDir)
+                .resourcesOutput(resourcesDir)
+                .input(schema)
+                .defaultPackageName("com.palantir.test")
+                .libraryName("first-library")
+                .libraryVersion("1.0.0")
+                .build());
+        JavaGenerator.generate(JavaGeneratorArgs.builder()
+                .javaOutput(outputDir)
+                .resourcesOutput(resourcesDir)
+                .input(schema)
+                .defaultPackageName("com.palantir.test")
+                .libraryName("second-library")
+                .libraryVersion("2.0.0")
+                .build());
+
+        Path packageDir = resourcesDir.resolve("com/palantir/test/providedversion");
+        assertThat(packageDir.resolve("first-library-metric-schema.properties")).hasContent("libraryVersion=1.0.0\n");
+        assertThat(packageDir.resolve("second-library-metric-schema.properties"))
+                .hasContent("libraryVersion=2.0.0\n");
+    }
+
+    @Test
+    void noLibraryName_writesNoResource() throws IOException {
+        JavaGenerator.generate(JavaGeneratorArgs.builder()
+                .javaOutput(outputDir)
+                .resourcesOutput(resourcesDir)
+                .input(compileAndEmit(
+                        ImmutableList.of(Paths.get("src/test/resources/provided-version/provided-version.yml"))))
+                .defaultPackageName("com.palantir.test")
+                .libraryVersion("1.0.0")
+                .build());
+
+        try (Stream<Path> files = Files.walk(resourcesDir)) {
+            assertThat(files.filter(Files::isRegularFile)).isEmpty();
         }
     }
 
@@ -180,7 +225,7 @@ public class JavaGeneratorTest {
                 .isInstanceOf(ExceptionInInitializerError.class)
                 .cause()
                 .isInstanceOf(SafeNullPointerException.class)
-                .hasMessageContaining("Missing generated resource metric-schema.properties");
+                .hasMessageContaining("Missing generated resource specific_libraryversion-metric-schema.properties");
     }
 
     @Test

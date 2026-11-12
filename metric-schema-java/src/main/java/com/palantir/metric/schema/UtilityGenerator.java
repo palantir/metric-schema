@@ -44,9 +44,11 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
@@ -54,13 +56,22 @@ final class UtilityGenerator {
 
     static final String LIBRARY_VERSION_PROPERTY = "libraryVersion";
 
+    private static final Pattern DISALLOWED_RESOURCE_NAME_CHARS = Pattern.compile("[^a-z0-9-]");
+
     /**
      * Name of the classpath resource, relative to the generated classes' package, which holds
      * {@link java.util.Properties} with metadata such as the library version. One resource is shared by all generated
-     * classes in a package. Keeping the version out of the generated source keeps compilation cacheable across release
-     * and snapshot builds, and keeping the resource in the classes' package means shading relocates it along with them.
+     * classes of a library in a package, and is prefixed by the library name so that libraries sharing a package don't
+     * collide on the classpath. Keeping the version out of the generated source keeps compilation cacheable across
+     * release and snapshot builds, and keeping the resource in the classes' package means shading relocates it along
+     * with them.
      */
-    static final String METADATA_RESOURCE_NAME = "metric-schema.properties";
+    static String metadataResourceName(String libraryName) {
+        return DISALLOWED_RESOURCE_NAME_CHARS
+                        .matcher(libraryName.toLowerCase(Locale.ROOT))
+                        .replaceAll("_")
+                + "-metric-schema.properties";
+    }
 
     static JavaFile generateUtilityClass(
             String namespace,
@@ -100,7 +111,7 @@ final class UtilityGenerator {
                             Modifier.FINAL)
                     .initializer("$N()", ReservedNames.LOAD_LIBRARY_VERSION_METHOD)
                     .build());
-            builder.addMethod(generateLoadLibraryVersion(className));
+            builder.addMethod(generateLoadLibraryVersion(className, metadataResourceName(libraryName.get())));
         }
 
         metrics.getTags().forEach(tagDef -> {
@@ -384,7 +395,7 @@ final class UtilityGenerator {
                 .build());
     }
 
-    private static MethodSpec generateLoadLibraryVersion(ClassName className) {
+    private static MethodSpec generateLoadLibraryVersion(ClassName className, String resourceName) {
         return MethodSpec.methodBuilder(ReservedNames.LOAD_LIBRARY_VERSION_METHOD)
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
                 .returns(String.class)
@@ -393,8 +404,8 @@ final class UtilityGenerator {
                         InputStream.class,
                         Preconditions.class,
                         className,
-                        METADATA_RESOURCE_NAME,
-                        "Missing generated resource " + METADATA_RESOURCE_NAME)
+                        resourceName,
+                        "Missing generated resource " + resourceName)
                 .addStatement("$T properties = new $T()", Properties.class, Properties.class)
                 .addStatement(
                         "properties.load(new $T(stream, $T.UTF_8))", InputStreamReader.class, StandardCharsets.class)
