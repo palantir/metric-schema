@@ -25,7 +25,6 @@ import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import com.palantir.metric.schema.model.ImplementationVisibility;
 import com.squareup.javapoet.JavaFile;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import org.apache.commons.io.output.StringBuilderWriter;
 
 public final class JavaGenerator {
     // TODO(forozco): consider splitting this out into an API package
@@ -83,7 +83,8 @@ public final class JavaGenerator {
         }
         Path resource = packageDir.resolve(resourceName);
         try {
-            StringWriter writer = new StringWriter();
+            // StringBuilderWriter rather than StringWriter, which synchronizes on a StringBuffer
+            StringBuilderWriter writer = new StringBuilderWriter();
             metadata.store(writer, /* comments= */ null);
             // Properties.store always writes a timestamp comment, which would change the resource on every build
             String contents = writer.toString()
