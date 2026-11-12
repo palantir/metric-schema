@@ -1,0 +1,9 @@
+options:
+  javaPackage: com.palantir.test.missingresource
+namespaces:
+  missing.resource:
+    docs: Test data metric.
+    metrics:
+      utilization:
+        type: gauge
+        docs: Test data.

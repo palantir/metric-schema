@@ -1,9 +1,16 @@
-package com.palantir.test;
+package com.palantir.test.providedversion;
 
 import com.codahale.metrics.Gauge;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.Properties;
 
 /** Test data metric. */
 public final class ProvidedVersionMetrics {
@@ -11,7 +18,7 @@ public final class ProvidedVersionMetrics {
 
     private static final String LIBRARY_NAME = "specific_libraryVersion";
 
-    private static final String LIBRARY_VERSION = "1.0.0";
+    private static final String LIBRARY_VERSION = loadLibraryVersion();
 
     private static final MetricName utilizationMetricName = MetricName.builderWithExpectedTags(3)
             .safeName("provided.version.utilization")
@@ -24,6 +31,22 @@ public final class ProvidedVersionMetrics {
 
     private ProvidedVersionMetrics(TaggedMetricRegistry registry) {
         this.registry = registry;
+    }
+
+    private static String loadLibraryVersion() {
+        try (InputStream stream = Preconditions.checkNotNull(
+                ProvidedVersionMetrics.class.getResourceAsStream("specific_libraryversion-metric-schema.properties"),
+                "Missing generated resource specific_libraryversion-metric-schema.properties")) {
+            Properties properties = new Properties();
+            properties.load(new InputStreamReader(stream, StandardCharsets.UTF_8));
+            // Only recorded when a release version is known at build time
+            return Objects.requireNonNullElseGet(
+                    properties.getProperty("libraryVersion"),
+                    () -> Objects.requireNonNullElse(
+                            ProvidedVersionMetrics.class.getPackage().getImplementationVersion(), "unknown"));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     public static ProvidedVersionMetrics of(TaggedMetricRegistry registry) {

@@ -37,20 +37,47 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 final class UtilityGenerator {
 
+    static final String LIBRARY_VERSION_PROPERTY = "libraryVersion";
+
+    private static final Pattern DISALLOWED_RESOURCE_NAME_CHARS = Pattern.compile("[^a-z0-9-]");
+
+    /**
+     * Name of the classpath resource, relative to the generated classes' package, which holds
+     * {@link java.util.Properties} with metadata such as the library version. One resource is shared by all generated
+     * classes of a library in a package, and is prefixed by the library name so that libraries with distinct names
+     * sharing a package don't collide on the classpath. Projects that share a library name and package, such as
+     * subprojects of one build, still share a resource. Keeping the version out of the generated source keeps
+     * compilation cacheable across release and snapshot builds, and keeping the resource in the classes' package means
+     * shading relocates it along with them.
+     */
+    static String metadataResourceName(String libraryName) {
+        return DISALLOWED_RESOURCE_NAME_CHARS
+                        .matcher(libraryName.toLowerCase(Locale.ROOT))
+                        .replaceAll("_")
+                + "-metric-schema.properties";
+    }
+
     static JavaFile generateUtilityClass(
             String namespace,
             MetricNamespace metrics,
             Optional<String> libraryName,
-            Optional<String> libraryVersion,
             String packageName,
             ImplementationVisibility visibility) {
         String name = metrics.getShortName().orElse(namespace);
@@ -83,16 +110,9 @@ final class UtilityGenerator {
                             Modifier.PRIVATE,
                             Modifier.STATIC,
                             Modifier.FINAL)
-                    .initializer(libraryVersion
-                            // When a libraryVersion value is provided, use the string constant:
-                            .map(version -> CodeBlock.of("$S", version))
-                            // Otherwise fall back to package.getImplementationVersion()
-                            .orElseGet(() -> CodeBlock.of(
-                                    "$T.requireNonNullElse($T.class.getPackage().getImplementationVersion(), $S)",
-                                    Objects.class,
-                                    className,
-                                    "unknown")))
+                    .initializer("$N()", ReservedNames.LOAD_LIBRARY_VERSION_METHOD)
                     .build());
+            builder.addMethod(generateLoadLibraryVersion(className, metadataResourceName(libraryName.get())));
         }
 
         metrics.getTags().forEach(tagDef -> {
@@ -374,6 +394,35 @@ final class UtilityGenerator {
                         .addStatement("return value")
                         .build())
                 .build());
+    }
+
+    private static MethodSpec generateLoadLibraryVersion(ClassName className, String resourceName) {
+        return MethodSpec.methodBuilder(ReservedNames.LOAD_LIBRARY_VERSION_METHOD)
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                .returns(String.class)
+                .beginControlFlow(
+                        "try ($T stream = $T.checkNotNull($T.class.getResourceAsStream($S), $S))",
+                        InputStream.class,
+                        Preconditions.class,
+                        className,
+                        resourceName,
+                        "Missing generated resource " + resourceName)
+                .addStatement("$T properties = new $T()", Properties.class, Properties.class)
+                .addStatement(
+                        "properties.load(new $T(stream, $T.UTF_8))", InputStreamReader.class, StandardCharsets.class)
+                .addComment("Only recorded when a release version is known at build time")
+                .addStatement(
+                        "return $T.requireNonNullElseGet(properties.getProperty($S), () -> $T.requireNonNullElse("
+                                + "$T.class.getPackage().getImplementationVersion(), $S))",
+                        Objects.class,
+                        LIBRARY_VERSION_PROPERTY,
+                        Objects.class,
+                        className,
+                        "unknown")
+                .nextControlFlow("catch ($T e)", IOException.class)
+                .addStatement("throw new $T(e)", UncheckedIOException.class)
+                .endControlFlow()
+                .build();
     }
 
     private static String className(String namespace) {

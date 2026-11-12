@@ -29,13 +29,20 @@ final class ReservedNames {
     static final String LIBRARY_VERSION_TAG = "libraryVersion";
     static final String JAVA_VERSION_FIELD = "JAVA_VERSION";
     static final String JAVA_VERSION_TAG = "javaVersion";
+    static final String LOAD_LIBRARY_VERSION_METHOD = "loadLibraryVersion";
     static final String FACTORY_METHOD = "of";
     static final String BUILDER_METHOD = "builder";
     static final String GAUGE_NAME = "gauge";
     static final String REGISTRY_NAME = "registry";
 
     private static final ImmutableSet<String> RESERVED_NAMES = ImmutableSet.of(
-            FACTORY_METHOD, GAUGE_NAME, JAVA_VERSION_FIELD, LIBRARY_NAME_FIELD, LIBRARY_VERSION_FIELD, REGISTRY_NAME);
+            FACTORY_METHOD,
+            GAUGE_NAME,
+            JAVA_VERSION_FIELD,
+            LIBRARY_NAME_FIELD,
+            LIBRARY_VERSION_FIELD,
+            LOAD_LIBRARY_VERSION_METHOD,
+            REGISTRY_NAME);
 
     /** Returns true if the input string cannot be used. */
     static boolean isValid(String input) {
