@@ -56,6 +56,8 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                 project.getLayout().getBuildDirectory().dir("generated/sources/metricSchema/java/main");
         Provider<Directory> generatedResourcesDir =
                 project.getLayout().getBuildDirectory().dir("generated/sources/metricSchema/resources/main");
+        Provider<Directory> generatedPropertiesResourcesDir =
+                project.getLayout().getBuildDirectory().dir("generated/sources/metricSchemaProperties/resources/main");
         Provider<Directory> metricSchemaDir =
                 project.getLayout().getBuildDirectory().dir("metricSchema");
 
@@ -82,6 +84,7 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                     task.getLibraryName().convention(defaultLibraryName(project));
                     task.getLibraryVersion().convention(defaultLibraryVersion(project));
                     task.getOutputDir().set(generatedJavaDir);
+                    task.getResourcesOutputDir().set(generatedPropertiesResourcesDir);
                     task.getPackageName().set(project.getGroup().toString());
                 });
 
@@ -103,8 +106,11 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
                 .getSourceSets()
                 .named(SourceSet.MAIN_SOURCE_SET_NAME)
                 .configure(sourceSet -> {
-                    sourceSet.getJava().srcDir(generateMetricsTask);
+                    sourceSet.getJava().srcDir(generateMetricsTask.flatMap(GenerateMetricsTask::getOutputDir));
                     sourceSet.getResources().srcDir(compileMetricSchemaTask.map(CompileMetricSchemaTask::getOutputDir));
+                    sourceSet
+                            .getResources()
+                            .srcDir(generateMetricsTask.flatMap(GenerateMetricsTask::getResourcesOutputDir));
                 });
 
         project.getPluginManager().withPlugin("com.palantir.sls-java-service-distribution", _plugin -> {
@@ -173,11 +179,13 @@ public final class MetricSchemaPlugin implements Plugin<Project> {
         // Gradle returns 'unspecified' when there is no version information, which is not orderable.
         String version = Objects.toString(project.getRootProject().getVersion());
         return OrderableSlsVersion.safeValueOf(version)
-                // Only provide version data for releases and release candidates, not snapshots. This way we
+                // We only provide version data for releases and release candidates, not snapshots. This way we
                 // don't invalidate build caches on each commit.
-                // We prefer passing along version information at this level because it will not be mutated
-                // by shading, where the fallback based on 'package.getImplementationVersion()' will reflect
-                // the shadow jar version.
+                // We provide version data in a resource rather than in the Java source so we don't invalidate build
+                // caches for compilation tasks.
+                // We prefer passing along version information at this level because the resource sits in the
+                // generated classes' package and is relocated with them by shading, where the fallback based on
+                // 'package.getImplementationVersion()' will reflect the shadow jar version.
                 .filter(ver ->
                         ver.getType() == SlsVersionType.RELEASE || ver.getType() == SlsVersionType.RELEASE_CANDIDATE)
                 .map(SlsVersion::getValue)

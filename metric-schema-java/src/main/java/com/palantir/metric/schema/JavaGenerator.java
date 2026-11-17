@@ -16,13 +16,23 @@
 
 package com.palantir.metric.schema;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.goethe.Goethe;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import com.palantir.metric.schema.model.ImplementationVisibility;
+import com.squareup.javapoet.JavaFile;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
+import java.util.stream.Collectors;
+import org.apache.commons.io.output.StringBuilderWriter;
 
 public final class JavaGenerator {
     // TODO(forozco): consider splitting this out into an API package
@@ -38,18 +48,56 @@ public final class JavaGenerator {
 
     @CanIgnoreReturnValue
     public static List<Path> generate(JavaGeneratorArgs args) {
-        return SchemaParser.get().parseFile(args.input()).stream()
-                .flatMap(schema -> schema.getNamespaces().entrySet().stream().map(entry -> {
-                    return UtilityGenerator.generateUtilityClass(
-                            entry.getKey(),
-                            entry.getValue(),
-                            args.libraryName(),
-                            args.libraryVersion(),
-                            getPackage(args, schema),
-                            getVisibility(schema));
-                }))
-                .map(javaFile -> Goethe.formatAndEmit(javaFile, args.output()))
+        List<JavaFile> javaFiles = SchemaParser.get().parseFile(args.input()).stream()
+                .flatMap(schema -> schema.getNamespaces().entrySet().stream()
+                        .map(entry -> UtilityGenerator.generateUtilityClass(
+                                entry.getKey(),
+                                entry.getValue(),
+                                args.libraryName(),
+                                getPackage(args, schema),
+                                getVisibility(schema))))
                 .collect(ImmutableList.toImmutableList());
+        Properties metadata = new Properties();
+        args.libraryVersion()
+                .ifPresent(version -> metadata.setProperty(UtilityGenerator.LIBRARY_VERSION_PROPERTY, version));
+        // Generated code only reads the resource when it has a libraryName
+        args.libraryName()
+                .ifPresent(libraryName -> javaFiles.stream()
+                        .map(javaFile -> javaFile.packageName)
+                        .distinct()
+                        .forEach(packageName -> writeMetadataResource(
+                                args.resourcesOutput(),
+                                packageName,
+                                UtilityGenerator.metadataResourceName(libraryName),
+                                metadata)));
+        return javaFiles.stream()
+                .map(javaFile -> Goethe.formatAndEmit(javaFile, args.javaOutput()))
+                .collect(ImmutableList.toImmutableList());
+    }
+
+    private static void writeMetadataResource(
+            Path resourcesOutput, String packageName, String resourceName, Properties metadata) {
+        Path packageDir = resourcesOutput;
+        for (String component : Splitter.on('.').split(packageName)) {
+            packageDir = packageDir.resolve(component);
+        }
+        Path resource = packageDir.resolve(resourceName);
+        try {
+            // StringBuilderWriter rather than StringWriter, which synchronizes on a StringBuffer
+            StringBuilderWriter writer = new StringBuilderWriter();
+            metadata.store(writer, /* comments= */ null);
+            // Properties.store always writes a timestamp comment, which would change the resource on every build
+            String contents = writer.toString()
+                    .lines()
+                    .filter(line -> !line.startsWith("#"))
+                    .map(line -> line + "\n")
+                    .collect(Collectors.joining());
+            Files.createDirectories(packageDir);
+            Files.writeString(resource, contents, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new SafeUncheckedIoException(
+                    "Failed to write metadata resource", e, SafeArg.of("resource", resource));
+        }
     }
 
     private static String getPackage(JavaGeneratorArgs args, MetricSchema schema) {
