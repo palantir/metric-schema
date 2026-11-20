@@ -34,13 +34,13 @@ com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 c
 
 com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
-com.palantir.conjure.java:conjure-lib:8.100.0 (2 constraints: cd210079)
+com.palantir.conjure.java:conjure-lib:8.100.0 (2 constraints: ec21b39a)
 
 com.palantir.conjure.java.api:errors:2.83.0 (1 constraints: 2510afa9)
 
-com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.49.0 (1 constraints: 8b1cdba4)
+com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.50.0 (1 constraints: 831cc4a4)
 
-com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.49.0 (1 constraints: 47057a3b)
+com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.50.0 (1 constraints: 3f05633b)
 
 com.palantir.goethe:goethe:0.31.0 (1 constraints: 36052e3b)
 
@@ -64,7 +64,7 @@ com.palantir.tokens:auth-tokens:4.13.0 (1 constraints: 20109fa9)
 
 com.palantir.tritium:tritium-ids:0.143.0 (1 constraints: fe0f9aa6)
 
-com.palantir.tritium:tritium-registry:0.143.0 (2 constraints: 152266ad)
+com.palantir.tritium:tritium-registry:0.143.0 (2 constraints: 17226cad)
 
 com.squareup:javapoet:1.13.0 (2 constraints: 2b113eee)
 
