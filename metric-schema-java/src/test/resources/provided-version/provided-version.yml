@@ -1,3 +1,5 @@
+options:
+  javaPackage: com.palantir.test.providedversion
 namespaces:
   provided.version:
     docs: Test data metric.

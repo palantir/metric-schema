@@ -43,12 +43,19 @@ public abstract class JavaGeneratorArgs {
     abstract Path input();
 
     /** Output directory for generated java code. */
-    abstract Path output();
+    abstract Path javaOutput();
+
+    /** Output directory for generated resources, such as the library version read by generated code. */
+    abstract Path resourcesOutput();
 
     /** Used to add the libraryName tag to all metrics. */
     abstract Optional<String> libraryName();
 
-    /** Used to add the libraryVersion tag to all metrics. */
+    /**
+     * Used to add the libraryVersion tag to all metrics. The version is written to {@link #resourcesOutput()} rather
+     * than into generated java code, so generated sources are identical regardless of version. When absent, generated
+     * code falls back to the package implementation version.
+     */
     abstract Optional<String> libraryVersion();
 
     /** The default Java package name for generated classes. */

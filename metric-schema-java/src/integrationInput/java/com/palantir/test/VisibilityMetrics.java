@@ -7,7 +7,13 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Properties;
 
 /** Tests we respect javaVisibility */
 final class VisibilityMetrics {
@@ -15,8 +21,7 @@ final class VisibilityMetrics {
 
     private static final String LIBRARY_NAME = "witchcraft";
 
-    private static final String LIBRARY_VERSION =
-            Objects.requireNonNullElse(VisibilityMetrics.class.getPackage().getImplementationVersion(), "unknown");
+    private static final String LIBRARY_VERSION = loadLibraryVersion();
 
     private static final MetricName testMetricName = MetricName.builderWithExpectedTags(3)
             .safeName("visibility.test")
@@ -29,6 +34,22 @@ final class VisibilityMetrics {
 
     private VisibilityMetrics(TaggedMetricRegistry registry) {
         this.registry = registry;
+    }
+
+    private static String loadLibraryVersion() {
+        try (InputStream stream = Preconditions.checkNotNull(
+                VisibilityMetrics.class.getResourceAsStream("witchcraft-metric-schema.properties"),
+                "Missing generated resource witchcraft-metric-schema.properties")) {
+            Properties properties = new Properties();
+            properties.load(new InputStreamReader(stream, StandardCharsets.UTF_8));
+            // Only recorded when a release version is known at build time
+            return Objects.requireNonNullElseGet(
+                    properties.getProperty("libraryVersion"),
+                    () -> Objects.requireNonNullElse(
+                            VisibilityMetrics.class.getPackage().getImplementationVersion(), "unknown"));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     static VisibilityMetrics of(TaggedMetricRegistry registry) {
